@@ -27,6 +27,8 @@ function checkRateLimit(roomId, maxRequests = 5, windowMs = 1000) {
 exports.sendNotification = functions.https.onCall(async (data, context) => {
     const { roomId, requestId } = data;
 
+    console.log('sendNotification called with:', { roomId, requestId });
+
     // Basic validation
     if (!roomId || !/^[A-F0-9]{32}$/.test(roomId)) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid room ID');
