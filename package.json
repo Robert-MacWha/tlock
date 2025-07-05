@@ -1,36 +1,21 @@
 {
-  "name": "root",
-  "version": "0.1.0",
+  "name": "tlock",
+  "version": "1.0.0",
   "private": true,
-  "description": "",
-  "homepage": "https://github.com/MetaMask/template-snap-monorepo#readme",
-  "bugs": {
-    "url": "https://github.com/MetaMask/template-snap-monorepo/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MetaMask/template-snap-monorepo.git"
-  },
-  "license": "(MIT-0 OR Apache-2.0)",
-  "author": "",
+  "description": "Tlock 2FA wallet system",
+  "license": "MIT",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach --parallel --topological --verbose run build",
-    "lint": "yarn lint:eslint && yarn lint:misc --check",
-    "lint:eslint": "eslint . --cache",
-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
-    "lint:misc": "prettier '**/*.json' '**/*.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
-    "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
-    "test": "yarn workspace snap run test"
-  },
-  "resolutions": {
-    "cookie": "^0.7.1",
-    "path-to-regexp@0.1.10": "^0.1.12",
-    "sharp": "^0.33.5",
-    "socket.io": "^4.8.1",
-    "ws": "^8.17.1"
+    "build": "yarn workspaces foreach --parallel --topological run build",
+    "dev:shared": "yarn workspace @tlock/shared dev",
+    "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' run dev",
+    "dev:mobile": "yarn workspace @tlock/mobile dev",
+    "build:snap": "yarn workspace @tlock/snap build",
+    "build:mobile:android": "yarn workspace @tlock/mobile build:android",
+    "deploy:functions": "yarn workspace @tlock/firebase/functions deploy",
+    "test": "yarn workspaces foreach run test"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",
@@ -51,9 +36,15 @@
     "eslint-plugin-promise": "^7.1.0",
     "prettier": "^3.3.3",
     "prettier-plugin-packagejson": "^2.2.18",
-    "sharp": "^0.32.6",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.6.0"
+  },
+  "resolutions": {
+    "cookie": "^0.7.1",
+    "path-to-regexp@0.1.10": "^0.1.12",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
+    "ws": "^8.17.1"
   },
   "packageManager": "yarn@3.2.1",
   "engines": {
@@ -62,11 +53,8 @@
   "lavamoat": {
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
-      "sharp": true
+      "sharp": true,
+      "eslint-plugin-import-x>unrs-resolver": false
     }
-  },
-  "dependencies": {
-    "@types/qrcode": "^1.5.5",
-    "qrcode": "^1.5.4"
   }
 }

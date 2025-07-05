@@ -1,0 +1,17 @@
+{
+    "name": "@tlock/functions",
+    "dependencies": {
+        "firebase-admin": "^13.0.2",
+        "firebase-functions": "^6.3.0",
+        "@tlock/shared": "workspace:*"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "serve": "firebase emulators:start --only functions",
+        "deploy": "firebase deploy --only functions"
+    },
+    "engines": {
+        "node": "22"
+    },
+    "private": true
+}
