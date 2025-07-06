@@ -27,6 +27,7 @@ export default function App() {
         try {
             const saved = await SecureStore.getItemAsync('tlock_pairing');
             if (saved) {
+                console.log('Loaded saved pairing data:');
                 const data = JSON.parse(saved) as PairingData;
                 setPairingData(data);
 
@@ -35,7 +36,9 @@ export default function App() {
 
                 setState('paired');
                 await registerDevice(client);
+                return;
             }
+            console.log('No saved pairing data found');
         } catch (error) {
             console.error('Failed to load pairing:', error);
         }
@@ -56,7 +59,7 @@ export default function App() {
         try {
             const newPairing = await parseQrCode(data);
 
-            await SecureStore.setItemAsync('skylock_pairing', JSON.stringify(newPairing));
+            await SecureStore.setItemAsync('tlock_pairing', JSON.stringify(newPairing));
             setPairingData(newPairing);
 
             const client = createSecuredClient(FIREBASE_URL, CLOUD_FUNCTION_URL, newPairing);

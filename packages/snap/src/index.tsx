@@ -70,9 +70,30 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
 async function handleHomeScreen(interfaceId: string) {
     console.log('Showing home screen');
 
+    try {
+        console.log('Retrieving state for pairing check');
+        const state = await getState<SnapState>();
+        console.log('Current state:', state);
+        if (state && state.fcmToken) {
+            console.log('Device already paired with FCM token:', state.fcmToken);
+            showScreen(interfaceId, (
+                <Box>
+                    <Heading>2FA Wallet</Heading>
+                    <Text>Your device is already paired.</Text>
+                    <Button name="pair">Replace Paired Device</Button>
+                </Box>
+            ));
+            return;
+        }
+    } catch (error) {
+        console.error('Error retrieving state:', error);
+        // If state retrieval fails, assume device is not paired
+    }
+
     showScreen(interfaceId, (
         <Box>
-            <Heading>2FA Wallet Test</Heading>
+            <Heading>2FA Wallet</Heading>
+            <Text>Your device is not paired.</Text>
             <Button name="pair">Pair Device</Button>
         </Box>
     ));
