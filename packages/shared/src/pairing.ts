@@ -46,7 +46,7 @@ export async function parseQrCode(qrCode: string): Promise<PairingData> {
     const expectedPrefix = `${QR_PROTOCOL}://${QR_ACTION}/`;
 
     if (!qrCode.startsWith(expectedPrefix)) {
-        throw new Error("Invalid QR code format");
+        throw new Error("Expected QR code to start with " + expectedPrefix + " but got: " + qrCode);
     }
 
     const encodedData = qrCode.slice(expectedPrefix.length);
@@ -60,7 +60,7 @@ export async function parseQrCode(qrCode: string): Promise<PairingData> {
         throw new Error("Invalid shared secret in QR code");
     }
 
-    const roomId = await deriveRoomId(new Uint8Array(qrData.sharedSecret));
+    const roomId = await deriveRoomId(qrData.sharedSecret);
     if (!ROOM_ID_PATTERN.test(roomId)) {
         throw new Error("Invalid room ID derived from shared secret");
     }

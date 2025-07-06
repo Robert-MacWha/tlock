@@ -10,8 +10,8 @@ export interface StoredRequest {
 }
 
 export interface MessagingBackend {
-    registerDevice(roomId: string, registration: string): Promise<void>;
-    getDeviceRegistration(roomId: string): Promise<string>;
+    submitDevice(roomId: string, registration: string): Promise<void>;
+    getDevice(roomId: string): Promise<string>;
 
     submitRequest(roomId: string, requestId: string, request: StoredRequest): Promise<void>;
     getRequest(roomId: string, requestId: string): Promise<StoredRequest | null>;
@@ -26,18 +26,18 @@ export class SecureClient {
         private pairingData: PairingData
     ) { }
 
-    async registerDevice(fcmToken: string, deviceName: string): Promise<void> {
+    async submitDevice(fcmToken: string, deviceName: string): Promise<void> {
         const registration: DeviceRegistration = {
             fcmToken,
             deviceName,
         };
 
         const encryptedRegistration = encryptMessage(registration, this.pairingData.sharedSecret);
-        await this.backend.registerDevice(this.pairingData.roomId, encryptedRegistration);
+        await this.backend.submitDevice(this.pairingData.roomId, encryptedRegistration);
     }
 
-    async getDeviceInfo(): Promise<DeviceRegistration | null> {
-        const encryptedRegistration = await this.backend.getDeviceRegistration(this.pairingData.roomId);
+    async getDevice(): Promise<DeviceRegistration | null> {
+        const encryptedRegistration = await this.backend.getDevice(this.pairingData.roomId);
         if (!encryptedRegistration) return null;
 
         try {

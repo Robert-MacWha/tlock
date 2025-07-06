@@ -9,13 +9,15 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach --parallel --topological run build",
-    "dev:shared": "yarn workspace @tlock/shared dev",
-    "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' run dev",
+    "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
     "dev:mobile": "yarn workspace @tlock/mobile dev",
     "build:snap": "yarn workspace @tlock/snap build",
     "build:mobile:android": "yarn workspace @tlock/mobile build:android",
     "deploy:functions": "yarn workspace @tlock/firebase/functions deploy",
     "test": "yarn workspaces foreach run test"
+  },
+  "dependencies": {
+    "expo": "~53.0.17"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",

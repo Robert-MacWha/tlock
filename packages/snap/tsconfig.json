@@ -7,6 +7,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "src/state.ts"
   ]
 }

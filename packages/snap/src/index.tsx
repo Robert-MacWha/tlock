@@ -1,20 +1,12 @@
 import type { OnRpcRequestHandler, OnHomePageHandler, OnUserInputHandler, UserInputEvent, ComponentOrElement } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button, Image } from '@metamask/snaps-sdk/jsx';
+import { CLOUD_FUNCTION_URL, createQrCode, createSecuredClient, deriveRoomId, FIREBASE_URL, generatePairingData, PairingData } from '@tlock/shared';
 import qrcode from 'qrcode';
+import { getState, setState } from './state';
 
-async function generatePairingData(): Promise<{ sharedSecret: number[], roomId: string }> {
-    const sharedSecret = new Uint8Array(32);
-    crypto.getRandomValues(sharedSecret);
-
-    // Derive deterministic room ID from secret
-    const roomIdBytes = await crypto.subtle.digest('SHA-256', sharedSecret);
-    const roomId = Array.from(new Uint8Array(roomIdBytes.slice(0, 16)),
-        byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
-
-    return {
-        sharedSecret: Array.from(sharedSecret),
-        roomId
-    };
+interface SnapState {
+    sharedSecret?: number[];
+    fcmToken?: string;
 }
 
 // Home page UI
@@ -28,7 +20,7 @@ export const onHomePage: OnHomePageHandler = async () => {
         }
     });
 
-    showHomeScreen(interfaceId);
+    handleHomeScreen(interfaceId);
 
     return {
         id: interfaceId
@@ -53,52 +45,52 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
     const buttonName = event.name;
     console.log('Button clicked:', buttonName);
 
-    switch (buttonName) {
-        case 'home':
-            return showHomeScreen(interfaceId);
-        case 'pair':
-            return showPairingScreen(interfaceId);
-        default:
-            console.log('Unknown button clicked:', buttonName);
-            return;
+    try {
+        switch (buttonName) {
+            case 'home':
+                return handleHomeScreen(interfaceId);
+            case 'pair':
+                return handlePair(interfaceId);
+            case 'confirm-pair':
+                return handleConfirmPair(interfaceId);
+            default:
+                console.log('Unknown button clicked:', buttonName);
+                return;
+        }
+    } catch (error) {
+        console.error('Error handling button click:', error);
+        if (error instanceof Error) {
+            await showErrorScreen(interfaceId, error.message);
+        } else {
+            await showErrorScreen(interfaceId, 'An unexpected error occurred');
+        }
     }
 }
 
-async function showScreen(interfaceId: string, ui: ComponentOrElement) {
-    console.log('Updating interface with new screen');
-
-    return await snap.request({
-        method: 'snap_updateInterface',
-        params: {
-            id: interfaceId,
-            ui
-        }
-    });
-
-}
-
-async function showHomeScreen(interfaceId: string) {
+async function handleHomeScreen(interfaceId: string) {
     console.log('Showing home screen');
 
     showScreen(interfaceId, (
         <Box>
-            <Heading>2FA Wallet</Heading>
+            <Heading>2FA Wallet Test</Heading>
             <Button name="pair">Pair Device</Button>
         </Box>
     ));
 }
 
-async function showPairingScreen(interfaceId: string) {
+async function handlePair(interfaceId: string) {
     console.log('Handling pairing logic');
 
     try {
         // Generate random 128-bit secret
         const { sharedSecret, roomId } = await generatePairingData();
-        const qrData = `skylock://pair/${btoa(JSON.stringify({
-            roomId,
-            sharedSecret: Array.from(sharedSecret)
-        }))}`;
+        const qrData = await createQrCode(sharedSecret);
         const secretQR = await qrcode.toString(qrData);
+
+        // Save shared secret to persistent storage
+        setState<SnapState>({
+            sharedSecret,
+        });
 
         console.log("Show pairing screen");
         showScreen(interfaceId, (
@@ -115,7 +107,6 @@ async function showPairingScreen(interfaceId: string) {
             error = error.message;
         }
         console.error('Error generating pairing data:', error);
-
         await showErrorScreen(interfaceId, 'Failed to generate pairing data. Please try again.');
     }
 }
@@ -130,4 +121,74 @@ async function showErrorScreen(interfaceId: string, message: string) {
             <Button name="home">Home</Button>
         </Box>
     ));
+}
+
+async function handleConfirmPair(interfaceId: string) {
+    console.log('Confirming pairing');
+
+    const state = await getState<SnapState>();
+    if (!state) {
+        console.error('No shared secret found in state');
+        await showErrorScreen(interfaceId, 'No pairing data found');
+        return;
+    }
+
+    console.log('Current state:', state);
+
+    const { sharedSecret } = state;
+    if (!sharedSecret) {
+        console.error('Shared secret is not set in state');
+        await showErrorScreen(interfaceId, 'Error pairing: shared secret is missing');
+        return;
+    }
+
+    console.log('Using shared secret:', sharedSecret);
+
+    const roomId = deriveRoomId(sharedSecret);
+    const pairingData: PairingData = {
+        roomId,
+        sharedSecret
+    }
+
+    const client = createSecuredClient(
+        FIREBASE_URL, CLOUD_FUNCTION_URL, pairingData,
+    );
+
+    console.log('Created secured client with roomId:', roomId);
+
+    const registeredDevice = await client.getDevice();
+    if (!registeredDevice) {
+        console.error("Device not registered yet");
+        await showErrorScreen(interfaceId, 'Device not registered. Please scan the QR code with your mobile app.');
+        return;
+    }
+
+    console.log('Device registered:', registeredDevice);
+
+    setState<SnapState>({
+        sharedSecret: pairingData.sharedSecret,
+        fcmToken: registeredDevice.fcmToken,
+    });
+
+    console.log('Pairing completed successfully');
+    showScreen(interfaceId, (
+        <Box>
+            <Heading>Pairing Successful!</Heading>
+            <Text>Your device has been successfully paired.</Text>
+            <Button name="home">Home</Button>
+        </Box>
+    ));
+}
+
+async function showScreen(interfaceId: string, ui: ComponentOrElement) {
+    console.log('Updating interface with new screen');
+
+    return await snap.request({
+        method: 'snap_updateInterface',
+        params: {
+            id: interfaceId,
+            ui
+        }
+    });
+
 }

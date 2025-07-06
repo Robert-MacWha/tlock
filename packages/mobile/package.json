@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "allow-scripts": "",
     "dev": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -11,6 +12,9 @@
   "dependencies": {
     "@tlock/shared": "workspace:*",
     "expo": "~53.0.17",
+    "expo-camera": "~16.1.10",
+    "expo-notifications": "~0.31.4",
+    "expo-secure-store": "~14.2.3",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-native": "0.79.5"

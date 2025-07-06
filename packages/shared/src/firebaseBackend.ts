@@ -15,7 +15,7 @@ export class FirebaseMessaging implements MessagingBackend {
         private fcmToken?: string,
     ) { }
 
-    async registerDevice(roomId: string, encryptedRegistration: string): Promise<void> {
+    async submitDevice(roomId: string, encryptedRegistration: string): Promise<void> {
         const response = await fetch(`${this.firebaseUrl}/${FirebasePaths.registration(roomId)}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -26,11 +26,12 @@ export class FirebaseMessaging implements MessagingBackend {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to register device: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`Failed to register device: [${response.status}] ${errorText}`);
         }
     }
 
-    async getDeviceRegistration(roomId: string): Promise<string> {
+    async getDevice(roomId: string): Promise<string> {
         const response = await fetch(`${this.firebaseUrl}/${FirebasePaths.registration(roomId)}.json`);
 
         if (!response.ok) {

@@ -1,22 +1,26 @@
+import { randomBytes } from '@noble/hashes/utils';
+import { sha256 } from '@noble/hashes/sha2';
+
 export const SHARED_SECRET_LENGTH = 32;
 export const ROOM_ID_LENGTH = 32;
 export const ROOM_ID_PATTERN = /^[0-9A-F]{32}$/;
 
-export function generateSecureRandom(length: number): Uint8Array {
-    const bytes = new Uint8Array(length);
-    crypto.getRandomValues(bytes);
-    return bytes;
+export function generateSecureRandom(length: number): number[] {
+    const bytes = randomBytes(length);
+    return Array.from(bytes);
 }
 
-export async function deriveRoomId(sharedSecret: Uint8Array): Promise<string> {
-    const hash = await crypto.subtle.digest('SHA-256', sharedSecret);
-    const roomIdBytes = new Uint8Array(hash.slice(0, 16)); // 128 bits
 
-    return Array.from(roomIdBytes, byte =>
+export function deriveRoomId(sharedSecret: number[]): string {
+    const secretBytes = new Uint8Array(sharedSecret);
+
+    const hash = sha256(secretBytes);
+    const hexHash = Array.from(hash, byte =>
         byte.toString(16).padStart(2, '0')
-    ).join('').toUpperCase();
-}
+    ).join('');
 
+    return hexHash.substring(0, 32).toUpperCase();
+}
 export function isValidRoomId(roomId: string): boolean {
     return ROOM_ID_PATTERN.test(roomId);
 }
