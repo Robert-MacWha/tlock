@@ -3,7 +3,7 @@
   "description": "An example Snap written in TypeScript.",
   "proposedName": "TypeScript Example",
   "source": {
-    "shasum": "pO/rD6cBJav388JL3PdAhX9USdmeah5rseryjyJJQ2o=",
+    "shasum": "DN4ehUwJ5ny11efMRYrlfw+CJe8IIo+75TMlZfBqNAk=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -16,8 +16,10 @@
     "snap_dialog": {},
     "snap_notify": {},
     "snap_manageState": {},
+    "snap_manageAccounts": {},
     "endowment:network-access": {},
-    "endowment:page-home": {}
+    "endowment:page-home": {},
+    "endowment:keyring": {}
   },
   "platformVersion": "6.24.0",
   "manifestVersion": "0.1"

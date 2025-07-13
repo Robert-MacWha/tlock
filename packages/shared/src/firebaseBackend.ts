@@ -40,7 +40,7 @@ export class FirebaseMessaging implements MessagingBackend {
 
         const data = await response.json();
         if (!data || !data.encryptedData) {
-            throw new Error('No registration data found for this room ID');
+            throw new Error('No registration data found for room ID ' + roomId);
         }
 
         return data.encryptedData;
@@ -68,6 +68,35 @@ export class FirebaseMessaging implements MessagingBackend {
 
         const data = await response.json();
         return data;
+    }
+
+    async getRequests(roomId: string): Promise<{ [requestId: string]: StoredRequest }> {
+        const response = await fetch(`${this.firebaseUrl}/requests/${roomId}.json`);
+
+        if (!response.ok) {
+            if (response.status === 404) return {};
+            throw new Error(`Failed to get requests: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data) return {};
+
+        return data;
+    }
+
+    async deleteRequest(roomId: string, requestId: string): Promise<void> {
+        const response = await fetch(`${this.firebaseUrl}/${FirebasePaths.request(roomId, requestId)}.json`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                // Request doesn't exist, but that's fine for delete operation
+                return;
+            }
+            throw new Error(`Failed to delete request: ${response.status}`);
+        }
     }
 
     async sendNotification(roomId: string, requestId: string): Promise<void> {

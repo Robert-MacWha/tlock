@@ -1,7 +1,7 @@
 {
   "name": "@tlock/mobile",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "allow-scripts": "",
     "dev": "expo start",
@@ -10,14 +10,22 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@scure/bip32": "^1.7.0",
     "@tlock/shared": "workspace:*",
+    "bip39": "^3.1.0",
     "expo": "~53.0.17",
     "expo-camera": "~16.1.10",
+    "expo-constants": "~17.1.7",
+    "expo-linking": "~7.1.7",
     "expo-notifications": "~0.31.4",
+    "expo-router": "~5.1.3",
     "expo-secure-store": "~14.2.3",
+    "expo-standard-web-crypto": "^2.1.4",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
-    "react-native": "0.79.5"
+    "react-native": "0.79.5",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

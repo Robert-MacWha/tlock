@@ -1,12 +1,7 @@
-import { deriveRoomId, generateSecureRandom, isValidSharedSecret, ROOM_ID_PATTERN, SHARED_SECRET_LENGTH } from "./crypto";
-
-export interface PairingData {
-    roomId: string;
-    sharedSecret: number[];
-}
+import { generateSecureRandom, isValidSharedSecret, SHARED_SECRET_LENGTH } from "./crypto";
 
 export interface QrCodeData {
-    sharedSecret: number[];
+    sharedSecret: SharedSecret;
     version: number;
 }
 
@@ -16,23 +11,20 @@ export interface DeviceRegistration {
     deviceName: string;
 }
 
+export type SharedSecret = number[];
+
 export const QR_VERSION = 1;
 export const QR_PROTOCOL = "tlock";
 export const QR_ACTION = "pair";
 export const FIREBASE_URL = "https://tlock-974e6-default-rtdb.firebaseio.com/"
 export const CLOUD_FUNCTION_URL = "https://sendnotification-clnhgoo57a-uc.a.run.app";
 
-export async function generatePairingData(): Promise<PairingData> {
+export async function generateSharedSecret(): Promise<SharedSecret> {
     const sharedSecret = generateSecureRandom(SHARED_SECRET_LENGTH);
-    const roomId = await deriveRoomId(sharedSecret);
-
-    return {
-        roomId,
-        sharedSecret: Array.from(sharedSecret)
-    };
+    return Array.from(sharedSecret);
 }
 
-export async function createQrCode(sharedSecret: number[]): Promise<string> {
+export async function createQrCode(sharedSecret: SharedSecret): Promise<string> {
     const qrData: QrCodeData = {
         sharedSecret,
         version: QR_VERSION
@@ -42,7 +34,7 @@ export async function createQrCode(sharedSecret: number[]): Promise<string> {
     return `${QR_PROTOCOL}://${QR_ACTION}/${encodedData}`;
 }
 
-export async function parseQrCode(qrCode: string): Promise<PairingData> {
+export async function parseQrCode(qrCode: string): Promise<SharedSecret> {
     const expectedPrefix = `${QR_PROTOCOL}://${QR_ACTION}/`;
 
     if (!qrCode.startsWith(expectedPrefix)) {
@@ -60,13 +52,5 @@ export async function parseQrCode(qrCode: string): Promise<PairingData> {
         throw new Error("Invalid shared secret in QR code");
     }
 
-    const roomId = await deriveRoomId(qrData.sharedSecret);
-    if (!ROOM_ID_PATTERN.test(roomId)) {
-        throw new Error("Invalid room ID derived from shared secret");
-    }
-
-    return {
-        roomId,
-        sharedSecret: qrData.sharedSecret
-    };
+    return qrData.sharedSecret;
 }

@@ -1,48 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Alert, Platform } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Button, Alert } from 'react-native';
+import { CameraView } from 'expo-camera';
 // import * as Notifications from 'expo-notifications';
-import * as SecureStore from 'expo-secure-store';
-import { CLOUD_FUNCTION_URL, createSecuredClient, FIREBASE_URL, PairingData, parseQrCode, SecureClient } from '@tlock/shared';
-
+import { parseQrCode, SecureClient } from '@tlock/shared';
+import { useSecureClientContext } from '../contexts/SecureClientContext';
 
 export default function App() {
     const [state, setState] = useState<'home' | 'scanning' | 'paired' | 'requests'>('home');
-    const [pairingData, setPairingData] = useState<PairingData | null>(null);
-    const [secureClient, setSecureClient] = useState<SecureClient | null>(null);
-    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-
-    useEffect(() => {
-        requestPermissions();
-        loadSavedPairing();
-    }, []);
-
-    const requestPermissions = async () => {
-        await requestCameraPermission();
-        // await Notifications.requestPermissionsAsync();
-    }
-
-    const loadSavedPairing = async () => {
-        try {
-            const saved = await SecureStore.getItemAsync('tlock_pairing');
-            if (saved) {
-                console.log('Loaded saved pairing data:');
-                const data = JSON.parse(saved) as PairingData;
-                setPairingData(data);
-
-                const client = createSecuredClient(FIREBASE_URL, CLOUD_FUNCTION_URL, data);
-                setSecureClient(client);
-
-                setState('paired');
-                await registerDevice(client);
-                return;
-            }
-            console.log('No saved pairing data found');
-        } catch (error) {
-            console.error('Failed to load pairing:', error);
-        }
-    }
+    const { secureClient, savePairing, unpair } = useSecureClientContext();
 
     const registerDevice = async (client: SecureClient) => {
         // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
@@ -57,14 +22,14 @@ export default function App() {
         setIsScanningBarCode(true);
 
         try {
-            const newPairing = await parseQrCode(data);
+            const sharedSecret = await parseQrCode(data);
+            savePairing(sharedSecret);
 
-            await SecureStore.setItemAsync('tlock_pairing', JSON.stringify(newPairing));
-            setPairingData(newPairing);
-
-            const client = createSecuredClient(FIREBASE_URL, CLOUD_FUNCTION_URL, newPairing);
-            setSecureClient(client);
-            await registerDevice(client);
+            if (!secureClient) {
+                Alert.alert('Error', 'Failed to create secure client. Please try again.');
+                return;
+            }
+            await registerDevice(secureClient);
 
             setState('paired');
             Alert.alert('Success', 'Device paired successfully!');
@@ -98,15 +63,16 @@ export default function App() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Skylock 2FA</Text>
-            <Text>Secure your MetaMask transactions</Text>
+
+            {secureClient && (
+                <Text>Paired with Room ID: {secureClient.roomId.substring(0, 4)}</Text>
+            )}
 
             <Button title="Pair with MetaMask" onPress={() => setState('scanning')} />
 
-            {pairingData && (
-                <Text>Paired with Room ID: {pairingData.roomId}</Text>
+            {secureClient && (
+                <Button title="Unpair" onPress={unpair} />
             )}
-
-            <StatusBar style="auto" />
         </View>
     );
 }
