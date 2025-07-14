@@ -4,7 +4,7 @@ import { generateMnemonic, mnemonicToSeed } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bytesToHex } from 'viem';
-import type { Hex } from 'viem';
+import type { Address, Hex, PrivateKeyAccount } from 'viem';
 
 export interface Account {
     id: number;
@@ -14,9 +14,8 @@ export interface Account {
 interface SeedPhraseContextType {
     accounts: Account[];
     addAccount: () => Promise<string>;
-    getAccountId: (address: string) => number | undefined;
-    signPersonal: (accountId: number, raw: Hex) => Promise<Hex>;
-    sign: (accountId: number, hash: Hex) => Promise<Hex>;
+    signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
+    sign: (from: Address, hash: Hex) => Promise<Hex>;
 }
 
 const SEED_PHRASE_KEY = 'tlock_seed_phrase';
@@ -110,36 +109,38 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
         return address;
     };
 
-    const getAccountId = (address: string): number | undefined => {
-        const account = accounts.find(acc => acc.address.toLowerCase() === address.toLowerCase());
-        return account ? account.id : undefined;
-    }
-
-    const sign = async (accountId: number, hash: Hex): Promise<Hex> => {
-        const privateKey = await getPrivateKey(accountId);
+    const sign = async (from: Address, hash: Hex): Promise<Hex> => {
         try {
-            const account = privateKeyToAccount(privateKey);
+            const account = await getAccountFromAddress(from);
             return await account.sign({ hash });
         } catch (error) {
             throw new Error(`Failed to sign hash: ${hash}`);
         }
     };
 
-    const signPersonal = async (accountId: number, raw: Hex): Promise<Hex> => {
-        const privateKey = await getPrivateKey(accountId);
+    const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
         try {
-            const account = privateKeyToAccount(privateKey);
+            const account = await getAccountFromAddress(from);
             return await account.signMessage({ message: { raw } });
         } catch (error) {
             throw new Error(`Failed to sign raw: ${raw}`);
         }
     }
 
+    const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
+        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
+        if (!account) {
+            throw new Error(`Account with address ${address} not found`);
+        }
+
+        const privateKey = await getPrivateKey(account.id);
+        return privateKeyToAccount(privateKey);
+    }
+
     return (
         <SeedPhraseContext.Provider value={{
             accounts,
             addAccount,
-            getAccountId,
             signPersonal,
             sign,
         }} >
