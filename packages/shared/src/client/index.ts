@@ -77,7 +77,7 @@ export interface Client {
     getDevice(): Promise<DeviceRegistration | null>;
 
     submitRequest<T extends RequestType>(type: T, data: RequestTypeMap[T]): Promise<string>;
-    updateRequest<T extends RequestType>(id: string, type: T, data: RequestTypeMap[T]): Promise<void>;
+    updateRequest<T extends RequestType>(id: string, type: T, data: Partial<RequestTypeMap[T]>): Promise<void>;
     getRequest<T extends RequestType>(id: string, requestType: T): Promise<RequestTypeMap[T]>;
     getRequests(): Promise<PendingRequest[]>;
     deleteRequest(id: string): Promise<void>;

@@ -88,8 +88,10 @@ export class FirebaseClient implements Client {
         return requestId;
     }
 
-    async updateRequest<T extends RequestType>(id: string, type: T, data: RequestTypeMap[T]): Promise<void> {
-        const encryptedData = encryptMessage(data, this.sharedSecret);
+    async updateRequest<T extends RequestType>(id: string, type: T, partialData: Partial<RequestTypeMap[T]>): Promise<void> {
+        const existingRequest = await this.getRequest(id, type);
+        const mergedData = { ...existingRequest, ...partialData };
+        const encryptedData = encryptMessage(mergedData, this.sharedSecret);
 
         const storedRequest: StoredRequest = {
             type,
