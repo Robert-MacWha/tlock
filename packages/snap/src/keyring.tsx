@@ -1,6 +1,6 @@
 import { emitSnapKeyringEvent, Keyring, KeyringAccount, KeyringEvent, KeyringRequest, KeyringResponse } from "@metamask/keyring-api";
 import { Json } from "@metamask/snaps-sdk";
-import { CreateAccountRequest, SecureClient, SignMessageRequest, SignPersonalRequest, SignTransactionRequest, SignTypedDataRequest } from "@tlock/shared";
+import { CreateAccountRequest, Client, SignMessageRequest, SignPersonalRequest, SignTransactionRequest, SignTypedDataRequest } from "@tlock/shared";
 import { v4 as uuid } from 'uuid';
 import { EthAccountType, EthMethod, } from '@metamask/keyring-api';
 import {
@@ -12,10 +12,10 @@ import { KeyringState } from "./state";
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
-    private client: SecureClient;
+    private client: Client;
     private state: KeyringState;
 
-    constructor(client: SecureClient, state?: KeyringState) {
+    constructor(client: Client, state?: KeyringState) {
         console.log('TlockKeyring initialized');
         this.client = client;
         this.state = state ?? {

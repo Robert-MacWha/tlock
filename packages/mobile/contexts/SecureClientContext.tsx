@@ -1,9 +1,9 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { createSecuredClient, SecureClient, SharedSecret } from "@tlock/shared";
+import { createClient, Client, SharedSecret } from "@tlock/shared";
 
 interface SecureClientContextType {
-    secureClient: SecureClient | null;
+    secureClient: Client | null;
     savePairing: (sharedSecret: SharedSecret) => Promise<void>;
     unpair: () => Promise<void>;
 }
@@ -15,7 +15,7 @@ const SecureClientContext = createContext<SecureClientContextType | undefined>(u
  * update pairing information.
  */
 export function SecureClientProvider({ children }: { children: ReactNode }) {
-    const [secureClient, setSecureClient] = useState<SecureClient | null>(null);
+    const [secureClient, setSecureClient] = useState<Client | null>(null);
 
     useEffect(() => {
         const initializeApp = async () => {
@@ -28,14 +28,14 @@ export function SecureClientProvider({ children }: { children: ReactNode }) {
         const secret = await SecureStore.getItemAsync('tlock_pairing');
         if (secret) {
             const data = JSON.parse(secret) as SharedSecret;
-            const client = createSecuredClient(data);
+            const client = createClient(data);
             setSecureClient(client);
         }
     }
 
     const savePairing = async (sharedSecret: SharedSecret) => {
         await SecureStore.setItemAsync('tlock_pairing', JSON.stringify(sharedSecret));
-        const client = createSecuredClient(sharedSecret);
+        const client = createClient(sharedSecret);
         setSecureClient(client);
     }
 

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import { CameraView } from 'expo-camera';
 // import * as Notifications from 'expo-notifications';
-import { parseQrCode, SecureClient } from '@tlock/shared';
+import { parseQrCode, Client } from '@tlock/shared';
 import { useSecureClientContext } from '../contexts/SecureClientContext';
 
 export default function App() {
     const [state, setState] = useState<'home' | 'scanning' | 'paired' | 'requests'>('home');
     const { secureClient, savePairing, unpair } = useSecureClientContext();
 
-    const registerDevice = async (client: SecureClient) => {
+    const registerDevice = async (client: Client) => {
         // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
         const fcmToken = "new-fcm-token";
         await client.submitDevice(fcmToken, 'React Native App');

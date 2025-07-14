@@ -1,6 +1,6 @@
 import { Box, Heading, Text } from "@metamask/snaps-sdk/jsx";
 import { showErrorScreen, showScreen } from "./screen";
-import { createSecuredClient, CreateAccountRequest } from "@tlock/shared";
+import { createClient, CreateAccountRequest } from "@tlock/shared";
 import { getState } from "./state";
 import { emitSnapKeyringEvent, KeyringAccount, KeyringEvent } from "@metamask/keyring-api";
 import {
@@ -22,7 +22,7 @@ export async function handleCreateAccount(interfaceId: string) {
         return;
     }
 
-    const client = createSecuredClient(state.sharedSecret, state.fcmToken);
+    const client = createClient(state.sharedSecret, state.fcmToken);
     const requestId = await client.submitRequest('createAccount', { status: 'pending' });
 
     // Wait for the account to be created

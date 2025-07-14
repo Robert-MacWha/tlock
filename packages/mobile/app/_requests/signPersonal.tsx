@@ -3,7 +3,7 @@ import { View, Text, Button } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
 import { useSecureClientContext } from '../../contexts/SecureClientContext';
-import { Request, SignPersonalRequest } from '@tlock/shared';
+import { SignPersonalRequest } from '@tlock/shared';
 import { Address, verifyMessage } from 'viem';
 
 export default function SignPersonalScreen() {

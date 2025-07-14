@@ -1,28 +1,13 @@
-import { generateSecureRandom, isValidSharedSecret, SHARED_SECRET_LENGTH } from "./crypto";
+import { SharedSecret, isValidSharedSecret } from "./crypto";
 
 export interface QrCodeData {
     sharedSecret: SharedSecret;
     version: number;
 }
 
-// Device registration data sent to firebase during pairing
-export interface DeviceRegistration {
-    fcmToken: string;
-    deviceName: string;
-}
-
-export type SharedSecret = number[];
-
 export const QR_VERSION = 1;
 export const QR_PROTOCOL = "tlock";
 export const QR_ACTION = "pair";
-export const FIREBASE_URL = "https://tlock-974e6-default-rtdb.firebaseio.com/"
-export const CLOUD_FUNCTION_URL = "https://sendnotification-clnhgoo57a-uc.a.run.app";
-
-export async function generateSharedSecret(): Promise<SharedSecret> {
-    const sharedSecret = generateSecureRandom(SHARED_SECRET_LENGTH);
-    return Array.from(sharedSecret);
-}
 
 export async function createQrCode(sharedSecret: SharedSecret): Promise<string> {
     const qrData: QrCodeData = {

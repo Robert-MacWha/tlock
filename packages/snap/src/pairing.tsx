@@ -1,4 +1,4 @@
-import { createQrCode, createSecuredClient, generateSharedSecret } from "@tlock/shared";
+import { createQrCode, generateSharedSecret, createClient } from "@tlock/shared";
 import { getState, updateState } from "./state";
 import qrcode from 'qrcode';
 import { showErrorScreen, showScreen } from "./screen";
@@ -9,7 +9,7 @@ export async function handlePair(interfaceId: string) {
 
     try {
         // Generate random 128-bit secret
-        const sharedSecret = await generateSharedSecret();
+        const sharedSecret = generateSharedSecret();
         const qrData = await createQrCode(sharedSecret);
         const secretQR = await qrcode.toString(qrData);
 
@@ -57,7 +57,7 @@ export async function handleConfirmPair(interfaceId: string) {
     }
 
     console.log('Using shared secret:', sharedSecret);
-    const client = createSecuredClient(sharedSecret);
+    const client = createClient(sharedSecret);
 
     const registeredDevice = await client.getDevice();
     if (!registeredDevice) {

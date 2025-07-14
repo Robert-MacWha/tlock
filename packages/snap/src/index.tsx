@@ -1,6 +1,6 @@
 import type { OnRpcRequestHandler, OnHomePageHandler, OnUserInputHandler, UserInputEvent, OnKeyringRequestHandler, Json } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button } from '@metamask/snaps-sdk/jsx';
-import { createSecuredClient, deriveRoomId, SecureClient, SharedSecret } from '@tlock/shared';
+import { createClient, deriveRoomId, Client } from '@tlock/shared';
 import { getState } from './state';
 import { showErrorScreen, showScreen } from './screen';
 import { handleConfirmPair, handlePair } from './pairing';
@@ -49,7 +49,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, reques
         throw new Error('Device is not paired. Please pair your device first.');
     }
 
-    const client = createSecuredClient(state.sharedSecret, state.fcmToken);
+    const client = createClient(state.sharedSecret, state.fcmToken);
     const keyring = new TlockKeyring(client, state.keyringState);
     return (await handleKeyringRequest(keyring, request)) ?? null;
 }

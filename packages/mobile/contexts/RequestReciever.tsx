@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useEffect, useState, useRef } from 'react';
-import { SecureClient, RequestType, PendingRequest } from '@tlock/shared';
+import { PendingRequest } from '@tlock/shared';
 import { useDevMode } from '../hooks/useDevMode';
 import { useSecureClientContext } from './SecureClientContext';
 
