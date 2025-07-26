@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
+import { useAccountsContext } from '../../contexts/AccountsContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
-import { useBiometricAuth } from '../../contexts/BiometricAuthContext';
 
 export default function CreateAccountScreen() {
-    const { addAccount } = useSeedPhraseContext();
+    const { addAccount } = useAccountsContext();
     const { loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {

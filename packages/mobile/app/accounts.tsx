@@ -1,9 +1,9 @@
 import React from "react";
 import { Alert, Button, StyleSheet, Text, View } from "react-native";
-import { useSeedPhraseContext } from "../contexts/SeedPhraseContext";
+import { useAccountsContext } from "../contexts/AccountsContext";
 
 export default function AccountsScreen() {
-    const { accounts, addAccount } = useSeedPhraseContext();
+    const { accounts, addAccount } = useAccountsContext();
 
     async function handleAddAccount() {
         try {

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions } from "react-native";
 import { useSetupStatus } from "../hooks/useSetupStatus";
-import { useSeedPhraseContext } from "../contexts/SeedPhraseContext";
+import { useAccountsContext } from "../contexts/AccountsContext";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../components/SeedPhraseDisplay';
-import { useBiometricAuth } from '../contexts/BiometricAuthContext';
+import { useAuthenticator } from '../hooks/useAuthenticator';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
-    const { getSeedPhrase } = useSeedPhraseContext();
-    const { authenticate } = useBiometricAuth();
+    const { getSeedPhrase } = useAccountsContext();
+    const { authenticate } = useAuthenticator();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
 

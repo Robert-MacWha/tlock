@@ -1,0 +1,178 @@
+import * as SecureStore from 'expo-secure-store';
+import { generateMnemonic, mnemonicToSeed } from 'bip39';
+import { HDKey } from '@scure/bip32';
+import { privateKeyToAccount } from 'viem/accounts';
+import { bytesToHex } from 'viem';
+import type { Address, Hex, PrivateKeyAccount } from 'viem';
+import { useAuthenticator } from '../hooks/useAuthenticator';
+
+export interface Account {
+    id: number;
+    address: Address;
+}
+
+const SEED_PHRASE_KEY = 'tlock_seed_phrase';
+const ACCOUNT_COUNTER_KEY = 'tlock_account_counter';
+const ACCOUNTS_KEY = 'tlock_accounts';
+
+export function useSeedPhrase() {
+    const { authenticate } = useAuthenticator();
+
+    const getSeedPhrase = async (): Promise<string> => {
+        await authenticate();
+
+        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (!seedPhrase) {
+            throw new Error('No seed phrase found');
+        }
+        return seedPhrase;
+    };
+
+    const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
+        const seedPhrase = generateMnemonic();
+
+        if (!seedPhrase) {
+            throw new Error('Seed phrase cannot be empty');
+        }
+
+        const existingSeedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (existingSeedPhrase && !override) {
+            throw new Error('Seed phrase already exists. Use override to replace it.');
+        }
+
+        await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
+
+        // Reset accounts and counter
+        setAccounts([]);
+        setAccountCounter(0);
+        await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
+        await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
+
+        return seedPhrase;
+    }
+
+    const getAccounts = async (): Promise<Account[]> => {
+        const accountsStr = await SecureStore.getItemAsync(ACCOUNTS_KEY);
+
+        if (accountsStr) {
+            return JSON.parse(accountsStr);
+        }
+        return [];
+    };
+
+    const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
+        const accounts = (await getAccounts());
+        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
+        if (!account) {
+            throw new Error(`Account with address ${address} not found`);
+        }
+
+        const privateKey = await getPrivateKey(account.id);
+        return privateKeyToAccount(privateKey);
+    }
+
+    const addAccount = async (): Promise<Address> => {
+        const accounts = await getAccounts();
+        const newAccountId = await getAccountCounter() + 1;
+        const address = await deriveAddress(newAccountId);
+
+        const newAccount: Account = {
+            id: newAccountId,
+            address
+        };
+
+        const newAccounts = [...accounts, newAccount];
+        await setAccounts(newAccounts);
+        await setAccountCounter(newAccountId);
+
+        return address;
+    };
+
+    const sign = async (from: Address, hash: Hex): Promise<Hex> => {
+        try {
+            const account = await getAccountFromAddress(from);
+            return await account.sign({ hash });
+        } catch (error) {
+            throw new Error(`Failed to sign hash: ${hash}`);
+        }
+    };
+
+    const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
+        try {
+            const account = await getAccountFromAddress(from);
+            return await account.signMessage({ message: { raw } });
+        } catch (error) {
+            throw new Error(`Failed to sign raw: ${raw}`);
+        }
+    }
+
+    return {
+        getSeedPhrase,
+        generateSeedPhrase,
+        getAccounts,
+        addAccount,
+        sign,
+        signPersonal,
+    }
+}
+
+const getAccountCounter = async (): Promise<number> => {
+    const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
+    if (counterStr) {
+        return parseInt(counterStr, 10);
+    }
+    return 0;
+};
+
+const setAccounts = async (accounts: Account[]) => {
+    await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify(accounts));
+}
+
+const setAccountCounter = async (counter: number) => {
+    await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, counter.toString());
+}
+
+const getPrivateKey = async (accountId: number): Promise<Hex> => {
+    try {
+        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (!seedPhrase) {
+            throw new Error('No seed phrase found');
+        }
+
+        const seed = await mnemonicToSeed(seedPhrase);
+        const hdKey = HDKey.fromMasterSeed(seed);
+        const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
+
+        if (!derived.privateKey) {
+            throw new Error('Failed to derive private key');
+        }
+
+        return bytesToHex(derived.privateKey);
+    } catch (error) {
+        throw new Error('Failed to get private key');
+    }
+}
+
+const deriveAddress = async (accountId: number): Promise<Address> => {
+    try {
+        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (!seedPhrase) {
+            throw new Error('No seed phrase found');
+        }
+
+        const seed = await mnemonicToSeed(seedPhrase);
+        const hdKey = HDKey.fromMasterSeed(seed);
+        const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
+
+        if (!derived.privateKey) {
+            throw new Error('Failed to derive private key');
+        }
+
+        const privateKey = bytesToHex(derived.privateKey);
+        const account = privateKeyToAccount(privateKey);
+
+        return account.address;
+    } catch (error) {
+        throw new Error('Failed to derive address');
+    }
+}

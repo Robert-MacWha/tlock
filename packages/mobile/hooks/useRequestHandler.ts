@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { RequestType, RequestTypeMap } from '@tlock/shared';
 import { useSecureClientContext } from '../contexts/SecureClientContext';
-import { useBiometricAuth } from '../contexts/BiometricAuthContext';
+import { useAuthenticator } from './useAuthenticator';
 
 interface RequestHandlerConfig<T extends RequestType> {
     type: T;
@@ -12,7 +12,7 @@ interface RequestHandlerConfig<T extends RequestType> {
 export function useRequestHandler<T extends RequestType>(config: RequestHandlerConfig<T>) {
     const { requestId } = useLocalSearchParams() as { requestId: string };
     const { secureClient } = useSecureClientContext();
-    const { authenticate } = useBiometricAuth();
+    const { authenticate } = useAuthenticator();
 
     const [request, setRequest] = useState<RequestTypeMap[T] | undefined>();
     const [loading, setLoading] = useState(true);

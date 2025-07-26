@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
+import { useAccountsContext } from '../../contexts/AccountsContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { Address } from 'viem';
 
 export default function ImportAccountScreen() {
     let [selectedAddress, setSelectedAddress] = React.useState<Address | null>(null);
 
-    const { accounts } = useSeedPhraseContext();
+    const { accounts } = useAccountsContext();
     const { loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {

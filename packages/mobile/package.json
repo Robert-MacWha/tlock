@@ -9,6 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
+  "jest": {
+    "preset": "jest-expo"
+  },
   "dependencies": {
     "@scure/bip32": "^1.7.0",
     "@tlock/shared": "workspace:*",
@@ -32,7 +35,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/react-native": "^13.2.0",
     "@types/react": "~19.0.10",
+    "jest": "^30.0.5",
+    "jest-expo": "^53.0.9",
+    "react-test-renderer": "19.0.0",
     "typescript": "~5.8.3"
   },
   "private": true
