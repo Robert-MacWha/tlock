@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
+import { useAccountsContext } from '../../contexts/AccountsContext';
 import { useSecureClientContext } from '../../contexts/SecureClientContext';
 
 export default function CreateAccountScreen() {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
+import { useAccountsContext } from '../../contexts/AccountsContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
 
 export default function SignPersonalScreen() {
-    const { signPersonal } = useSeedPhraseContext();
+    const { signPersonal } = useAccountsContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signPersonal',
         onApprove: async (request) => {

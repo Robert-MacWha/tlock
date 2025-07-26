@@ -3,7 +3,7 @@ import './polyfills';
 import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import { SeedPhraseProvider } from '../contexts/SeedPhraseContext';
+import { AccountsProvider } from '../contexts/AccountsContext';
 import { SecureClientProvider } from '../contexts/SecureClientContext';
 import { RequestReceiverProvider } from '../contexts/RequestReciever';
 import { useSetupStatus } from '../hooks/useSetupStatus';
@@ -24,14 +24,14 @@ export default function RootLayout() {
 
     if (isSetupComplete === false) {
         return (
-            <SeedPhraseProvider>
+            <AccountsProvider>
                 <SetupFlow />
-            </SeedPhraseProvider>
+            </AccountsProvider>
         );
     }
 
     return (
-        <SeedPhraseProvider>
+        <AccountsProvider>
             <SecureClientProvider>
                 <RequestReceiverProvider>
                     <Tabs>
@@ -80,6 +80,6 @@ export default function RootLayout() {
                     </Tabs>
                 </RequestReceiverProvider>
             </SecureClientProvider>
-        </SeedPhraseProvider>
+        </AccountsProvider>
     );
 }
