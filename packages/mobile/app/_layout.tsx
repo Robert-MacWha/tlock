@@ -18,12 +18,10 @@ export default function RootLayout() {
         requestCameraPermission();
     }, []);
 
-    // Show loading while checking setup status
     if (isSetupComplete === null) {
         return <LoadingScreen />;
     }
 
-    // Show setup flow if not complete
     if (isSetupComplete === false) {
         return (
             <SeedPhraseProvider>
@@ -32,7 +30,6 @@ export default function RootLayout() {
         );
     }
 
-    // Show main app if setup is complete
     return (
         <SeedPhraseProvider>
             <SecureClientProvider>
