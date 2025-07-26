@@ -4,9 +4,8 @@ import { Client, ImportAccountRequest, SignMessageRequest, SignPersonalRequest, 
 import { v4 as uuid } from 'uuid';
 import { EthAccountType, EthMethod, } from '@metamask/keyring-api';
 import { recoverPersonalSignature, SignTypedDataVersion } from '@metamask/eth-sig-util';
-import { Address, Hex, serializeTransaction } from 'viem';
+import { Address, Hex, SignTypedDataParameters } from 'viem';
 import { KeyringState, updateState } from "./state";
-import { Common } from "@ethereumjs/common";
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
@@ -286,14 +285,21 @@ export class TlockKeyring implements Keyring {
         return response.signature;
     }
 
-    private async signTypedData(from: Address, data: Json, version: SignTypedDataVersion): Promise<string> {
+    private async signTypedData(from: Address, data: any, version: SignTypedDataVersion): Promise<string> {
         console.log('Signing typed data:', data, 'from:', from, 'version:', version);
+
+        if (version !== SignTypedDataVersion.V4) {
+            throw new Error(`Unsupported SignTypedDataVersion: ${version}`);
+        }
+
+        if (!data) {
+            throw new Error("Data for signing typed data cannot be null or undefined");
+        }
 
         const requestId = await this.client.submitRequest('signTypedData', {
             status: 'pending',
             from,
-            data: JSON.stringify(data),
-            version,
+            data: data,
         });
 
         let response: SignTypedDataRequest;

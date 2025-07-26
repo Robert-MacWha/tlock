@@ -1,7 +1,6 @@
-import { Address, Hex, Transaction } from "viem";
+import { Address, Hex, Transaction, SignTypedDataParameters } from "viem";
 import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
-import { SignTypedDataVersion } from "@metamask/eth-sig-util";
 
 /**
  * PendingRequest represents a request currently pending in the backend.
@@ -46,8 +45,7 @@ export interface SignTransactionRequest {
 export interface SignTypedDataRequest {
     status: RequestStatus;
     from: Address;
-    data: any;
-    version: SignTypedDataVersion;
+    data: SignTypedDataParameters;
     signature?: Hex;
 }
 

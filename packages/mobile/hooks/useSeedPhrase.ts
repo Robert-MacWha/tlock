@@ -1,9 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 import { generateMnemonic, mnemonicToSeed } from 'bip39';
 import { HDKey } from '@scure/bip32';
-import { privateKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount, SignTypedDataParameters } from 'viem/accounts';
 import { bytesToHex } from 'viem';
-import type { Address, Hex, PrivateKeyAccount, Transaction, } from 'viem';
+import type { Address, Hex, PrivateKeyAccount, Transaction } from 'viem';
 import { useAuthenticator } from '../hooks/useAuthenticator';
 import * as MetamaskSigUtil from '@metamask/eth-sig-util';
 
@@ -99,16 +99,14 @@ export function useSeedPhrase() {
         }
     }
 
-    const signTypedData = async (from: Address, data: any, version: MetamaskSigUtil.SignTypedDataVersion): Promise<Hex> => {
-        const privateKey = await _getPrivateKeyFromAddress(from);
-        const privateKeyBuffer = Buffer.from(privateKey.slice(2), 'hex');
-        // TODO: Find a way to use viem instead of MetamaskSigUtil for signing typed data
-        // Can't do it currently because metamask has their own three versions of typed data
-        // for stupid reasons
-
-        //? Returns a 0x-prefixed hexstring
-        const sig = MetamaskSigUtil.signTypedData({ privateKey: privateKeyBuffer, data, version }) as Hex;
-        return sig;
+    const signTypedData = async (from: Address, data: SignTypedDataParameters): Promise<Hex> => {
+        const account = await _getAccountFromAddress(from);
+        try {
+            return await account.signTypedData(data);
+        } catch (error) {
+            console.log(error);
+            throw new Error(`Failed to sign typed data: ${JSON.stringify(data)}`);
+        }
     }
 
     const signTransaction = async (from: Address, transaction: Transaction): Promise<Hex> => {

@@ -9,7 +9,7 @@ export default function SignPersonalScreen() {
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signTypedData',
         onApprove: async (request) => {
-            const signature = await signTypedData(request.from, request.data, request.version);
+            const signature = await signTypedData(request.from, request.data);
             return { signature };
         },
     });
@@ -25,7 +25,7 @@ export default function SignPersonalScreen() {
                 MetaMask is requesting to sign a text challenge. Do you approve?
             </Text>
             <Text>
-                Message: {request.data}
+                Message: {JSON.stringify(request.data, null, 2)}
             </Text>
             <Button title="Approve" onPress={handleApprove} />
             <Button title="Reject" onPress={handleReject} />

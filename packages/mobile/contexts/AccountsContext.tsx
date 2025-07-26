@@ -11,7 +11,7 @@ interface AccountsContextType {
     addAccount: () => Promise<Address>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
-    signTypedData: (from: Address, data: any, version: SignTypedDataVersion) => Promise<Hex>;
+    signTypedData: (from: Address, data: any) => Promise<Hex>;
     signTransaction: (from: Address, transaction: Transaction) => Promise<Hex>;
 }
 
