@@ -6035,6 +6035,7 @@ __metadata:
     ts-jest: ^29.1.0
     typescript: ~5.7.3
     uuid: ^11.1.0
+    viem: ^2.33.1
   languageName: unknown
   linkType: soft
 

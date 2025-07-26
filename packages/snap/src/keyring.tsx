@@ -3,12 +3,9 @@ import { Json } from "@metamask/snaps-sdk";
 import { Client, ImportAccountRequest, SignMessageRequest, SignPersonalRequest, SignTransactionRequest, SignTypedDataRequest } from "@tlock/shared";
 import { v4 as uuid } from 'uuid';
 import { EthAccountType, EthMethod, } from '@metamask/keyring-api';
-import {
-    recoverPersonalSignature,
-    SignTypedDataVersion,
-} from '@metamask/eth-sig-util';
+import { recoverPersonalSignature, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { Address, Hex, serializeTransaction } from 'viem';
-import { KeyringState } from "./state";
+import { KeyringState, updateState } from "./state";
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
@@ -353,7 +350,9 @@ export class TlockKeyring implements Keyring {
     }
 
     private async saveState(): Promise<void> {
-        console.log('TODO: Saving keyring state');
+        updateState({
+            keyringState: this.state,
+        });
     }
 }
 

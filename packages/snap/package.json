@@ -25,7 +25,8 @@
     "@tlock/shared": "workspace:*",
     "@types/qrcode": "^1.5.5",
     "qrcode": "^1.5.4",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "viem": "^2.33.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
