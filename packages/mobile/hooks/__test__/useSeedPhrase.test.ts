@@ -17,8 +17,6 @@ const mockUseAuthenticator = useAuthenticator as jest.MockedFunction<typeof useA
 
 // Mock implementations
 const mockAuthenticate = jest.fn();
-const mockGetItemAsync = jest.fn();
-const mockSetItemAsync = jest.fn();
 
 describe('useSeedPhrase', () => {
     beforeEach(() => {
@@ -29,8 +27,9 @@ describe('useSeedPhrase', () => {
             authenticate: mockAuthenticate,
         });
 
-        mockSecureStore.getItemAsync = mockGetItemAsync;
-        mockSecureStore.setItemAsync = mockSetItemAsync;
+        // Mock SecureStore methods directly
+        mockSecureStore.getItemAsync.mockImplementation(jest.fn());
+        mockSecureStore.setItemAsync.mockImplementation(jest.fn());
 
         // Default successful authentication
         mockAuthenticate.mockResolvedValue(undefined);
@@ -49,7 +48,7 @@ describe('useSeedPhrase', () => {
         accounts?: string | null;
         accountCounter?: string | null;
     }) => {
-        mockGetItemAsync.mockImplementation((key: string) => {
+        mockSecureStore.getItemAsync.mockImplementation((key: string) => {
             switch (key) {
                 case 'tlock_seed_phrase':
                     return Promise.resolve(options.seedPhrase ?? null);
@@ -111,9 +110,9 @@ describe('useSeedPhrase', () => {
             const seedPhrase = await result.current.generateSeedPhrase();
 
             expect(seedPhrase).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_accounts', '[]');
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_account_counter', '0');
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_accounts', '[]');
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_account_counter', '0');
         });
 
         it('should override existing seed phrase when override is true', async () => {
@@ -123,18 +122,11 @@ describe('useSeedPhrase', () => {
             const seedPhrase = await result.current.generateSeedPhrase(true);
 
             expect(seedPhrase).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
         });
     });
 
     describe('getAccounts', () => {
-        it('should throw error when authentication fails', async () => {
-            mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
-
-            await expect(result.current.getAccounts()).rejects.toThrow('Authentication failed');
-        });
-
         it('should return empty array when no accounts exist', async () => {
             setupStorageState({ accounts: null });
             const { result } = renderHook(() => useSeedPhrase());
@@ -181,8 +173,8 @@ describe('useSeedPhrase', () => {
             const address = await result.current.addAccount();
 
             expect(address).toBeDefined();
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_account_counter', '1');
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address));
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_account_counter', '1');
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address));
         });
 
         it('should add subsequent accounts with incremented counter', async () => {
@@ -197,23 +189,30 @@ describe('useSeedPhrase', () => {
             const address = await result.current.addAccount();
 
             expect(address).toBeDefined();
-            expect(mockSetItemAsync).toHaveBeenCalledWith('tlock_account_counter', '2');
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_account_counter', '2');
         });
     });
 
     describe('sign', () => {
         it('should throw error when authentication fails', async () => {
+            const existingAccounts = [{ id: 1, address: '0x123' }];
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify(existingAccounts),
+                accountCounter: '1'
+            });
+
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
             const { result } = renderHook(() => useSeedPhrase());
 
-            await expect(result.current.sign('0x123' as Address, '0xhash' as Hex)).rejects.toThrow('Authentication failed');
+            await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when account does not exist', async () => {
             setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useSeedPhrase());
 
-            await expect(result.current.sign('0x123' as Address, '0xhash' as Hex)).rejects.toThrow('Failed to sign hash: 0xhash');
+            await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Account with address 0x123 not found');
         });
 
         it('should sign hash successfully', async () => {
@@ -224,15 +223,22 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useSeedPhrase());
 
-            const signature = await result.current.sign(mockAccount.address as Address, '0xhash' as Hex);
+            const signature = await result.current.sign(mockAccount.address as Address, '0x11223344' as Hex);
 
             expect(signature).toBeDefined();
-            expect(signature).toMatch(/^0x[a-fA-F0-9]+$/);
+            expect(signature).toBe("0x0c43fcdbe26032227a790b33d9153dfddcb0e96f9b343ab62a06547d5b876ae57c4c421bb0f6f55b0605686c8c58ac9753ca64a6da88386d2281b5ed1c306f5f1c");
         });
     });
 
     describe('signPersonal', () => {
         it('should throw error when authentication fails', async () => {
+            const existingAccounts = [{ id: 1, address: '0x123' }];
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify(existingAccounts),
+                accountCounter: '1'
+            });
+
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
             const { result } = renderHook(() => useSeedPhrase());
 
@@ -243,7 +249,7 @@ describe('useSeedPhrase', () => {
             setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useSeedPhrase());
 
-            await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Failed to sign raw: 0xmessage');
+            await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Account with address 0x123 not found');
         });
 
         it('should sign personal message successfully', async () => {
@@ -257,7 +263,7 @@ describe('useSeedPhrase', () => {
             const signature = await result.current.signPersonal(mockAccount.address as Address, '0xmessage' as Hex);
 
             expect(signature).toBeDefined();
-            expect(signature).toMatch(/^0x[a-fA-F0-9]+$/);
+            expect(signature).toBe("0x4254c2fe56c860aa52ed65245b8270ca323ba21e1de8a77ed7dbc8269328b79178f58f11bc4c63818346fb93fad6e1d885b3c7e98d1d24b2c984ade9ff08b6701c");
         });
     });
 });

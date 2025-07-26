@@ -29,15 +29,16 @@ export function useSeedPhrase() {
     };
 
     const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
-        const seedPhrase = generateMnemonic();
-
-        if (!seedPhrase) {
-            throw new Error('Seed phrase cannot be empty');
-        }
+        await authenticate();
 
         const existingSeedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
         if (existingSeedPhrase && !override) {
             throw new Error('Seed phrase already exists. Use override to replace it.');
+        }
+
+        const seedPhrase = generateMnemonic();
+        if (!seedPhrase) {
+            throw new Error('Seed phrase cannot be empty');
         }
 
         await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
@@ -58,6 +59,14 @@ export function useSeedPhrase() {
             return JSON.parse(accountsStr);
         }
         return [];
+    };
+
+    const getAccountCounter = async (): Promise<number> => {
+        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
+        if (counterStr) {
+            return parseInt(counterStr, 10);
+        }
+        return 0;
     };
 
     const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
@@ -89,20 +98,50 @@ export function useSeedPhrase() {
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
+        const account = await getAccountFromAddress(from);
         try {
-            const account = await getAccountFromAddress(from);
             return await account.sign({ hash });
         } catch (error) {
+            console.log(error);
             throw new Error(`Failed to sign hash: ${hash}`);
         }
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
+        const account = await getAccountFromAddress(from);
         try {
-            const account = await getAccountFromAddress(from);
             return await account.signMessage({ message: { raw } });
         } catch (error) {
+            console.log(error);
             throw new Error(`Failed to sign raw: ${raw}`);
+        }
+    }
+
+    const getPrivateKey = async (accountId: number): Promise<Hex> => {
+        const seedPhrase = await getSeedPhrase();
+        try {
+            const seed = await mnemonicToSeed(seedPhrase);
+            const hdKey = HDKey.fromMasterSeed(seed);
+            const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
+
+            if (!derived.privateKey) {
+                throw new Error('Failed to derive private key');
+            }
+
+            return bytesToHex(derived.privateKey);
+        } catch (error) {
+            throw new Error('Failed to get private key');
+        }
+    }
+
+    const deriveAddress = async (accountId: number): Promise<Address> => {
+        const privateKey = await getPrivateKey(accountId);
+        try {
+            const account = privateKeyToAccount(privateKey);
+
+            return account.address;
+        } catch (error) {
+            throw new Error('Failed to derive address');
         }
     }
 
@@ -116,63 +155,10 @@ export function useSeedPhrase() {
     }
 }
 
-const getAccountCounter = async (): Promise<number> => {
-    const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
-    if (counterStr) {
-        return parseInt(counterStr, 10);
-    }
-    return 0;
-};
-
 const setAccounts = async (accounts: Account[]) => {
     await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify(accounts));
 }
 
 const setAccountCounter = async (counter: number) => {
     await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, counter.toString());
-}
-
-const getPrivateKey = async (accountId: number): Promise<Hex> => {
-    try {
-        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
-        if (!seedPhrase) {
-            throw new Error('No seed phrase found');
-        }
-
-        const seed = await mnemonicToSeed(seedPhrase);
-        const hdKey = HDKey.fromMasterSeed(seed);
-        const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
-
-        if (!derived.privateKey) {
-            throw new Error('Failed to derive private key');
-        }
-
-        return bytesToHex(derived.privateKey);
-    } catch (error) {
-        throw new Error('Failed to get private key');
-    }
-}
-
-const deriveAddress = async (accountId: number): Promise<Address> => {
-    try {
-        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
-        if (!seedPhrase) {
-            throw new Error('No seed phrase found');
-        }
-
-        const seed = await mnemonicToSeed(seedPhrase);
-        const hdKey = HDKey.fromMasterSeed(seed);
-        const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
-
-        if (!derived.privateKey) {
-            throw new Error('Failed to derive private key');
-        }
-
-        const privateKey = bytesToHex(derived.privateKey);
-        const account = privateKeyToAccount(privateKey);
-
-        return account.address;
-    } catch (error) {
-        throw new Error('Failed to derive address');
-    }
 }
