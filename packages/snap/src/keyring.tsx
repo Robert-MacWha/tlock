@@ -1,6 +1,6 @@
 import { emitSnapKeyringEvent, Keyring, KeyringAccount, KeyringEvent, KeyringRequest, KeyringResponse } from "@metamask/keyring-api";
 import { Json } from "@metamask/snaps-sdk";
-import { CreateAccountRequest, Client, SignMessageRequest, SignPersonalRequest, SignTransactionRequest, SignTypedDataRequest } from "@tlock/shared";
+import { Client, ImportAccountRequest, SignMessageRequest, SignPersonalRequest, SignTransactionRequest, SignTypedDataRequest } from "@tlock/shared";
 import { v4 as uuid } from 'uuid';
 import { EthAccountType, EthMethod, } from '@metamask/keyring-api';
 import {
@@ -40,26 +40,26 @@ export class TlockKeyring implements Keyring {
     async createAccount(options: Record<string, Json> = {}): Promise<KeyringAccount> {
         console.log('Creating account with options:', options);
 
-        const requestId = await this.client.submitRequest('createAccount', { status: 'pending' });
+        const requestId = await this.client.submitRequest('importAccount', { status: 'pending' });
 
-        let response: CreateAccountRequest;
+        let response: ImportAccountRequest;
         try {
             response = await this.client.pollUntil(
                 requestId,
-                'createAccount',
+                'importAccount',
                 500, // ms
                 60,  // s
-                (r: CreateAccountRequest) => r.status !== 'pending'
+                (r: ImportAccountRequest) => r.status !== 'pending'
             );
             await this.client.deleteRequest(requestId);
         } catch (error) {
-            console.error("Error creating account:", error);
-            throw new Error("Failed to create account. Please try again.");
+            console.error("Error importing account:", error);
+            throw new Error("Failed to importing account. Please try again.");
         }
 
         if (!response.address) {
-            console.log('Account creation failed, no address returned');
-            throw new Error("Account creation failed, no address returned");
+            console.log('Account importing failed, no address returned');
+            throw new Error("Account importing failed, no address returned");
         }
 
         const id = uuid();

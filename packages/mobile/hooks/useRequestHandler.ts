@@ -41,6 +41,7 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
             throw new Error('No request data available');
         }
 
+        setLoading(true);
         const updates = await config.onApprove(request);
         await secureClient.updateRequest(requestId, config.type, {
             ...request,
@@ -53,6 +54,7 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
     const handleReject = async () => {
         if (!secureClient || !request) return;
 
+        setLoading(true);
         await secureClient.updateRequest(requestId, config.type, {
             ...request,
             status: 'rejected',

@@ -58,6 +58,7 @@ export class FirebaseClient implements Client {
         );
 
         if (!data || !data.encryptedData) {
+            console.log("No device registered for this room");
             return null;
         }
 
@@ -162,13 +163,14 @@ export class FirebaseClient implements Client {
     }
 
     private async sendNotification(fcmToken: string, requestId: string): Promise<void> {
-        await this.http.post(CLOUD_FUNCTION_URL, {
-            data: {
-                roomId: this.roomId,
-                requestId,
-                fcmToken: fcmToken
-            }
-        });
+        console.log("TODO: Send notification to FCM token:", fcmToken, "for request ID:", requestId);
+        // await this.http.post(CLOUD_FUNCTION_URL, {
+        //     data: {
+        //         roomId: this.roomId,
+        //         requestId,
+        //         fcmToken: fcmToken
+        //     }
+        // });
     }
 }
 

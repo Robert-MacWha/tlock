@@ -1,12 +1,12 @@
 import type { OnRpcRequestHandler, OnHomePageHandler, OnUserInputHandler, UserInputEvent, OnKeyringRequestHandler, Json } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button } from '@metamask/snaps-sdk/jsx';
-import { createClient, deriveRoomId, Client } from '@tlock/shared';
-import { getState } from './state';
+import { createClient, deriveRoomId } from '@tlock/shared';
+import { getState, SnapState } from './state';
 import { showErrorScreen, showScreen } from './screen';
 import { handleConfirmPair, handlePair } from './pairing';
-import { handleCreateAccount } from './account';
 import { TlockKeyring } from './keyring';
 import { handleKeyringRequest } from '@metamask/keyring-api';
+import { handleImportAccount } from './importAccount';
 // Home page UI
 export const onHomePage: OnHomePageHandler = async () => {
     console.log('Rendering home page');
@@ -69,8 +69,8 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
             case 'confirm-pair':
                 await handleConfirmPair(interfaceId);
                 return;
-            case 'create-account':
-                await handleCreateAccount(interfaceId);
+            case 'import-account':
+                await handleImportAccount(interfaceId);
                 return;
             default:
                 console.log('Unknown button clicked:', buttonName);
@@ -94,16 +94,7 @@ async function handleHomeScreen(interfaceId: string) {
         const state = await getState();
         console.log('Current state:', state);
         if (state && state.fcmToken) {
-            const roomId = deriveRoomId(state.sharedSecret || []).substring(0, 4);
-            await showScreen(interfaceId, (
-                <Box>
-                    <Heading>2FA Wallet</Heading>
-                    <Text>Paired to device</Text>
-                    <Text>Room ID: {roomId}</Text>
-                    <Button name="pair">Replace Paired Device</Button>
-                    <Button name="create-account">Create Account</Button>
-                </Box>
-            ));
+            await showPairedScreen(state, interfaceId);
             return;
         } else {
             console.log('Device is not paired');
@@ -118,6 +109,19 @@ async function handleHomeScreen(interfaceId: string) {
             <Heading>2FA Wallet</Heading>
             <Text>Your device is not paired.</Text>
             <Button name="pair">Pair Device</Button>
+        </Box>
+    ));
+}
+
+async function showPairedScreen(state: SnapState, interfaceId: string) {
+    const roomId = deriveRoomId(state.sharedSecret || []).substring(0, 4);
+    await showScreen(interfaceId, (
+        <Box>
+            <Heading>2FA Wallet Test</Heading>
+            <Text>Paired to device</Text>
+            <Text>Room ID: {roomId}</Text>
+            <Button name="pair">Replace Paired Device</Button>
+            <Button name="import-account">Import Account</Button>
         </Box>
     ));
 }

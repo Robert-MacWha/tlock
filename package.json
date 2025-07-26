@@ -18,8 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "expo": "~53.0.17",
-    "viem": "^2.31.7"
+    "expo": "~53.0.17"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",

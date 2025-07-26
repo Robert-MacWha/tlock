@@ -37,10 +37,8 @@ export class RequestHandlerService {
         console.log('Handling request:', request);
 
         if (!this.isAppInForeground) {
-            // App is in background, show push notification
             await this.showPushNotification(request);
         } else {
-            // App is in foreground or user tapped notification, navigate directly
             await this.navigateToRequestScreen(request);
         }
     }
@@ -71,19 +69,31 @@ export class RequestHandlerService {
 
     private getNotificationContent(request: PendingRequest) {
         const contentMap: Record<RequestType, { title: string; body: string }> = {
-            'createAccount': {
-                title: 'Account Creation Request',
-                body: 'Tap to approve creating a new account'
+            'importAccount': {
+                title: 'Account Request',
+                body: 'Tap to approve importing an account into your wallet'
             },
             'signTransaction': {
-                title: 'Transaction Signature Request',
+                title: 'Transaction Request',
                 body: 'Tap to review and sign transaction'
+            },
+            'signMessage': {
+                title: 'Signature Request',
+                body: 'Tap to review and sign message'
+            },
+            'signPersonal': {
+                title: 'Signature Request',
+                body: 'Tap to review and sign personal message'
+            },
+            'signTypedData': {
+                title: 'Signature Request',
+                body: 'Tap to review and sign typed data'
             },
         };
 
         return contentMap[request.type] || {
-            title: 'New Request',
-            body: 'Tap to handle request'
+            title: 'Unknown Request',
+            body: 'Tap to handle'
         };
     }
 

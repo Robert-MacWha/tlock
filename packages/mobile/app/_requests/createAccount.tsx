@@ -6,7 +6,7 @@ import { useRequestHandler } from '../../hooks/useRequestHandler';
 export default function CreateAccountScreen() {
     const { addAccount } = useSeedPhraseContext();
     const { loading, error, handleApprove, handleReject } = useRequestHandler({
-        type: 'createAccount',
+        type: 'importAccount',
         onApprove: async () => {
             const address = await addAccount();
             return { address };

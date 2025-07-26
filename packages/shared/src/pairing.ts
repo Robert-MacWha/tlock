@@ -34,7 +34,7 @@ export async function parseQrCode(qrCode: string): Promise<SharedSecret> {
     }
 
     if (!isValidSharedSecret(qrData.sharedSecret)) {
-        throw new Error("Invalid shared secret in QR code");
+        throw new Error(`Invalid shared secret in QR code: ${qrData.sharedSecret}`);
     }
 
     return qrData.sharedSecret;

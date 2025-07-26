@@ -8,14 +8,15 @@ import type { Address, Hex, PrivateKeyAccount } from 'viem';
 
 export interface Account {
     id: number;
-    address: string;
+    address: Address;
 }
 
 interface SeedPhraseContextType {
     accounts: Account[];
-    addAccount: () => Promise<string>;
+    addAccount: () => Promise<Address>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
+    // signTypedData: (version: string, from: Address, data: any) => Promise<Hex>;
 }
 
 const SEED_PHRASE_KEY = 'tlock_seed_phrase';
@@ -83,7 +84,7 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const addAccount = async (): Promise<string> => {
+    const addAccount = async (): Promise<Address> => {
         const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
         if (!seedPhrase) {
             throw new Error('No seed phrase found. Generate one first.');
@@ -127,6 +128,20 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    // const signTypedData = async (version: ethSigUtil.SignTypedDataVersion, from: Address, data: any): Promise<string> => {
+    //     try {
+    //         const privateKey = await getPrivateKeyFromAddress(from);
+    //         const signature = ethSigUtil.signTypedData({
+    //             privateKey,
+    //             data: data as unknown as TypedDataV1 | TypedMessage<any>,
+    //             version: version,
+    //         });
+    //         return signature;
+    //     } catch (error) {
+    //         throw new Error(`Failed to sign typed data: ${JSON.stringify(data)}`);
+    //     }
+    // }
+
     const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
         const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
         if (!account) {
@@ -158,7 +173,7 @@ export function useSeedPhraseContext() {
 }
 
 // Helper function to derive address without exposing private key
-const deriveAddress = async (seedPhrase: string, accountId: number): Promise<string> => {
+const deriveAddress = async (seedPhrase: string, accountId: number): Promise<Address> => {
     const seed = await mnemonicToSeed(seedPhrase);
     const hdKey = HDKey.fromMasterSeed(seed);
     const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);

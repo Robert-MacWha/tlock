@@ -1,6 +1,6 @@
 import { Box, Heading, Text } from "@metamask/snaps-sdk/jsx";
-import { showErrorScreen, showScreen } from "./screen";
-import { createClient, CreateAccountRequest } from "@tlock/shared";
+import { showErrorScreen, showScreen, showTextScreen } from "./screen";
+import { createClient, ImportAccountRequest } from "@tlock/shared";
 import { getState } from "./state";
 import { emitSnapKeyringEvent, KeyringAccount, KeyringEvent } from "@metamask/keyring-api";
 import {
@@ -9,12 +9,8 @@ import {
 } from '@metamask/keyring-api';
 import { v4 as uuid } from 'uuid';
 
-export async function handleCreateAccount(interfaceId: string) {
-    await showScreen(interfaceId, (
-        <Box>
-            <Heading>Creating new account... check phone for next steps</Heading>
-        </Box>
-    ));
+export async function handleImportAccount(interfaceId: string) {
+    await showTextScreen(interfaceId, "Importing account...");
 
     const state = await getState();
     if (!state || !state.sharedSecret || !state.fcmToken) {
@@ -22,35 +18,38 @@ export async function handleCreateAccount(interfaceId: string) {
         return;
     }
 
-    const client = createClient(state.sharedSecret, state.fcmToken);
-    const requestId = await client.submitRequest('createAccount', { status: 'pending' });
+    await showTextScreen(interfaceId, "Importing account...", "Please check your device for approval");
 
-    // Wait for the account to be created
-    let response: CreateAccountRequest;
+    const client = createClient(state.sharedSecret, state.fcmToken);
+    const requestId = await client.submitRequest('importAccount', { status: 'pending' });
+
+    // Wait for the account to be selected
+    let response: ImportAccountRequest;
     try {
         response = await client.pollUntil(
             requestId,
-            'createAccount',
+            'importAccount',
             500, // ms
             60,  // s
-            (r: CreateAccountRequest) => r.status !== 'pending'
+            (r: ImportAccountRequest) => r.status !== 'pending'
         );
         await client.deleteRequest(requestId);
 
         if (response.status !== 'approved') {
-            await showErrorScreen(interfaceId, "Account creation request was not approved");
+            await showErrorScreen(interfaceId, "Request not approved", "Please try again");
             return;
         }
 
         if (!response.address) {
-            throw new Error("Account creation failed, no address returned");
+            throw new Error("Account import failed, no address returned");
         }
     } catch (error) {
-        console.error("Error creating account:", error);
-        await showErrorScreen(interfaceId, "Failed to create account. Please try again.");
+        console.error("Error importing account:", error);
+        await showErrorScreen(interfaceId, "Failed to import account", "Please try again");
         return;
     }
 
+    // TODO: Use the keyring class instead of manually emitting events
     const id = uuid();
     const address = response.address;
     const account: KeyringAccount = {
@@ -75,7 +74,7 @@ export async function handleCreateAccount(interfaceId: string) {
     // Show success screen
     await showScreen(interfaceId, (
         <Box>
-            <Heading>Account created successfully!</Heading>
+            <Heading>Account imported successfully!</Heading>
             <Text>Address: {address}</Text>
         </Box>
     ));

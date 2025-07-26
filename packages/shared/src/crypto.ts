@@ -1,5 +1,4 @@
-import { randomBytes } from '@noble/hashes/utils';
-import { sha256 } from '@noble/hashes/sha2';
+import { sha256 } from 'viem';
 
 export type SharedSecret = number[];
 
@@ -15,18 +14,14 @@ export function generateSharedSecret(): SharedSecret {
 export function isValidSharedSecret(sharedSecret: SharedSecret): boolean {
     return Array.isArray(sharedSecret) &&
         sharedSecret.length === SHARED_SECRET_LENGTH &&
-        sharedSecret.every(num => Number.isInteger(num) && num >= 0 && num <= 255);
+        sharedSecret.every(num => Number.isInteger(num));
 }
 
 export function deriveRoomId(sharedSecret: SharedSecret): string {
     const secretBytes = new Uint8Array(sharedSecret);
 
     const hash = sha256(secretBytes);
-    const hexHash = Array.from(hash, byte =>
-        byte.toString(16).padStart(2, '0')
-    ).join('');
-
-    return hexHash.substring(0, 32).toUpperCase();
+    return hash.substring(2, 34).toUpperCase();
 }
 
 export function encryptMessage<T>(message: T, sharedSecret: SharedSecret): string {
@@ -40,6 +35,7 @@ export function decryptMessage<T>(encryptedMessage: string, sharedSecret: Shared
 }
 
 function generateSecureRandom(length: number): number[] {
-    const bytes = randomBytes(length);
+    const bytes = new Uint32Array(length);
+    crypto.getRandomValues(bytes)
     return Array.from(bytes);
 }

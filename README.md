@@ -1,5 +1,15 @@
 ## Flows
 
+## Develop
+
+Run `yarn dev:snap` to launch a dev server for the snap
+Run `yarn dev:mobile` to launch a expo go server for the expo app
+
+Use node v18
+
+### Test Application
+- https://ethsigner.netlify.app/
+
 ### Pairing
 Mobile device and browser snap pair via a QR code containing a shared secret.
 

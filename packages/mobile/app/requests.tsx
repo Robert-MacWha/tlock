@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
-import { useSeedPhraseContext } from "../contexts/SeedPhraseContext";
 import { useSecureClientContext } from "../contexts/SecureClientContext";
 import { useRequestReceiverContext } from "../contexts/RequestReciever";
 import { requestHandler } from "../services/RequestHandlerService";
@@ -8,7 +7,6 @@ import { requestHandler } from "../services/RequestHandlerService";
 export default function RequestsScreen() {
     const { pendingRequests, getPendingRequests } = useRequestReceiverContext();
     const { secureClient } = useSecureClientContext();
-    const { accounts, addAccount, sign } = useSeedPhraseContext();
 
     return (
         <View style={styles.container}>

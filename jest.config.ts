@@ -3,6 +3,7 @@ module.exports = {
     testEnvironment: 'node',
 
     testMatch: ['**/packages/**/*.test.{ts,tsx}'],
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
     // Basic coverage
     collectCoverageFrom: [

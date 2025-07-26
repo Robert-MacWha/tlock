@@ -1,4 +1,3 @@
-import { SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { Address, Hex } from "viem";
 import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
@@ -22,9 +21,14 @@ export interface DeviceRegistration {
 }
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
-export type RequestType = 'createAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
+export type RequestType = 'createAccount' | 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
 
 export interface CreateAccountRequest {
+    status: RequestStatus;
+    address?: string;
+}
+
+export interface ImportAccountRequest {
     status: RequestStatus;
     address?: string;
 }
@@ -47,7 +51,7 @@ export interface SignTypedDataRequest {
     status: RequestStatus;
     from: Address;
     data: string; // JSON stringified data
-    version: SignTypedDataVersion;
+    version: string;
     signature?: Hex;
 }
 
@@ -60,6 +64,7 @@ export interface SignMessageRequest {
 
 export interface RequestTypeMap {
     createAccount: CreateAccountRequest;
+    importAccount: ImportAccountRequest;
     signPersonal: SignPersonalRequest;
     signTransaction: SignTransactionRequest;
     signTypedData: SignTypedDataRequest;

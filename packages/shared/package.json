@@ -17,8 +17,7 @@
         "dist"
     ],
     "dependencies": {
-        "@noble/curves": "^1.9.2",
-        "@noble/hashes": "^1.8.0",
-        "jest": "^30.0.4"
+        "jest": "^30.0.4",
+        "viem": "^2.33.1"
     }
 }

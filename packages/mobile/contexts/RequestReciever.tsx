@@ -1,6 +1,5 @@
-import React, { createContext, useContext, ReactNode, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useRef } from 'react';
 import { PendingRequest } from '@tlock/shared';
-import { useDevMode } from '../hooks/useDevMode';
 import { useSecureClientContext } from './SecureClientContext';
 
 interface RequestHandlerContextType {
@@ -25,21 +24,15 @@ export function RequestReceiverProvider({
     onRequestReceived,
 }: RequestHandlerProviderProps) {
     const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
-    const { isDev } = useDevMode();
-    const { secureClient, savePairing } = useSecureClientContext();
+    const { secureClient } = useSecureClientContext();
     const previousRequestIds = useRef(new Set<string>());
 
-    // Start/stop polling based on secureClient availability
-    useEffect(() => {
-        if (!isDev) {
-            setupPushNotifications();
-        }
-    }, [secureClient, isDev]);
+    // const setupPushNotifications = async () => {
+    //     if (!secureClient) return;
+    //     throw new Error('Push notifications setup is not implemented yet');
+    // };
 
-    const setupPushNotifications = async () => {
-        if (!secureClient) return;
-        throw new Error('Push notifications setup is not implemented yet');
-    };
+    // setupPushNotifications();
 
     const getPendingRequests = async (): Promise<void> => {
         setPendingRequests([]);
