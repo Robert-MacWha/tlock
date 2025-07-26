@@ -5,10 +5,12 @@ import { useSeedPhraseContext } from "../contexts/SeedPhraseContext";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../components/SeedPhraseDisplay';
+import { useBiometricAuth } from '../contexts/BiometricAuthContext';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
     const { getSeedPhrase } = useSeedPhraseContext();
+    const { authenticate } = useBiometricAuth();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
 
@@ -26,6 +28,7 @@ export default function SettingsScreen() {
                     style: 'destructive',
                     onPress: async () => {
                         try {
+                            await authenticate();
                             await SecureStore.deleteItemAsync('tlock_setup_complete');
                             setIsSetupComplete(false);
                             router.replace('/_setup');

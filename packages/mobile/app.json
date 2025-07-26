@@ -29,7 +29,8 @@
       "permissions": [
         "CAMERA",
         "NOTIFICATIONS",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "USE_BIOMETRIC"
       ]
     },
     "web": {
@@ -38,7 +39,8 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-router"
+      "expo-router",
+      "expo-local-authentication"
     ]
   }
 }

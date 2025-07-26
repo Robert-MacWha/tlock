@@ -5,6 +5,7 @@ import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bytesToHex } from 'viem';
 import type { Address, Hex, PrivateKeyAccount } from 'viem';
+import { useBiometricAuth } from './BiometricAuthContext';
 
 export interface Account {
     id: number;
@@ -33,6 +34,7 @@ const SeedPhraseContext = createContext<SeedPhraseContextType | undefined>(undef
 export function SeedPhraseProvider({ children }: { children: ReactNode }) {
     const [accountCounter, setAccountCounter] = useState(0);
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const { authenticate } = useBiometricAuth();
 
     useEffect(() => {
         console.log('Initializing seed phrase hook');
@@ -84,6 +86,8 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
     }
 
     const getSeedPhrase = async (): Promise<string> => {
+        await authenticate();
+
         const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
         if (!seedPhrase) {
             throw new Error('No seed phrase found');

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Button } from 'react-native';
 import { useSeedPhraseContext } from '../../contexts/SeedPhraseContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
+import { useBiometricAuth } from '../../contexts/BiometricAuthContext';
 
 export default function CreateAccountScreen() {
     const { addAccount } = useSeedPhraseContext();
