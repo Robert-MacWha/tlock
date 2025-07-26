@@ -16,7 +16,8 @@ interface SeedPhraseContextType {
     addAccount: () => Promise<Address>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
-    // signTypedData: (version: string, from: Address, data: any) => Promise<Hex>;
+    generateSeedPhrase: (override?: boolean) => Promise<string>;
+    getSeedPhrase: () => Promise<string>;
 }
 
 const SEED_PHRASE_KEY = 'tlock_seed_phrase';
@@ -36,36 +37,11 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         console.log('Initializing seed phrase hook');
         const initializeApp = async () => {
-            try {
-                await generateSeedPhrase();
-                console.log('Seed phrase generated successfully');
-            } catch (error) {
-                console.log('Failed to generate seed phrase:', error);
-            }
             await loadAccounts();
         };
 
         initializeApp();
     }, []);
-
-    // Generate a new seed phrase and save it. Throws an
-    // error if the seed phrase already exists. 
-    const generateSeedPhrase = async () => {
-        const existing = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
-        if (existing) {
-            throw new Error('Seed phrase already exists.');
-        }
-
-        const mnemonic = generateMnemonic();
-        await SecureStore.setItemAsync(SEED_PHRASE_KEY, mnemonic);
-
-        // Reset accounts when generating new seed
-        setAccountCounter(0);
-        setAccounts([]);
-        await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
-        await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
-        console.log('New seed phrase generated:', mnemonic);
-    };
 
     const loadAccounts = async () => {
         try {
@@ -82,6 +58,37 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error('Failed to load accounts:', error);
         }
+    };
+
+    const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
+        const seedPhrase = generateMnemonic();
+
+        if (!seedPhrase) {
+            throw new Error('Seed phrase cannot be empty');
+        }
+
+        const existingSeedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (existingSeedPhrase && !override) {
+            throw new Error('Seed phrase already exists. Use override to replace it.');
+        }
+
+        await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
+
+        // Reset accounts and counter
+        setAccounts([]);
+        setAccountCounter(0);
+        await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
+        await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
+
+        return seedPhrase;
+    }
+
+    const getSeedPhrase = async (): Promise<string> => {
+        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+        if (!seedPhrase) {
+            throw new Error('No seed phrase found');
+        }
+        return seedPhrase;
     };
 
     const addAccount = async (): Promise<Address> => {
@@ -155,9 +162,11 @@ export function SeedPhraseProvider({ children }: { children: ReactNode }) {
     return (
         <SeedPhraseContext.Provider value={{
             accounts,
+            generateSeedPhrase,
             addAccount,
             signPersonal,
             sign,
+            getSeedPhrase,
         }} >
             {children}
         </SeedPhraseContext.Provider>

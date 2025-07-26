@@ -6,17 +6,28 @@ import { useCameraPermissions } from 'expo-camera';
 import { SeedPhraseProvider } from '../contexts/SeedPhraseContext';
 import { SecureClientProvider } from '../contexts/SecureClientContext';
 import { RequestReceiverProvider } from '../contexts/RequestReciever';
+import { useSetupStatus } from '../hooks/useSetupStatus';
+import LoadingScreen from './_loading';
+import SetupFlow from './_setup';
 
 export default function RootLayout() {
+    const { isSetupComplete } = useSetupStatus();
     const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
     useEffect(() => {
-        requestPermissions();
+        requestCameraPermission();
     }, []);
 
-    const requestPermissions = async () => {
-        requestCameraPermission();
-        // await Notifications.requestPermissionsAsync();
+    if (isSetupComplete === null) {
+        return <LoadingScreen />;
+    }
+
+    if (isSetupComplete === false) {
+        return (
+            <SeedPhraseProvider>
+                <SetupFlow />
+            </SeedPhraseProvider>
+        );
     }
 
     return (
@@ -43,7 +54,25 @@ export default function RootLayout() {
                             }}
                         />
                         <Tabs.Screen
+                            name="settings"
+                            options={{
+                                title: 'Settings',
+                            }}
+                        />
+                        <Tabs.Screen
                             name="_requests"
+                            options={{
+                                href: null
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="_setup"
+                            options={{
+                                href: null
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="_loading"
                             options={{
                                 href: null
                             }}
