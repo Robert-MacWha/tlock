@@ -6,19 +6,33 @@ import { useCameraPermissions } from 'expo-camera';
 import { SeedPhraseProvider } from '../contexts/SeedPhraseContext';
 import { SecureClientProvider } from '../contexts/SecureClientContext';
 import { RequestReceiverProvider } from '../contexts/RequestReciever';
+import { useSetupStatus } from '../hooks/useSetupStatus';
+import LoadingScreen from './_loading';
+import SetupFlow from './_setup';
 
 export default function RootLayout() {
+    const { isSetupComplete } = useSetupStatus();
     const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
     useEffect(() => {
-        requestPermissions();
+        requestCameraPermission();
     }, []);
 
-    const requestPermissions = async () => {
-        requestCameraPermission();
-        // await Notifications.requestPermissionsAsync();
+    // Show loading while checking setup status
+    if (isSetupComplete === null) {
+        return <LoadingScreen />;
     }
 
+    // Show setup flow if not complete
+    if (isSetupComplete === false) {
+        return (
+            <SeedPhraseProvider>
+                <SetupFlow />
+            </SeedPhraseProvider>
+        );
+    }
+
+    // Show main app if setup is complete
     return (
         <SeedPhraseProvider>
             <SecureClientProvider>
@@ -43,7 +57,25 @@ export default function RootLayout() {
                             }}
                         />
                         <Tabs.Screen
+                            name="settings"
+                            options={{
+                                title: 'Settings',
+                            }}
+                        />
+                        <Tabs.Screen
                             name="_requests"
+                            options={{
+                                href: null
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="_setup"
+                            options={{
+                                href: null
+                            }}
+                        />
+                        <Tabs.Screen
+                            name="_loading"
                             options={{
                                 href: null
                             }}
