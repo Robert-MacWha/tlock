@@ -3,8 +3,9 @@ import { generateMnemonic, mnemonicToSeed } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bytesToHex } from 'viem';
-import type { Address, Hex, PrivateKeyAccount } from 'viem';
+import type { Address, Hex, PrivateKeyAccount, Transaction, } from 'viem';
 import { useAuthenticator } from '../hooks/useAuthenticator';
+import * as MetamaskSigUtil from '@metamask/eth-sig-util';
 
 export interface Account {
     id: number;
@@ -61,29 +62,10 @@ export function useSeedPhrase() {
         return [];
     };
 
-    const getAccountCounter = async (): Promise<number> => {
-        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
-        if (counterStr) {
-            return parseInt(counterStr, 10);
-        }
-        return 0;
-    };
-
-    const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
-        const accounts = (await getAccounts());
-        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
-        if (!account) {
-            throw new Error(`Account with address ${address} not found`);
-        }
-
-        const privateKey = await getPrivateKey(account.id);
-        return privateKeyToAccount(privateKey);
-    }
-
     const addAccount = async (): Promise<Address> => {
         const accounts = await getAccounts();
-        const newAccountId = await getAccountCounter() + 1;
-        const address = await deriveAddress(newAccountId);
+        const newAccountId = await _getAccountCounter() + 1;
+        const address = await _deriveAddress(newAccountId);
 
         const newAccount: Account = {
             id: newAccountId,
@@ -98,7 +80,7 @@ export function useSeedPhrase() {
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
-        const account = await getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         try {
             return await account.sign({ hash });
         } catch (error) {
@@ -108,7 +90,7 @@ export function useSeedPhrase() {
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
-        const account = await getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         try {
             return await account.signMessage({ message: { raw } });
         } catch (error) {
@@ -117,7 +99,54 @@ export function useSeedPhrase() {
         }
     }
 
-    const getPrivateKey = async (accountId: number): Promise<Hex> => {
+    const signTypedData = async (from: Address, data: any, version: MetamaskSigUtil.SignTypedDataVersion): Promise<Hex> => {
+        const privateKey = await _getPrivateKeyFromAddress(from);
+        const privateKeyBuffer = Buffer.from(privateKey.slice(2), 'hex');
+        // TODO: Find a way to use viem instead of MetamaskSigUtil for signing typed data
+        // Can't do it currently because metamask has their own three versions of typed data
+        // for stupid reasons
+
+        //? Returns a 0x-prefixed hexstring
+        const sig = MetamaskSigUtil.signTypedData({ privateKey: privateKeyBuffer, data, version }) as Hex;
+        return sig;
+    }
+
+    const signTransaction = async (from: Address, transaction: Transaction): Promise<Hex> => {
+        const account = await _getAccountFromAddress(from);
+        try {
+            const signedTransaction = await account.signTransaction(transaction);
+            return signedTransaction;
+        } catch (error) {
+            console.log(error);
+            throw new Error(`Failed to sign transaction from address: ${from}`);
+        }
+    }
+
+    const _getAccountCounter = async (): Promise<number> => {
+        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
+        if (counterStr) {
+            return parseInt(counterStr, 10);
+        }
+        return 0;
+    };
+
+    const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
+        const privateKey = await _getPrivateKeyFromAddress(address);
+        return privateKeyToAccount(privateKey);
+    }
+
+    const _getPrivateKeyFromAddress = async (address: Address): Promise<Hex> => {
+        const accounts = await getAccounts();
+        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
+        if (!account) {
+            throw new Error(`Account with address ${address} not found`);
+        }
+
+        const privateKey = await _getPrivateKey(account.id);
+        return privateKey;
+    }
+
+    const _getPrivateKey = async (accountId: number): Promise<Hex> => {
         const seedPhrase = await getSeedPhrase();
         try {
             const seed = await mnemonicToSeed(seedPhrase);
@@ -134,8 +163,8 @@ export function useSeedPhrase() {
         }
     }
 
-    const deriveAddress = async (accountId: number): Promise<Address> => {
-        const privateKey = await getPrivateKey(accountId);
+    const _deriveAddress = async (accountId: number): Promise<Address> => {
+        const privateKey = await _getPrivateKey(accountId);
         try {
             const account = privateKeyToAccount(privateKey);
 
@@ -152,6 +181,8 @@ export function useSeedPhrase() {
         addAccount,
         sign,
         signPersonal,
+        signTypedData,
+        signTransaction,
     }
 }
 

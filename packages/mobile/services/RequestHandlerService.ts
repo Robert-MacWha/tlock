@@ -73,10 +73,6 @@ export class RequestHandlerService {
                 title: 'Account Request',
                 body: 'Tap to approve importing an account into your wallet'
             },
-            'signTransaction': {
-                title: 'Transaction Request',
-                body: 'Tap to review and sign transaction'
-            },
             'signMessage': {
                 title: 'Signature Request',
                 body: 'Tap to review and sign message'
@@ -88,6 +84,10 @@ export class RequestHandlerService {
             'signTypedData': {
                 title: 'Signature Request',
                 body: 'Tap to review and sign typed data'
+            },
+            'signTransaction': {
+                title: 'Transaction Request',
+                body: 'Tap to review and sign transaction'
             },
         };
 

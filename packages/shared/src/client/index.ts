@@ -1,6 +1,7 @@
-import { Address, Hex } from "viem";
+import { Address, Hex, Transaction } from "viem";
 import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
+import { SignTypedDataVersion } from "@metamask/eth-sig-util";
 
 /**
  * PendingRequest represents a request currently pending in the backend.
@@ -21,12 +22,7 @@ export interface DeviceRegistration {
 }
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
-export type RequestType = 'createAccount' | 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
-
-export interface CreateAccountRequest {
-    status: RequestStatus;
-    address?: string;
-}
+export type RequestType = 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
 
 export interface ImportAccountRequest {
     status: RequestStatus;
@@ -43,15 +39,15 @@ export interface SignPersonalRequest {
 export interface SignTransactionRequest {
     status: RequestStatus;
     from: Address;
-    transaction: string;
+    transaction: Transaction;
     signature?: Hex;
 }
 
 export interface SignTypedDataRequest {
     status: RequestStatus;
     from: Address;
-    data: string; // JSON stringified data
-    version: string;
+    data: any;
+    version: SignTypedDataVersion;
     signature?: Hex;
 }
 
@@ -63,7 +59,6 @@ export interface SignMessageRequest {
 }
 
 export interface RequestTypeMap {
-    createAccount: CreateAccountRequest;
     importAccount: ImportAccountRequest;
     signPersonal: SignPersonalRequest;
     signTransaction: SignTransactionRequest;

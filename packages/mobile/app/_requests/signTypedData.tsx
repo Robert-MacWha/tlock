@@ -5,17 +5,18 @@ import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
 
 export default function SignPersonalScreen() {
-    const { signPersonal } = useAccountsContext();
+    const { signTypedData } = useAccountsContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
-        type: 'signPersonal',
+        type: 'signTypedData',
         onApprove: async (request) => {
-            const signature = await signPersonal(request.from, request.message);
+            const signature = await signTypedData(request.from, request.data, request.version);
             return { signature };
         },
     });
 
     if (loading) return <Text>Loading...</Text>;
     if (error) return <Text>Error: {error}</Text>;
+    if (!request) return <Text>No request available</Text>;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
@@ -24,7 +25,7 @@ export default function SignPersonalScreen() {
                 MetaMask is requesting to sign a text challenge. Do you approve?
             </Text>
             <Text>
-                Message: {fromHex(request?.message || '0x', 'string')}
+                Message: {request.data}
             </Text>
             <Button title="Approve" onPress={handleApprove} />
             <Button title="Reject" onPress={handleReject} />

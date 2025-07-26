@@ -6,6 +6,7 @@ import { EthAccountType, EthMethod, } from '@metamask/keyring-api';
 import { recoverPersonalSignature, SignTypedDataVersion } from '@metamask/eth-sig-util';
 import { Address, Hex, serializeTransaction } from 'viem';
 import { KeyringState, updateState } from "./state";
+import { Common } from "@ethereumjs/common";
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
@@ -247,18 +248,19 @@ export class TlockKeyring implements Keyring {
         return response.signature;
     }
 
+    // https://docs.metamask.io/services/concepts/transaction-types/
+    //? Metamask and viem's types should be compatible thanks to standardization,
+    //? but this will be tested via unit and integration tests anyways because
+    //? *I don't trust metamask*
     private async signTransaction(tx: any): Promise<Json> {
         if (tx.chainId.startsWith('0x')) {
             tx.chainId = parseInt(tx.chainId, 16);
         }
-        const serializedTx = serializeTransaction({
-            ...tx
-        });
 
         const requestId = await this.client.submitRequest('signTransaction', {
             status: 'pending',
             from: tx.from,
-            transaction: serializedTx,
+            transaction: tx,
         });
 
         let response: SignTransactionRequest;

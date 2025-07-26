@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Account, useSeedPhrase } from '../hooks/useSeedPhrase';
-import type { Address, Hex } from 'viem';
+import type { Address, Hex, Transaction } from 'viem';
+import { SignTypedDataVersion } from '@metamask/eth-sig-util';
 
 interface AccountsContextType {
     accounts: Account[];
@@ -10,13 +11,24 @@ interface AccountsContextType {
     addAccount: () => Promise<Address>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
+    signTypedData: (from: Address, data: any, version: SignTypedDataVersion) => Promise<Hex>;
+    signTransaction: (from: Address, transaction: Transaction) => Promise<Hex>;
 }
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
 export function AccountsProvider({ children }: { children: ReactNode }) {
     const [accounts, setAccounts] = useState<Account[]>([]);
-    const { getAccounts, getSeedPhrase, generateSeedPhrase, addAccount, sign, signPersonal } = useSeedPhrase();
+    const {
+        getAccounts,
+        getSeedPhrase,
+        generateSeedPhrase,
+        addAccount,
+        sign,
+        signPersonal,
+        signTypedData,
+        signTransaction
+    } = useSeedPhrase();
 
     const refreshAccounts = async () => {
         const loadedAccounts = await getAccounts();
@@ -43,7 +55,9 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
             generateSeedPhrase: generateSeedPhraseWithRefresh,
             addAccount: addAccountWithRefresh,
             sign,
-            signPersonal
+            signPersonal,
+            signTypedData,
+            signTransaction
         }}>
             {children}
         </AccountsContext.Provider>

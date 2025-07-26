@@ -1,29 +1,30 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
 import { useAccountsContext } from '../../contexts/AccountsContext';
-import { useSecureClientContext } from '../../contexts/SecureClientContext';
+import { useRequestHandler } from '../../hooks/useRequestHandler';
 
-export default function CreateAccountScreen() {
-    const { requestId } = useLocalSearchParams() as { requestId: string };
-    const { secureClient } = useSecureClientContext();
+export default function SignPersonalScreen() {
+    const { signTransaction } = useAccountsContext();
+    const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
+        type: 'signTransaction',
+        onApprove: async (request) => {
+            const signature = await signTransaction(request.from, request.transaction);
+            return { signature };
+        },
+    });
 
-    const handleApprove = async () => {
-        console.log('Request approved');
-    };
-
-    const handleReject = async () => {
-        console.log('Request rejected');
-        router.back();
-    };
+    if (loading) return <Text>Loading...</Text>;
+    if (error) return <Text>Error: {error}</Text>;
+    if (!request) return <Text>No request available</Text>;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-            <Text style={{ fontSize: 24, marginBottom: 20 }}>
-                Sign Transaction
-            </Text>
+            <Text style={{ fontSize: 24, marginBottom: 20 }}>Personal Sign</Text>
             <Text style={{ marginBottom: 30 }}>
-                MetaMask is requesting to sign a transaction. Do you approve?
+                MetaMask is requesting to sign a text challenge. Do you approve?
+            </Text>
+            <Text>
+                Message: {JSON.stringify(request.transaction, null, 2)}
             </Text>
             <Button title="Approve" onPress={handleApprove} />
             <Button title="Reject" onPress={handleReject} />

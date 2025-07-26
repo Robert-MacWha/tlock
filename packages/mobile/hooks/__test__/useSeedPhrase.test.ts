@@ -266,4 +266,12 @@ describe('useSeedPhrase', () => {
             expect(signature).toBe("0x4254c2fe56c860aa52ed65245b8270ca323ba21e1de8a77ed7dbc8269328b79178f58f11bc4c63818346fb93fad6e1d885b3c7e98d1d24b2c984ade9ff08b6701c");
         });
     });
+
+    describe('signTypedData', () => {
+        // TODO
+    });
+
+    describe('signTransaction', () => {
+        // TODO
+    });
 });
