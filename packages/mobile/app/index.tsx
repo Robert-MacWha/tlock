@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import { CameraView } from 'expo-camera';
 // import * as Notifications from 'expo-notifications';
-import { parseQrCode, Client } from '@tlock/shared';
+import { parseQrCode, Client, createClient } from '@tlock/shared';
 import { useSecureClientContext } from '../contexts/SecureClientContext';
 
 export default function App() {
     const [state, setState] = useState<'home' | 'scanning' | 'paired' | 'requests'>('home');
     const { secureClient, savePairing, unpair } = useSecureClientContext();
+    const [isScanningBarCode, setIsScanningBarCode] = useState(false);
 
     const registerDevice = async (client: Client) => {
         // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
@@ -16,21 +17,14 @@ export default function App() {
         console.log('Device registered successfully');
     };
 
-    const [isScanningBarCode, setIsScanningBarCode] = useState(false);
     const handleBarCodeScanned = async ({ data }: { data: string }) => {
         if (isScanningBarCode) return;
         setIsScanningBarCode(true);
 
         try {
             const sharedSecret = await parseQrCode(data);
-            savePairing(sharedSecret);
-
-            if (!secureClient) {
-                Alert.alert('Error', 'Failed to create secure client. Please try again.');
-                return;
-            }
-            await registerDevice(secureClient);
-
+            const newClient = await savePairing(sharedSecret);
+            await registerDevice(newClient);
             setState('paired');
             Alert.alert('Success', 'Device paired successfully!');
         } catch (error) {
@@ -41,7 +35,7 @@ export default function App() {
         }
     };
 
-    if (state === 'scanning') {
+    const renderQRScanner = () => {
         return (
             <View style={styles.container}>
                 <CameraView
@@ -58,6 +52,10 @@ export default function App() {
                 </View>
             </View>
         );
+    };
+
+    if (state === 'scanning') {
+        return renderQRScanner();
     }
 
     return (

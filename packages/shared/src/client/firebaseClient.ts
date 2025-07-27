@@ -58,7 +58,7 @@ export class FirebaseClient implements Client {
         );
 
         if (!data || !data.encryptedData) {
-            console.log("No device registered for this room");
+            console.log(`No device registered for room ${this.roomId}`);
             return null;
         }
 
@@ -177,5 +177,5 @@ export class FirebaseClient implements Client {
 function generateRequestId(): string {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 15);
-    return `${timestamp}_${random}`;
+    return timestamp + "_" + random;
 }
