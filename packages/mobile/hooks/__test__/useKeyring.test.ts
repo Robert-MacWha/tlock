@@ -1,12 +1,13 @@
-import { renderHook, act } from '@testing-library/react-native';
+import { renderHook } from '@testing-library/react-native';
 import { useKeyring } from '../useKeyring';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthenticator } from '../useAuthenticator';
-import { Address, Hex } from 'viem';
+import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, TransactionLegacy, TransactionSerializableLegacy } from 'viem';
 
 // Mock only specific dependencies
 jest.mock('expo-secure-store');
 jest.mock('../useAuthenticator');
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('bip39', () => ({
     ...jest.requireActual('bip39'),
     generateMnemonic: jest.fn(() => 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
@@ -62,14 +63,49 @@ describe('useSeedPhrase', () => {
         });
     };
 
-    describe('getSeedPhrase', () => {
-        it('should throw error when authentication fails', async () => {
+    // Helper function to test authentication failures
+    const testAuthenticationFailure = (methodName: string, methodCall: (result: ReturnType<typeof useKeyring>) => Promise<unknown>) => {
+        it(`${methodName} should throw error when authentication fails`, async () => {
+            const existingAccounts = [{ id: 1, address: '0x123' }];
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify(existingAccounts),
+                accountCounter: '1'
+            });
+
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
             const { result } = renderHook(() => useKeyring());
 
-            await expect(result.current.getSeedPhrase()).rejects.toThrow('Authentication failed');
+            await expect(methodCall(result.current)).rejects.toThrow('Authentication failed');
         });
+    };
 
+    // Helper function to test account does not exist errors
+    const testAccountNotFound = (methodName: string, methodCall: (result: ReturnType<typeof useKeyring>) => Promise<unknown>) => {
+        it(`${methodName} should throw error when account does not exist`, async () => {
+            setupStorageState({ accounts: '[]' });
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(methodCall(result.current)).rejects.toThrow('Account with address 0x123 not found');
+        });
+    };
+
+    describe('Authentication failures', () => {
+        testAuthenticationFailure('getSeedPhrase', (result) => result.getSeedPhrase());
+        testAuthenticationFailure('generateSeedPhrase', (result) => result.generateSeedPhrase());
+        testAuthenticationFailure('addAccount', (result) => result.addAccount());
+        testAuthenticationFailure('sign', (result) => result.sign('0x123' as Address, '0x11223344' as Hex));
+        testAuthenticationFailure('signPersonal', (result) => result.signPersonal('0x123' as Address, '0xmessage' as Hex));
+        testAuthenticationFailure('signTransaction', (result) => result.signTransaction('0x123' as Address, '0x1122' as Hex));
+    });
+
+    describe('Account not found errors', () => {
+        testAccountNotFound('sign', (result) => result.sign('0x123' as Address, '0x11223344' as Hex));
+        testAccountNotFound('signPersonal', (result) => result.signPersonal('0x123' as Address, '0xmessage' as Hex));
+        testAccountNotFound('signTransaction', (result) => result.signTransaction('0x123' as Address, '0x1122' as Hex));
+    });
+
+    describe('getSeedPhrase', () => {
         it('should throw error when seed phrase does not exist', async () => {
             setupStorageState({ seedPhrase: null });
             const { result } = renderHook(() => useKeyring());
@@ -89,13 +125,6 @@ describe('useSeedPhrase', () => {
     });
 
     describe('generateSeedPhrase', () => {
-        it('should throw error when authentication fails', async () => {
-            mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.generateSeedPhrase()).rejects.toThrow('Authentication failed');
-        });
-
         it('should throw error when seed phrase already exists without override', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
             const { result } = renderHook(() => useKeyring());
@@ -148,13 +177,6 @@ describe('useSeedPhrase', () => {
     });
 
     describe('addAccount', () => {
-        it('should throw error when authentication fails', async () => {
-            mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.addAccount()).rejects.toThrow('Authentication failed');
-        });
-
         it('should throw error when no seed phrase exists', async () => {
             setupStorageState({ seedPhrase: null, accounts: '[]', accountCounter: '0' });
             const { result } = renderHook(() => useKeyring());
@@ -194,27 +216,6 @@ describe('useSeedPhrase', () => {
     });
 
     describe('sign', () => {
-        it('should throw error when authentication fails', async () => {
-            const existingAccounts = [{ id: 1, address: '0x123' }];
-            setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-                accounts: JSON.stringify(existingAccounts),
-                accountCounter: '1'
-            });
-
-            mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Authentication failed');
-        });
-
-        it('should throw error when account does not exist', async () => {
-            setupStorageState({ accounts: '[]' });
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Account with address 0x123 not found');
-        });
-
         it('should sign hash successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
@@ -231,27 +232,6 @@ describe('useSeedPhrase', () => {
     });
 
     describe('signPersonal', () => {
-        it('should throw error when authentication fails', async () => {
-            const existingAccounts = [{ id: 1, address: '0x123' }];
-            setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
-                accounts: JSON.stringify(existingAccounts),
-                accountCounter: '1'
-            });
-
-            mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Authentication failed');
-        });
-
-        it('should throw error when account does not exist', async () => {
-            setupStorageState({ accounts: '[]' });
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Account with address 0x123 not found');
-        });
-
         it('should sign personal message successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
@@ -267,11 +247,44 @@ describe('useSeedPhrase', () => {
         });
     });
 
+    describe('signTransaction', () => {
+        it('should sign transaction successfully', async () => {
+            const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify([mockAccount])
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            const transaction: TransactionSerializableLegacy = {
+                chainId: 1,
+                gas: 21001n,
+                nonce: 69,
+                to: '0x1234567890123456789012345678901234567890' as Address,
+                value: parseGwei('0.1'),
+                data: '0x00' as Hex,
+                type: 'legacy',
+            };
+            const serialized = serializeTransaction(transaction);
+            const signed = await result.current.signTransaction(mockAccount.address as Address, serialized);
+
+            expect(signed).toBeDefined();
+            expect(signed).toEqual("0xf86345808252099412345678901234567890123456789012345678908405f5e1000026a03e789887f49de3184594fd43dee586fec3c016f7eeed512773afacbf66f9c6aba019239a2415e90438bc7e124d0f93e786473c3b1bfdcff6392a2518d8d9a1b362");
+
+            // Ensure the transaction was serialized correctly
+            const parsed = parseTransaction(signed);
+            expect(parsed).toEqual({
+                ...transaction,
+                r: "0x3e789887f49de3184594fd43dee586fec3c016f7eeed512773afacbf66f9c6ab",
+                s: "0x19239a2415e90438bc7e124d0f93e786473c3b1bfdcff6392a2518d8d9a1b362",
+                v: 38n,
+                yParity: 1,
+            });
+        });
+    });
+
     describe('signTypedData', () => {
         // TODO
     });
 
-    describe('signTransaction', () => {
-        // TODO
-    });
 });
