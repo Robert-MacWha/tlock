@@ -17,9 +17,6 @@
     "deploy:functions": "yarn workspace @tlock/firebase/functions deploy",
     "test": "jest"
   },
-  "dependencies": {
-    "expo": "~53.0.17"
-  },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",
     "@lavamoat/preinstall-always-fail": "^2.0.0",
@@ -47,11 +44,14 @@
     "typescript-eslint": "^8.6.0"
   },
   "resolutions": {
+    "typescript": "5.7.3",
     "cookie": "^0.7.1",
     "path-to-regexp@0.1.10": "^0.1.12",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.1",
-    "ws": "^8.17.1"
+    "ws": "^8.17.1",
+    "viem": "2.33.1",
+    "abitype": "^1.0.0"
   },
   "packageManager": "yarn@3.2.1",
   "engines": {

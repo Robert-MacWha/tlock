@@ -1,11 +1,10 @@
-import type { OnRpcRequestHandler, OnHomePageHandler, OnUserInputHandler, UserInputEvent, OnKeyringRequestHandler, Json } from '@metamask/snaps-sdk';
+import { type OnRpcRequestHandler, type OnHomePageHandler, type OnUserInputHandler, type UserInputEvent, type OnKeyringRequestHandler, type Json, UserInputEventType } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button } from '@metamask/snaps-sdk/jsx';
 import { createClient, deriveRoomId } from '@tlock/shared';
 import { getState, SnapState } from './state';
 import { showErrorScreen, showScreen } from './screen';
 import { handleConfirmPair, handlePair } from './pairing';
 import { TlockKeyring } from './keyring';
-import { handleKeyringRequest } from '@metamask/keyring-api';
 import { handleImportAccount } from './importAccount';
 // Home page UI
 export const onHomePage: OnHomePageHandler = async () => {
@@ -34,7 +33,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     console.log('User input event:', id, event);
 
-    if (event.type === 'ButtonClickEvent') {
+    if (event.type === UserInputEventType.ButtonClickEvent) {
         await handleButtonClick(id, event);
         return;
     }
@@ -77,7 +76,7 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
                 return;
         }
     } catch (error) {
-        console.error(`Error handling button click button=${buttonName} err=${error}`);
+        console.error(`Error handling button click button=${buttonName} err=${error as string}`);
         if (error instanceof Error) {
             await showErrorScreen(interfaceId, error.message);
         } else {

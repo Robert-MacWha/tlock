@@ -1,9 +1,9 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example",
+  "description": "A solution for storing private keys and signing transactions remotely",
+  "proposedName": "Foxguard",
   "source": {
-    "shasum": "Njhx1RBc1EKDMwe19Pdg6tFyacaQVOMCctnKfCy1anA=",
+    "shasum": "uTkrH9fxaR4ki6ZvFrdmeCH7+w+2jq9mj9W8GJT3sDM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

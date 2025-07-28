@@ -12,10 +12,11 @@ import SetupFlow from './_setup';
 
 export default function RootLayout() {
     const { isSetupComplete } = useSetupStatus();
-    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+    const [, requestCameraPermission] = useCameraPermissions();
+
 
     useEffect(() => {
-        requestCameraPermission();
+        void requestCameraPermission();
     }, []);
 
     if (isSetupComplete === null) {

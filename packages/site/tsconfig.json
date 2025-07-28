@@ -5,5 +5,10 @@
     "resolveJsonModule": true,
     "jsx": "preserve"
   },
-  "include": ["src", "gatsby-browser.tsx", "gatsby-config.ts", "gatsby-ssr.tsx"]
+  "include": [
+    "src",
+    "gatsby-browser.tsx",
+    "gatsby-config.ts",
+    "gatsby-ssr.tsx"
+  ]
 }

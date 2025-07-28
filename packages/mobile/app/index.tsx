@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import { CameraView } from 'expo-camera';
 // import * as Notifications from 'expo-notifications';
-import { parseQrCode, Client, createClient } from '@tlock/shared';
+import { parseQrCode, Client } from '@tlock/shared';
 import { useSecureClientContext } from '../contexts/SecureClientContext';
 
 export default function App() {
@@ -41,7 +41,7 @@ export default function App() {
                 <CameraView
                     style={StyleSheet.absoluteFillObject}
                     facing="back"
-                    onBarcodeScanned={handleBarCodeScanned}
+                    onBarcodeScanned={(data) => { void handleBarCodeScanned(data) }}
                     barcodeScannerSettings={{
                         barcodeTypes: ['qr'],
                     }}
@@ -69,7 +69,7 @@ export default function App() {
             <Button title="Pair with MetaMask" onPress={() => setState('scanning')} />
 
             {secureClient && (
-                <Button title="Unpair" onPress={unpair} />
+                <Button title="Unpair" onPress={() => { void unpair() }} />
             )}
         </View>
     );

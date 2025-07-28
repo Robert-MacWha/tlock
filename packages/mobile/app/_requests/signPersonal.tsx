@@ -27,8 +27,8 @@ export default function SignPersonalScreen() {
             <Text>
                 Message: {fromHex(request.message || '0x', 'string')}
             </Text>
-            <Button title="Approve" onPress={handleApprove} />
-            <Button title="Reject" onPress={handleReject} />
+            <Button title="Approve" onPress={() => { void handleApprove() }} />
+            <Button title="Reject" onPress={() => { void handleReject() }} />
         </View>
     );
 }

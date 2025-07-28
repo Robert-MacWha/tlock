@@ -19,7 +19,7 @@ export default function RequestsScreen() {
             {secureClient && (
                 <View>
                     <Text>Paired with Room ID: {secureClient.roomId.substring(0, 4)}</Text>
-                    <Button title="Get Requests" onPress={() => getPendingRequests()} />
+                    <Button title="Get Requests" onPress={() => void getPendingRequests()} />
                 </View>
             )}
 
@@ -31,7 +31,7 @@ export default function RequestsScreen() {
                             <Text>Type: {request.type}</Text>
                             <Text>ID: {request.id}</Text>
                             <View style={styles.buttonRow}>
-                                <Button title="Handle" onPress={() => requestHandler.handleRequest(request)} />
+                                <Button title="Handle" onPress={() => void requestHandler.handleRequest(request)} />
                             </View>
                         </View>
                     ))}

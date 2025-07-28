@@ -31,7 +31,7 @@ export default function AccountsScreen() {
                 </View>
             )}
 
-            <Button title="Add New Account" onPress={handleAddAccount} />
+            <Button title="Add New Account" onPress={() => { void handleAddAccount() }} />
         </View>
     )
 }

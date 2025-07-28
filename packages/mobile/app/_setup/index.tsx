@@ -42,7 +42,7 @@ export default function SetupScreen() {
                 Foxguard is a secure key management app that works seamlessly with
                 MetaMask. To get started, you'll need to setup a seed phrase.
             </Text>
-            <Button title="Continue" onPress={handleNextFromIntro} />
+            <Button title="Continue" onPress={() => { void handleNextFromIntro() }} />
         </View>
     );
 
@@ -81,7 +81,7 @@ export default function SetupScreen() {
             <Text style={styles.description}>
                 You can now pair with MetaMask and start securing your transactions.
             </Text>
-            <Button title="Continue" onPress={completeSetup} />
+            <Button title="Continue" onPress={() => { void completeSetup() }} />
         </View>
     );
 
