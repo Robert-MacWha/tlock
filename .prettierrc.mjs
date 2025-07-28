@@ -1,5 +1,3 @@
-// All of these are defaults except singleQuote, but we specify them
-// for explicitness
 const config = {
     quoteProps: 'as-needed',
     singleQuote: true,
@@ -8,6 +6,7 @@ const config = {
     useTabs: false,
     endOfLine: 'auto',
     plugins: ['prettier-plugin-packagejson'],
+    semi: true,
 };
 
 export default config;

@@ -131,11 +131,6 @@ export function useKeyring() {
     };
 
     const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
-        const privateKey = await _getPrivateKeyFromAddress(address);
-        return privateKeyToAccount(privateKey);
-    }
-
-    const _getPrivateKeyFromAddress = async (address: Address): Promise<Hex> => {
         const accounts = await getAccounts();
         const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
         if (!account) {
@@ -143,7 +138,18 @@ export function useKeyring() {
         }
 
         const privateKey = await _getPrivateKey(account.id);
-        return privateKey;
+        return privateKeyToAccount(privateKey);
+    }
+
+    const _deriveAddress = async (accountId: number): Promise<Address> => {
+        const privateKey = await _getPrivateKey(accountId);
+        try {
+            const account = privateKeyToAccount(privateKey);
+            return account.address;
+        } catch (_error) {
+            // ? Should never be thrown, just here to prevent data leaks
+            throw new Error('Failed to derive address');
+        }
     }
 
     const _getPrivateKey = async (accountId: number): Promise<Hex> => {
@@ -159,17 +165,8 @@ export function useKeyring() {
 
             return bytesToHex(derived.privateKey);
         } catch (_error) {
+            // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to get private key');
-        }
-    }
-
-    const _deriveAddress = async (accountId: number): Promise<Address> => {
-        const privateKey = await _getPrivateKey(accountId);
-        try {
-            const account = privateKeyToAccount(privateKey);
-            return account.address;
-        } catch (_error) {
-            throw new Error('Failed to derive address');
         }
     }
 
