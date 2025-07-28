@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 
@@ -11,7 +11,7 @@ export default function SetupScreen() {
     const [currentStep, setCurrentStep] = useState<SetupStep>('intro');
     const [seedPhraseBackedUp, setSeedPhraseBackedUp] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
-    const { generateSeedPhrase } = useAccountsContext();
+    const { generateSeedPhrase } = useKeyringContext();
     const { setIsSetupComplete } = useSetupStatus();
 
     const completeSetup = async () => {

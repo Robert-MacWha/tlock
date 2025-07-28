@@ -6,6 +6,7 @@ import { showErrorScreen, showScreen } from './screen';
 import { handleConfirmPair, handlePair } from './pairing';
 import { TlockKeyring } from './keyring';
 import { handleImportAccount } from './importAccount';
+import { handleKeyringRequest } from '@metamask/keyring-api';
 // Home page UI
 export const onHomePage: OnHomePageHandler = async () => {
     console.log('Rendering home page');
@@ -50,6 +51,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, reques
 
     const client = createClient(state.sharedSecret, state.fcmToken);
     const keyring = new TlockKeyring(client, state.keyringState);
+    console.log('Handling keyring request:', request);
     return (await handleKeyringRequest(keyring, request)) ?? null;
 }
 

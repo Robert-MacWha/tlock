@@ -5978,6 +5978,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tlock/shared@workspace:packages/shared"
   dependencies:
+    "@ethereumjs/tx": ^10.0.0
     jest: ^30.0.4
     typescript: ^5.7.3
     viem: ^2.33.1

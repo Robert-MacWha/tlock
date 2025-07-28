@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { PendingRequest, RequestType } from '@tlock/shared';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
 
 /**
  * Central service for handling incoming requests from push notifications or in-app events.
@@ -10,7 +10,7 @@ import { AppState, AppStateStatus } from 'react-native';
 export class RequestHandlerService {
     private static instance: RequestHandlerService;
     private isAppInForeground = true;
-    private appStateSubscription?: any;
+    private appStateSubscription?: NativeEventSubscription;
 
     static getInstance(): RequestHandlerService {
         if (!RequestHandlerService.instance) {
@@ -62,7 +62,7 @@ export class RequestHandlerService {
 
     private async navigateToRequestScreen(request: PendingRequest) {
         router.push({
-            pathname: `/_requests/${request.type}` as any,
+            pathname: `/_requests/${request.type}`,
             params: { requestId: request.id }
         });
     }
@@ -101,7 +101,7 @@ export class RequestHandlerService {
         Notifications.addNotificationResponseReceivedListener(response => {
             const data = response.notification.request.content.data;
             if (data.requestId && data.requestType) {
-                this.navigateToRequestScreen({
+                void this.navigateToRequestScreen({
                     id: data.requestId as string,
                     type: data.requestType as RequestType,
                 });

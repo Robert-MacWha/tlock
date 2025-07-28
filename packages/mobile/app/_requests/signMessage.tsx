@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
 
 export default function SignMessageScreen() {
-    const { sign } = useAccountsContext();
+    const { sign } = useKeyringContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signMessage',
         onApprove: async (request) => {

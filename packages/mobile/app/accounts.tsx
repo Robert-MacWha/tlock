@@ -1,9 +1,9 @@
 import React from "react";
 import { Alert, Button, StyleSheet, Text, View } from "react-native";
-import { useAccountsContext } from "../contexts/AccountsContext";
+import { useKeyringContext } from "../contexts/KeyringContext";
 
 export default function AccountsScreen() {
-    const { accounts, addAccount } = useAccountsContext();
+    const { accounts, addAccount } = useKeyringContext();
 
     async function handleAddAccount() {
         try {

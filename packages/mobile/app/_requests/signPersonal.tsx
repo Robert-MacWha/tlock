@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
 
 export default function SignPersonalScreen() {
-    const { signPersonal } = useAccountsContext();
+    const { signPersonal } = useKeyringContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signPersonal',
         onApprove: async (request) => {

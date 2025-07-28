@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, TouchableOpacity } from 'react-native';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { Address } from 'viem';
 
@@ -48,7 +48,7 @@ function AccountItem({ address, isSelected, onSelect }: AccountItemProps) {
 export default function ImportAccountScreen() {
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-    const { accounts } = useAccountsContext();
+    const { accounts } = useKeyringContext();
     const { loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {

@@ -1,9 +1,8 @@
 import React, { createContext, useContext, ReactNode, useState } from 'react';
-import { Account, useSeedPhrase } from '../hooks/useSeedPhrase';
-import type { Address, Hex, Transaction } from 'viem';
-import { SignTypedDataVersion } from '@metamask/eth-sig-util';
+import { Account, useKeyring } from '../hooks/useKeyring';
+import type { Address, Hex, TypedDataDefinition, TransactionSerialized } from 'viem';
 
-interface AccountsContextType {
+interface KeyringContextType {
     accounts: Account[];
     refreshAccounts: () => Promise<void>;
     getSeedPhrase: () => Promise<string>;
@@ -11,13 +10,13 @@ interface AccountsContextType {
     addAccount: () => Promise<Address>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
-    signTypedData: (from: Address, data: any) => Promise<Hex>;
-    signTransaction: (from: Address, transaction: Transaction) => Promise<Hex>;
+    signTypedData: (from: Address, data: TypedDataDefinition) => Promise<Hex>;
+    signTransaction: (from: Address, transaction: Hex) => Promise<TransactionSerialized>;
 }
 
-const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
+const KeyringContext = createContext<KeyringContextType | undefined>(undefined);
 
-export function AccountsProvider({ children }: { children: ReactNode }) {
+export function KeyringProvider({ children }: { children: ReactNode }) {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const {
         getAccounts,
@@ -28,7 +27,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
         signPersonal,
         signTypedData,
         signTransaction
-    } = useSeedPhrase();
+    } = useKeyring();
 
     const refreshAccounts = async () => {
         const loadedAccounts = await getAccounts();
@@ -48,7 +47,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AccountsContext.Provider value={{
+        <KeyringContext.Provider value={{
             accounts,
             refreshAccounts,
             getSeedPhrase,
@@ -60,14 +59,14 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
             signTransaction
         }}>
             {children}
-        </AccountsContext.Provider>
+        </KeyringContext.Provider>
     );
 }
 
-export function useAccountsContext() {
-    const context = useContext(AccountsContext);
+export function useKeyringContext() {
+    const context = useContext(KeyringContext);
     if (!context) {
-        throw new Error('useAccountsContext must be used within a AccountsProvider');
+        throw new Error('useKeyringContext must be used within a KeyringProvider');
     }
     return context;
 }

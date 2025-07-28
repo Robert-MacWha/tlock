@@ -1,6 +1,5 @@
 import {
     recoverPersonalSignature,
-    SignTypedDataVersion,
 } from '@metamask/eth-sig-util';
 import type {
     Keyring,
@@ -21,13 +20,13 @@ import type {
     SignMessageRequest,
     SignPersonalRequest,
     SignTransactionRequest,
-    SignTypedDataRequest,
 } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
-import type { Address, Hex, SignTypedDataParameters, Transaction } from 'viem';
+import { serializeTransaction, type Address, type Hex, type TransactionSerialized } from 'viem';
 
 import type { KeyringState } from './state';
 import { updateState } from './state';
+import { KeyringRequestParams, mapViemTransactionType, requestToViem as toViemTransaction, TransactionRequest, TypedData, viemToJson } from './keyringTypes';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
@@ -35,7 +34,6 @@ export class TlockKeyring implements Keyring {
     private state: KeyringState;
 
     constructor(client: Client, state?: KeyringState) {
-        console.log('TlockKeyring initialized');
         this.client = client;
         this.state = state ?? {
             wallets: {},
@@ -91,7 +89,7 @@ export class TlockKeyring implements Keyring {
 
         const id = uuid();
         const { address } = response;
-        const account: KeyringAccount = {
+        const account = {
             id,
             address,
             options: {},
@@ -105,10 +103,16 @@ export class TlockKeyring implements Keyring {
             ],
             type: EthAccountType.Eoa,
         };
-        await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, {
-            account,
-            accountNameSuggestion: 'Tlock Account',
-        });
+
+        try {
+            await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, {
+                account,
+                accountNameSuggestion: 'Tlock Account',
+            });
+        } catch (error) {
+            console.error('Error registering account with metamask:', error);
+            throw new Error('Failed to create account. Please try again.');
+        }
 
         this.state.wallets[id] = { account };
         await this.saveState();
@@ -168,8 +172,8 @@ export class TlockKeyring implements Keyring {
     async submitRequest(request: KeyringRequest): Promise<KeyringResponse> {
         console.log('Submitting request:', request);
 
-        const { method, params = [] } = request.request;
-        const signature = await this.handleSigningRequest(method, params);
+        const req: KeyringRequestParams = request.request as KeyringRequestParams;
+        const signature = await this.handleSigningRequest(req);
         return {
             pending: false,
             result: signature,
@@ -183,10 +187,7 @@ export class TlockKeyring implements Keyring {
         const { request } =
             this.state.pendingRequests[id] ??
             throwError(`Request with ID ${id} not found`);
-        const result = await this.handleSigningRequest(
-            request.method,
-            request.params ?? [],
-        );
+        const result = await this.handleSigningRequest(request as KeyringRequestParams);
 
         await this.removePendingRequest(id);
         await emitSnapKeyringEvent(snap, KeyringEvent.RequestApproved, {
@@ -210,55 +211,29 @@ export class TlockKeyring implements Keyring {
         await this.saveState();
     }
 
-    private async handleSigningRequest(
-        method: string,
-        params: Json,
-    ): Promise<Json> {
-        switch (method as EthMethod) {
+    private async handleSigningRequest(request: KeyringRequestParams): Promise<Json> {
+        switch (request.method) {
             case EthMethod.PersonalSign: {
-                const [message, from] = params as [Hex, Address];
+                const [message, from] = request.params;
                 return await this.signPersonalMessage(message, from);
             }
-
             case EthMethod.SignTransaction: {
-                const [tx] = (params as [unknown]) as [Transaction];
+                const [tx] = request.params;
                 return await this.signTransaction(tx);
             }
-
-            case EthMethod.SignTypedDataV1: {
-                const [from, data] = params as [Address, Json];
-                return await this.signTypedData(
-                    from,
-                    data,
-                    SignTypedDataVersion.V1,
-                );
-            }
-
-            case EthMethod.SignTypedDataV3: {
-                const [from, data] = params as [Address, Json];
-                return await this.signTypedData(
-                    from,
-                    data,
-                    SignTypedDataVersion.V3,
-                );
-            }
-
             case EthMethod.SignTypedDataV4: {
-                const [from, data] = params as [Address, Json];
+                const [from, data] = request.params;
                 return await this.signTypedData(
                     from,
                     data,
-                    SignTypedDataVersion.V4,
                 );
             }
-
             case EthMethod.Sign: {
-                const [from, data] = params as [Address, Hex];
+                const [from, data] = request.params;
                 return await this.signMessage(from, data);
             }
-
             default: {
-                throw new Error(`EVM method '${method}' not supported`);
+                throw new Error(`EVM method '${request.method}' not supported`);
             }
         }
     }
@@ -325,25 +300,21 @@ export class TlockKeyring implements Keyring {
     }
 
     // https://docs.metamask.io/services/concepts/transaction-types/
-    //? Metamask and viem's types should be compatible thanks to standardization,
-    //? but this will be tested via unit and integration tests anyways because
-    //? *I don't trust metamask*
-    private async signTransaction(tx: Transaction): Promise<Json> {
-        //? Might also be a string because of metamask
-        let chainId = tx.chainId as unknown;
-        if (chainId && typeof chainId === 'string' && chainId.startsWith('0x')) {
-            chainId = parseInt(chainId, 16);
-            tx.chainId = chainId as number;
-        }
-
-        const requestId = await this.client.submitRequest('signTransaction', {
-            status: 'pending',
-            from: tx.from,
-            transaction: tx,
-        });
+    //? Pretty sure JSONTx is the correct type (or at least compatible), 
+    //? but I haven't found any documentation that confirms this.
+    private async signTransaction(tx: TransactionRequest): Promise<Json> {
+        console.log('Raw transaction from MetaMask:', tx);
+        const viemTx = toViemTransaction(tx);
+        console.log('Viem transaction:', viemTx);
 
         let response: SignTransactionRequest;
         try {
+            const requestId = await this.client.submitRequest('signTransaction', {
+                status: 'pending',
+                from: tx.from,
+                transaction: serializeTransaction(viemTx),
+            });
+
             response = await this.client.pollUntil(
                 requestId,
                 'signTransaction',
@@ -353,73 +324,70 @@ export class TlockKeyring implements Keyring {
             );
             await this.client.deleteRequest(requestId);
         } catch (error) {
-            console.error('Error signing transaction:', error);
-            throw new Error('Failed to sign transaction. Please try again.');
+            if (error instanceof Error) {
+                console.error(`Error signing transaction: ${error.message}`);
+                throw new Error('Failed to sign transaction: ' + error.message);
+            } else {
+                console.error('Error signing transaction:', error);
+                throw new Error('Failed to sign transaction. Please try again.');
+            }
         }
 
-        if (!response.signature) {
+        if (!response.signed) {
             console.log('Transaction signing failed, no signature returned');
             throw new Error(
                 'Transaction signing failed, no signature returned',
             );
         }
 
-        return response.signature;
+        const signed = response.signed as TransactionSerialized;
+        console.log(`Signed transaction:`, signed);
+        const json = viemToJson(signed, mapViemTransactionType(viemTx.type));
+        console.log('Serialized transaction to JSON:', json);
+        return json;
     }
 
     private async signTypedData(
         from: Address,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: any,
-        version: SignTypedDataVersion,
+        data: TypedData,
     ): Promise<string> {
         console.log(
-            'Signing typed data:',
+            'Signing typed data V4:',
             data,
             'from:',
             from,
-            'version:',
-            version,
         );
 
-        if (version !== SignTypedDataVersion.V4) {
-            throw new Error(`Unsupported SignTypedDataVersion: ${version}`);
-        }
+        throw new Error("signTypedData is not implemented yet");
 
-        if (!data) {
-            throw new Error(
-                'Data for signing typed data cannot be null or undefined',
-            );
-        }
+        // const castData: TypedDataDefinition = data as TypedDataDefinition;
+        // const requestId = await this.client.submitRequest('signTypedData', {
+        //     status: 'pending',
+        //     from,
+        //     data: castData,
+        // });
 
-        const castData: SignTypedDataParameters = data as SignTypedDataParameters;
-        const requestId = await this.client.submitRequest('signTypedData', {
-            status: 'pending',
-            from,
-            data: castData,
-        });
+        // let response: SignTypedDataRequest;
+        // try {
+        //     response = await this.client.pollUntil(
+        //         requestId,
+        //         'signTypedData',
+        //         500, // ms
+        //         60, // s
+        //         (r: SignTypedDataRequest) => r.status !== 'pending',
+        //     );
+        //     await this.client.deleteRequest(requestId);
+        // } catch (error) {
+        //     console.error('Error signing typed data:', error);
+        //     throw new Error('Failed to sign typed data. Please try again.');
+        // }
 
-        let response: SignTypedDataRequest;
-        try {
-            response = await this.client.pollUntil(
-                requestId,
-                'signTypedData',
-                500, // ms
-                60, // s
-                (r: SignTypedDataRequest) => r.status !== 'pending',
-            );
-            await this.client.deleteRequest(requestId);
-        } catch (error) {
-            console.error('Error signing typed data:', error);
-            throw new Error('Failed to sign typed data. Please try again.');
-        }
+        // if (!response.signature) {
+        //     console.log('Typed data signing failed, no signature returned');
+        //     throw new Error('Typed data signing failed, no signature returned');
+        // }
 
-        if (!response.signature) {
-            console.log('Typed data signing failed, no signature returned');
-            throw new Error('Typed data signing failed, no signature returned');
-        }
-
-        return response.signature;
+        // return response.signature;
     }
 
     private async signMessage(from: Address, data: Hex): Promise<string> {

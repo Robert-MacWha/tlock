@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
-import { useSeedPhrase } from '../useSeedPhrase';
+import { useKeyring } from '../useKeyring';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthenticator } from '../useAuthenticator';
 import { Address, Hex } from 'viem';
@@ -37,7 +37,7 @@ describe('useSeedPhrase', () => {
 
     describe('Hook initialization', () => {
         it('should initialize without errors', () => {
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
             expect(result.current).toBeDefined();
         });
     });
@@ -65,14 +65,14 @@ describe('useSeedPhrase', () => {
     describe('getSeedPhrase', () => {
         it('should throw error when authentication fails', async () => {
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.getSeedPhrase()).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when seed phrase does not exist', async () => {
             setupStorageState({ seedPhrase: null });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.getSeedPhrase()).rejects.toThrow('No seed phrase found');
         });
@@ -80,7 +80,7 @@ describe('useSeedPhrase', () => {
         it('should return seed phrase when it exists', async () => {
             const mockSeedPhrase = 'test seed phrase';
             setupStorageState({ seedPhrase: mockSeedPhrase });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const seedPhrase = await result.current.getSeedPhrase();
 
@@ -91,21 +91,21 @@ describe('useSeedPhrase', () => {
     describe('generateSeedPhrase', () => {
         it('should throw error when authentication fails', async () => {
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.generateSeedPhrase()).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when seed phrase already exists without override', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.generateSeedPhrase(false)).rejects.toThrow('Seed phrase already exists. Use override to replace it.');
         });
 
         it('should generate new seed phrase successfully', async () => {
             setupStorageState({ seedPhrase: null });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const seedPhrase = await result.current.generateSeedPhrase();
 
@@ -117,7 +117,7 @@ describe('useSeedPhrase', () => {
 
         it('should override existing seed phrase when override is true', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const seedPhrase = await result.current.generateSeedPhrase(true);
 
@@ -129,7 +129,7 @@ describe('useSeedPhrase', () => {
     describe('getAccounts', () => {
         it('should return empty array when no accounts exist', async () => {
             setupStorageState({ accounts: null });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const accounts = await result.current.getAccounts();
 
@@ -139,7 +139,7 @@ describe('useSeedPhrase', () => {
         it('should return accounts when they exist', async () => {
             const mockAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({ accounts: JSON.stringify(mockAccounts) });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const accounts = await result.current.getAccounts();
 
@@ -150,14 +150,14 @@ describe('useSeedPhrase', () => {
     describe('addAccount', () => {
         it('should throw error when authentication fails', async () => {
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.addAccount()).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when no seed phrase exists', async () => {
             setupStorageState({ seedPhrase: null, accounts: '[]', accountCounter: '0' });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.addAccount()).rejects.toThrow('No seed phrase found');
         });
@@ -168,7 +168,7 @@ describe('useSeedPhrase', () => {
                 accounts: '[]',
                 accountCounter: '0'
             });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const address = await result.current.addAccount();
 
@@ -184,7 +184,7 @@ describe('useSeedPhrase', () => {
                 accounts: JSON.stringify(existingAccounts),
                 accountCounter: '1'
             });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const address = await result.current.addAccount();
 
@@ -203,14 +203,14 @@ describe('useSeedPhrase', () => {
             });
 
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when account does not exist', async () => {
             setupStorageState({ accounts: '[]' });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.sign('0x123' as Address, '0x11223344' as Hex)).rejects.toThrow('Account with address 0x123 not found');
         });
@@ -221,7 +221,7 @@ describe('useSeedPhrase', () => {
                 seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
                 accounts: JSON.stringify([mockAccount])
             });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const signature = await result.current.sign(mockAccount.address as Address, '0x11223344' as Hex);
 
@@ -240,14 +240,14 @@ describe('useSeedPhrase', () => {
             });
 
             mockAuthenticate.mockRejectedValue(new Error('Authentication failed'));
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Authentication failed');
         });
 
         it('should throw error when account does not exist', async () => {
             setupStorageState({ accounts: '[]' });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.signPersonal('0x123' as Address, '0xmessage' as Hex)).rejects.toThrow('Account with address 0x123 not found');
         });
@@ -258,7 +258,7 @@ describe('useSeedPhrase', () => {
                 seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
                 accounts: JSON.stringify([mockAccount])
             });
-            const { result } = renderHook(() => useSeedPhrase());
+            const { result } = renderHook(() => useKeyring());
 
             const signature = await result.current.signPersonal(mockAccount.address as Address, '0xmessage' as Hex);
 

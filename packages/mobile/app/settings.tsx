@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
 import { useSetupStatus } from "../hooks/useSetupStatus";
-import { useAccountsContext } from "../contexts/AccountsContext";
+import { useKeyringContext } from "../contexts/KeyringContext";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../components/SeedPhraseDisplay';
@@ -9,7 +9,7 @@ import { useAuthenticator } from '../hooks/useAuthenticator';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
-    const { getSeedPhrase } = useAccountsContext();
+    const { getSeedPhrase } = useKeyringContext();
     const { authenticate } = useAuthenticator();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');

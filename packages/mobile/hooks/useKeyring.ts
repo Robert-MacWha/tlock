@@ -1,11 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
 import { generateMnemonic, mnemonicToSeed } from 'bip39';
 import { HDKey } from '@scure/bip32';
-import { privateKeyToAccount, SignTypedDataParameters } from 'viem/accounts';
-import { bytesToHex } from 'viem';
-import type { Address, Hex, PrivateKeyAccount, Transaction } from 'viem';
-import { useAuthenticator } from '../hooks/useAuthenticator';
-import * as MetamaskSigUtil from '@metamask/eth-sig-util';
+import { privateKeyToAccount } from 'viem/accounts';
+import { bytesToHex, parseTransaction } from 'viem';
+import type { Address, Hex, PrivateKeyAccount, TransactionSerialized, TypedDataDefinition } from 'viem';
+import { useAuthenticator } from './useAuthenticator';
 
 export interface Account {
     id: number;
@@ -16,7 +15,7 @@ const SEED_PHRASE_KEY = 'tlock_seed_phrase';
 const ACCOUNT_COUNTER_KEY = 'tlock_account_counter';
 const ACCOUNTS_KEY = 'tlock_accounts';
 
-export function useSeedPhrase() {
+export function useKeyring() {
     const { authenticate } = useAuthenticator();
 
     const getSeedPhrase = async (): Promise<string> => {
@@ -45,8 +44,8 @@ export function useSeedPhrase() {
         await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
 
         // Reset accounts and counter
-        setAccounts([]);
-        setAccountCounter(0);
+        await setAccounts([]);
+        await setAccountCounter(0);
         await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
         await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
 
@@ -57,7 +56,7 @@ export function useSeedPhrase() {
         const accountsStr = await SecureStore.getItemAsync(ACCOUNTS_KEY);
 
         if (accountsStr) {
-            return JSON.parse(accountsStr);
+            return JSON.parse(accountsStr) as Account[];
         }
         return [];
     };
@@ -99,7 +98,7 @@ export function useSeedPhrase() {
         }
     }
 
-    const signTypedData = async (from: Address, data: SignTypedDataParameters): Promise<Hex> => {
+    const signTypedData = async (from: Address, data: TypedDataDefinition): Promise<Hex> => {
         const account = await _getAccountFromAddress(from);
         try {
             return await account.signTypedData(data);
@@ -109,10 +108,13 @@ export function useSeedPhrase() {
         }
     }
 
-    const signTransaction = async (from: Address, transaction: Transaction): Promise<Hex> => {
+    const signTransaction = async (from: Address, transaction: Hex): Promise<TransactionSerialized> => {
+        console.log('Signing transaction:', transaction);
+
         const account = await _getAccountFromAddress(from);
         try {
-            const signedTransaction = await account.signTransaction(transaction);
+            const parsed = parseTransaction(transaction);
+            const signedTransaction = await account.signTransaction(parsed);
             return signedTransaction;
         } catch (error) {
             console.log(error);
@@ -156,7 +158,7 @@ export function useSeedPhrase() {
             }
 
             return bytesToHex(derived.privateKey);
-        } catch (error) {
+        } catch (_error) {
             throw new Error('Failed to get private key');
         }
     }
@@ -165,9 +167,8 @@ export function useSeedPhrase() {
         const privateKey = await _getPrivateKey(accountId);
         try {
             const account = privateKeyToAccount(privateKey);
-
             return account.address;
-        } catch (error) {
+        } catch (_error) {
             throw new Error('Failed to derive address');
         }
     }

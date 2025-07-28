@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 
 export default function SignPersonalScreen() {
-    const { signTypedData } = useAccountsContext();
+    const { signTypedData } = useKeyringContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signTypedData',
         onApprove: async (request) => {
