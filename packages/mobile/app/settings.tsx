@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions } from "react-native";
+import { Alert, Button, StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
 import { useSetupStatus } from "../hooks/useSetupStatus";
-import { useAccountsContext } from "../contexts/AccountsContext";
+import { useKeyringContext } from "../contexts/KeyringContext";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../components/SeedPhraseDisplay';
@@ -9,15 +9,36 @@ import { useAuthenticator } from '../hooks/useAuthenticator';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
-    const { getSeedPhrase } = useAccountsContext();
+    const { getSeedPhrase } = useKeyringContext();
     const { authenticate } = useAuthenticator();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
 
+    const resetApp = async () => {
+        try {
+            await authenticate();
+            await SecureStore.deleteItemAsync('tlock_setup_complete');
+            await setIsSetupComplete(false);
+            router.replace('/_setup');
+        } catch (_error) {
+            Alert.alert('Error', 'Failed to reset setup. Please try again.');
+        }
+    };
+
+    const showSeedPhrase = async () => {
+        try {
+            const phrase = await getSeedPhrase();
+            setSeedPhrase(phrase);
+            setShowSeedPhrasePopup(true);
+        } catch (_error) {
+            Alert.alert('Error', 'Failed to retrieve seed phrase. Please try again.');
+        }
+    };
+
     const resetSetup = async () => {
         Alert.alert(
-            'Reset Setup',
-            'This will clear your setup status and require you to go through initial setup again. Are you sure?',
+            'Reset App',
+            'This will clear your setup status and require you to go through initial setup again. All data within the app will be rest. Are you sure?',
             [
                 {
                     text: 'Cancel',
@@ -26,16 +47,7 @@ export default function SettingsScreen() {
                 {
                     text: 'Reset',
                     style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await authenticate();
-                            await SecureStore.deleteItemAsync('tlock_setup_complete');
-                            setIsSetupComplete(false);
-                            router.replace('/_setup');
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to reset setup. Please try again.');
-                        }
-                    },
+                    onPress: () => { void resetApp(); },
                 },
             ]
         );
@@ -53,15 +65,7 @@ export default function SettingsScreen() {
                 {
                     text: 'Show Seed Phrase',
                     style: 'default',
-                    onPress: async () => {
-                        try {
-                            const phrase = await getSeedPhrase();
-                            setSeedPhrase(phrase);
-                            setShowSeedPhrasePopup(true);
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to retrieve seed phrase. Please try again.');
-                        }
-                    },
+                    onPress: () => { void showSeedPhrase() },
                 },
             ]
         );
@@ -73,12 +77,12 @@ export default function SettingsScreen() {
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Recovery</Text>
-                <Button title="Show Seed Phrase" onPress={recoverSeedPhrase} color="#007AFF" />
+                <Button title="Show Seed Phrase" onPress={() => { void recoverSeedPhrase() }} color="#007AFF" />
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Developer</Text>
-                <Button title="Reset Setup" onPress={resetSetup} color="#ff6b6b" />
+                <Button title="Reset Setup" onPress={() => { void resetSetup(); }} color="#ff6b6b" />
             </View>
 
             <Modal

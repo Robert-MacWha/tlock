@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
 
 export default function SignPersonalScreen() {
-    const { signPersonal } = useAccountsContext();
+    const { signPersonal } = useKeyringContext();
     const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signPersonal',
         onApprove: async (request) => {
@@ -16,6 +16,7 @@ export default function SignPersonalScreen() {
 
     if (loading) return <Text>Loading...</Text>;
     if (error) return <Text>Error: {error}</Text>;
+    if (!request) return <Text>No request available</Text>;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
@@ -24,10 +25,10 @@ export default function SignPersonalScreen() {
                 MetaMask is requesting to sign a text challenge. Do you approve?
             </Text>
             <Text>
-                Message: {fromHex(request?.message || '0x', 'string')}
+                Message: {fromHex(request.message || '0x', 'string')}
             </Text>
-            <Button title="Approve" onPress={handleApprove} />
-            <Button title="Reject" onPress={handleReject} />
+            <Button title="Approve" onPress={() => { void handleApprove() }} />
+            <Button title="Reject" onPress={() => { void handleReject() }} />
         </View>
     );
 }

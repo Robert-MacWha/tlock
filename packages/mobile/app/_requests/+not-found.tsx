@@ -3,7 +3,7 @@ import { View, Text, Button } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 
 export default function RequestNotFound() {
-    const params = useLocalSearchParams();
+    const _params = useLocalSearchParams();
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>

@@ -10,6 +10,7 @@ interface RequestHandlerConfig<T extends RequestType> {
 }
 
 export function useRequestHandler<T extends RequestType>(config: RequestHandlerConfig<T>) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const { requestId } = useLocalSearchParams() as { requestId: string };
     const { secureClient } = useSecureClientContext();
     const { authenticate } = useAuthenticator();
@@ -35,7 +36,7 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
             }
         };
 
-        fetchRequest();
+        void fetchRequest();
     }, [requestId, config.type, secureClient]);
 
     const handleApprove = async () => {

@@ -24,18 +24,18 @@ export function deriveRoomId(sharedSecret: SharedSecret): string {
     return hash.substring(2, 34).toUpperCase();
 }
 
-export function encryptMessage<T>(message: T, sharedSecret: SharedSecret): string {
+export function encryptMessage<T>(message: T, _sharedSecret: SharedSecret): string {
     // TODO: Implement actual encryption logic
     return JSON.stringify(message);
 }
 
-export function decryptMessage<T>(encryptedMessage: string, sharedSecret: SharedSecret): T {
+export function decryptMessage<T>(encryptedMessage: string, _sharedSecret: SharedSecret): T {
     // TODO: Implement actual decryption logic
-    return JSON.parse(encryptedMessage);
+    return JSON.parse(encryptedMessage) as T;
 }
 
 function generateSecureRandom(length: number): number[] {
     const bytes = new Uint32Array(length);
-    crypto.getRandomValues(bytes)
+    crypto.getRandomValues(bytes);
     return Array.from(bytes);
 }

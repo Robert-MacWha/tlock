@@ -1,8 +1,8 @@
 export interface HttpClient {
     get<T>(url: string, path: string): Promise<T | null>;
-    put(url: string, path: string, data: any): Promise<void>;
+    put(url: string, path: string, data: unknown): Promise<void>;
     delete(url: string, path: string): Promise<void>;
-    post<T>(url: string, data: any): Promise<T>;
+    post<T>(url: string, data: unknown): Promise<T>;
 }
 
 export class FirebaseHttpClient implements HttpClient {
@@ -14,10 +14,10 @@ export class FirebaseHttpClient implements HttpClient {
             throw new Error(`GET ${path} failed: ${response.status}`);
         }
 
-        return response.json();
+        return response.json() as Promise<T>;
     }
 
-    async put(url: string, path: string, data: any): Promise<void> {
+    async put(url: string, path: string, data: unknown): Promise<void> {
         const response = await fetch(`${url}${path}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ export class FirebaseHttpClient implements HttpClient {
         }
     }
 
-    async post<T>(url: string, data: any): Promise<T> {
+    async post<T>(url: string, data: unknown): Promise<T> {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -52,6 +52,6 @@ export class FirebaseHttpClient implements HttpClient {
             throw new Error(`POST ${url} failed: ${response.status}`);
         }
 
-        return response.json();
+        return response.json() as Promise<T>;
     }
 }

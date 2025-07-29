@@ -4,7 +4,7 @@ import { createClient, Client, SharedSecret } from "@tlock/shared";
 
 interface SecureClientContextType {
     secureClient: Client | null;
-    savePairing: (sharedSecret: SharedSecret) => Promise<void>;
+    savePairing: (sharedSecret: SharedSecret) => Promise<Client>;
     unpair: () => Promise<void>;
 }
 
@@ -33,10 +33,11 @@ export function SecureClientProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    const savePairing = async (sharedSecret: SharedSecret) => {
+    const savePairing = async (sharedSecret: SharedSecret): Promise<Client> => {
         await SecureStore.setItemAsync('tlock_pairing', JSON.stringify(sharedSecret));
         const client = createClient(sharedSecret);
         setSecureClient(client);
+        return client;
     }
 
     const unpair = async () => {

@@ -27,14 +27,14 @@ export async function parseQrCode(qrCode: string): Promise<SharedSecret> {
     }
 
     const encodedData = qrCode.slice(expectedPrefix.length);
-    const qrData: QrCodeData = JSON.parse(atob(encodedData));
+    const qrData = JSON.parse(atob(encodedData)) as QrCodeData;
 
     if (qrData.version !== QR_VERSION) {
         throw new Error("Unsupported QR code version");
     }
 
     if (!isValidSharedSecret(qrData.sharedSecret)) {
-        throw new Error(`Invalid shared secret in QR code: ${qrData.sharedSecret}`);
+        throw new Error(`Invalid shared secret in QR code: ${qrData.sharedSecret.toString()}`);
     }
 
     return qrData.sharedSecret;

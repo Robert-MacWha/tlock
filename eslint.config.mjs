@@ -1,69 +1,37 @@
-import base, { createConfig } from '@metamask/eslint-config';
-import browser from '@metamask/eslint-config-browser';
-import jest from '@metamask/eslint-config-jest';
-import nodejs from '@metamask/eslint-config-nodejs';
-import typescript from '@metamask/eslint-config-typescript';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-const config = createConfig([
-  {
-    ignores: [
-      '**/build/',
-      '**/.cache/',
-      '**/dist/',
-      '**/docs/',
-      '**/public/',
-      '.yarn/',
-    ],
-  },
+export default tseslint.config(
+    eslint.configs.recommended,
+    ...tseslint.configs.recommended,
 
-  {
-    extends: base,
-
-    languageOptions: {
-      sourceType: 'module',
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        project: ['./tsconfig.json'],
-      },
+    {
+        ignores: [
+            'eslint.config.mjs',
+            '*.config.js',
+            '*.config.mjs',
+            '*.config.ts',
+            'node_modules/**',
+            'dist/**',
+            'build/**',
+            '**/*.d.ts',
+            'coverage/**'
+        ]
     },
 
-    settings: {
-      'import-x/extensions': ['.js', '.mjs'],
+    {
+        files: ['**/*.ts', '**/*.tsx'],
+        extends: [...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
+        rules: {
+            '@typescript-eslint/await-thenable': 'error',
+            '@typescript-eslint/require-await': 'off',
+            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+        },
     },
-  },
-
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    extends: typescript,
-
-    rules: {
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-shadow': ['error', { allow: ['Text'] }],
-    },
-  },
-
-  {
-    files: ['**/*.js', '**/*.cjs', 'packages/snap/snap.config.ts'],
-    extends: nodejs,
-
-    languageOptions: {
-      sourceType: 'script',
-    },
-  },
-
-  {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js'],
-    extends: [jest, nodejs],
-
-    rules: {
-      '@typescript-eslint/unbound-method': 'off',
-    },
-  },
-
-  {
-    files: ['packages/site/src/**'],
-    extends: [browser],
-  },
-]);
-
-export default config;
+);

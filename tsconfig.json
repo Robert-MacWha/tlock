@@ -13,7 +13,16 @@
     "noErrorTruncation": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
+    "incremental": true,
     "strict": true,
     "target": "es2020"
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "dist",
+    "build",
+    "*.config.*",
+    ".prettierrc.*"
+  ]
 }

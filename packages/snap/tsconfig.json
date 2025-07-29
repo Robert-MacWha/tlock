@@ -3,11 +3,14 @@
   "compilerOptions": {
     "baseUrl": "./",
     "jsx": "react-jsx",
-    "jsxImportSource": "@metamask/snaps-sdk"
+    "jsxImportSource": "@metamask/snaps-sdk",
+    // ? MetaMask packages cause huge TypeScript slowdown due to complex type definitions
+    // ? Use --skipLibCheck when compiling keyring.tsx to avoid 20+ second build times
+    // ? Example: npx tsc --noEmit --skipLibCheck packages/snap/src/keyring.tsx
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    "src/state.ts"
+    "**/*.tsx"
   ]
 }

@@ -31,12 +31,11 @@ export async function showErrorScreen(interfaceId: string, message: string, text
 export async function showScreen(interfaceId: string, ui: ComponentOrElement) {
     console.log('Updating interface with new screen');
 
-    return await snap.request({
+    await snap.request({
         method: 'snap_updateInterface',
         params: {
             id: interfaceId,
             ui
         }
     });
-
 }

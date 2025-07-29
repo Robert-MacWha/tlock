@@ -3,7 +3,6 @@ import { decryptMessage, deriveRoomId, encryptMessage, SharedSecret } from "../c
 import { FirebaseHttpClient, HttpClient } from "./http";
 
 const FIREBASE_URL = "https://tlock-974e6-default-rtdb.firebaseio.com/"
-const CLOUD_FUNCTION_URL = "https://sendnotification-clnhgoo57a-uc.a.run.app";
 
 interface StoredRequest {
     type: RequestType;
@@ -58,7 +57,7 @@ export class FirebaseClient implements Client {
         );
 
         if (!data || !data.encryptedData) {
-            console.log("No device registered for this room");
+            console.log(`No device registered for room ${this.roomId}`);
             return null;
         }
 
@@ -103,7 +102,7 @@ export class FirebaseClient implements Client {
         await this.http.put(FIREBASE_URL, FirebasePaths.request(this.roomId, id), storedRequest);
     }
 
-    async getRequest<T extends RequestType>(id: string, requestType: T): Promise<RequestTypeMap[T]> {
+    async getRequest<T extends RequestType>(id: string, _requestType: T): Promise<RequestTypeMap[T]> {
         const storedRequest = await this.http.get<StoredRequest>(
             FIREBASE_URL,
             FirebasePaths.request(this.roomId, id)
@@ -177,5 +176,5 @@ export class FirebaseClient implements Client {
 function generateRequestId(): string {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 15);
-    return `${timestamp}_${random}`;
+    return timestamp + "_" + random;
 }

@@ -1,32 +1,33 @@
 import React from 'react';
 import { View, Text, Button } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useAccountsContext } from '../../contexts/AccountsContext';
-import { useSecureClientContext } from '../../contexts/SecureClientContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
+import { useRequestHandler } from '../../hooks/useRequestHandler';
 
-export default function CreateAccountScreen() {
-    const { requestId } = useLocalSearchParams() as { requestId: string };
-    const { secureClient } = useSecureClientContext();
+export default function SignPersonalScreen() {
+    const { signTransaction } = useKeyringContext();
+    const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
+        type: 'signTransaction',
+        onApprove: async (request) => {
+            const signed = await signTransaction(request.from, request.transaction);
+            return { signed };
+        },
+    });
 
-    const handleApprove = async () => {
-        console.log('Request approved');
-    };
-
-    const handleReject = async () => {
-        console.log('Request rejected');
-        router.back();
-    };
+    if (loading) return <Text>Loading...</Text>;
+    if (error) return <Text>Error: {error}</Text>;
+    if (!request) return <Text>No request available</Text>;
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-            <Text style={{ fontSize: 24, marginBottom: 20 }}>
-                Sign Transaction
-            </Text>
+            <Text style={{ fontSize: 24, marginBottom: 20 }}>Sign Transaction</Text>
             <Text style={{ marginBottom: 30 }}>
                 MetaMask is requesting to sign a transaction. Do you approve?
             </Text>
-            <Button title="Approve" onPress={handleApprove} />
-            <Button title="Reject" onPress={handleReject} />
+            <Text>
+                Message: {request.transaction}
+            </Text>
+            <Button title="Approve" onPress={() => { void handleApprove() }} />
+            <Button title="Reject" onPress={() => { void handleReject() }} />
         </View>
     );
 }

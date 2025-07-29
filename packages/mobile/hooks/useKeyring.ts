@@ -2,9 +2,9 @@ import * as SecureStore from 'expo-secure-store';
 import { generateMnemonic, mnemonicToSeed } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
-import { bytesToHex } from 'viem';
-import type { Address, Hex, PrivateKeyAccount } from 'viem';
-import { useAuthenticator } from '../hooks/useAuthenticator';
+import { bytesToHex, parseTransaction } from 'viem';
+import type { Address, Hex, PrivateKeyAccount, TransactionSerialized, TypedDataDefinition } from 'viem';
+import { useAuthenticator } from './useAuthenticator';
 
 export interface Account {
     id: number;
@@ -15,7 +15,7 @@ const SEED_PHRASE_KEY = 'tlock_seed_phrase';
 const ACCOUNT_COUNTER_KEY = 'tlock_account_counter';
 const ACCOUNTS_KEY = 'tlock_accounts';
 
-export function useSeedPhrase() {
+export function useKeyring() {
     const { authenticate } = useAuthenticator();
 
     const getSeedPhrase = async (): Promise<string> => {
@@ -44,8 +44,8 @@ export function useSeedPhrase() {
         await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
 
         // Reset accounts and counter
-        setAccounts([]);
-        setAccountCounter(0);
+        await setAccounts([]);
+        await setAccountCounter(0);
         await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
         await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
 
@@ -56,34 +56,15 @@ export function useSeedPhrase() {
         const accountsStr = await SecureStore.getItemAsync(ACCOUNTS_KEY);
 
         if (accountsStr) {
-            return JSON.parse(accountsStr);
+            return JSON.parse(accountsStr) as Account[];
         }
         return [];
     };
 
-    const getAccountCounter = async (): Promise<number> => {
-        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
-        if (counterStr) {
-            return parseInt(counterStr, 10);
-        }
-        return 0;
-    };
-
-    const getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
-        const accounts = (await getAccounts());
-        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
-        if (!account) {
-            throw new Error(`Account with address ${address} not found`);
-        }
-
-        const privateKey = await getPrivateKey(account.id);
-        return privateKeyToAccount(privateKey);
-    }
-
     const addAccount = async (): Promise<Address> => {
         const accounts = await getAccounts();
-        const newAccountId = await getAccountCounter() + 1;
-        const address = await deriveAddress(newAccountId);
+        const newAccountId = await _getAccountCounter() + 1;
+        const address = await _deriveAddress(newAccountId);
 
         const newAccount: Account = {
             id: newAccountId,
@@ -98,7 +79,7 @@ export function useSeedPhrase() {
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
-        const account = await getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         try {
             return await account.sign({ hash });
         } catch (error) {
@@ -108,7 +89,7 @@ export function useSeedPhrase() {
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
-        const account = await getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         try {
             return await account.signMessage({ message: { raw } });
         } catch (error) {
@@ -117,7 +98,61 @@ export function useSeedPhrase() {
         }
     }
 
-    const getPrivateKey = async (accountId: number): Promise<Hex> => {
+    const signTypedData = async (from: Address, data: TypedDataDefinition): Promise<Hex> => {
+        const account = await _getAccountFromAddress(from);
+        try {
+            return await account.signTypedData(data);
+        } catch (error) {
+            console.log(error);
+            throw new Error(`Failed to sign typed data: ${JSON.stringify(data)}`);
+        }
+    }
+
+    const signTransaction = async (from: Address, transaction: Hex): Promise<TransactionSerialized> => {
+        console.log('Signing transaction:', transaction);
+
+        const account = await _getAccountFromAddress(from);
+        try {
+            const parsed = parseTransaction(transaction);
+            const signedTransaction = await account.signTransaction(parsed);
+            return signedTransaction;
+        } catch (error) {
+            console.log(error);
+            throw new Error(`Failed to sign transaction from address: ${from}`);
+        }
+    }
+
+    const _getAccountCounter = async (): Promise<number> => {
+        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
+        if (counterStr) {
+            return parseInt(counterStr, 10);
+        }
+        return 0;
+    };
+
+    const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
+        const accounts = await getAccounts();
+        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
+        if (!account) {
+            throw new Error(`Account with address ${address} not found`);
+        }
+
+        const privateKey = await _getPrivateKey(account.id);
+        return privateKeyToAccount(privateKey);
+    }
+
+    const _deriveAddress = async (accountId: number): Promise<Address> => {
+        const privateKey = await _getPrivateKey(accountId);
+        try {
+            const account = privateKeyToAccount(privateKey);
+            return account.address;
+        } catch (_error) {
+            // ? Should never be thrown, just here to prevent data leaks
+            throw new Error('Failed to derive address');
+        }
+    }
+
+    const _getPrivateKey = async (accountId: number): Promise<Hex> => {
         const seedPhrase = await getSeedPhrase();
         try {
             const seed = await mnemonicToSeed(seedPhrase);
@@ -129,19 +164,9 @@ export function useSeedPhrase() {
             }
 
             return bytesToHex(derived.privateKey);
-        } catch (error) {
+        } catch (_error) {
+            // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to get private key');
-        }
-    }
-
-    const deriveAddress = async (accountId: number): Promise<Address> => {
-        const privateKey = await getPrivateKey(accountId);
-        try {
-            const account = privateKeyToAccount(privateKey);
-
-            return account.address;
-        } catch (error) {
-            throw new Error('Failed to derive address');
         }
     }
 
@@ -152,6 +177,8 @@ export function useSeedPhrase() {
         addAccount,
         sign,
         signPersonal,
+        signTypedData,
+        signTransaction,
     }
 }
 

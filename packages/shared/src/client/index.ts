@@ -1,4 +1,4 @@
-import { Address, Hex } from "viem";
+import { Address, Hex, TransactionSerialized, TypedDataDefinition } from "viem";
 import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
 
@@ -21,12 +21,7 @@ export interface DeviceRegistration {
 }
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
-export type RequestType = 'createAccount' | 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
-
-export interface CreateAccountRequest {
-    status: RequestStatus;
-    address?: string;
-}
+export type RequestType = 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
 
 export interface ImportAccountRequest {
     status: RequestStatus;
@@ -43,15 +38,14 @@ export interface SignPersonalRequest {
 export interface SignTransactionRequest {
     status: RequestStatus;
     from: Address;
-    transaction: string;
-    signature?: Hex;
+    transaction: Hex;
+    signed?: TransactionSerialized;
 }
 
 export interface SignTypedDataRequest {
     status: RequestStatus;
     from: Address;
-    data: string; // JSON stringified data
-    version: string;
+    data: TypedDataDefinition;
     signature?: Hex;
 }
 
@@ -63,7 +57,6 @@ export interface SignMessageRequest {
 }
 
 export interface RequestTypeMap {
-    createAccount: CreateAccountRequest;
     importAccount: ImportAccountRequest;
     signPersonal: SignPersonalRequest;
     signTransaction: SignTransactionRequest;

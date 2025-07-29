@@ -8,6 +8,7 @@ import { useSecureClientContext } from '../contexts/SecureClientContext';
 export default function App() {
     const [state, setState] = useState<'home' | 'scanning' | 'paired' | 'requests'>('home');
     const { secureClient, savePairing, unpair } = useSecureClientContext();
+    const [isScanningBarCode, setIsScanningBarCode] = useState(false);
 
     const registerDevice = async (client: Client) => {
         // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
@@ -16,21 +17,14 @@ export default function App() {
         console.log('Device registered successfully');
     };
 
-    const [isScanningBarCode, setIsScanningBarCode] = useState(false);
     const handleBarCodeScanned = async ({ data }: { data: string }) => {
         if (isScanningBarCode) return;
         setIsScanningBarCode(true);
 
         try {
             const sharedSecret = await parseQrCode(data);
-            savePairing(sharedSecret);
-
-            if (!secureClient) {
-                Alert.alert('Error', 'Failed to create secure client. Please try again.');
-                return;
-            }
-            await registerDevice(secureClient);
-
+            const newClient = await savePairing(sharedSecret);
+            await registerDevice(newClient);
             setState('paired');
             Alert.alert('Success', 'Device paired successfully!');
         } catch (error) {
@@ -41,13 +35,13 @@ export default function App() {
         }
     };
 
-    if (state === 'scanning') {
+    const renderQRScanner = () => {
         return (
             <View style={styles.container}>
                 <CameraView
                     style={StyleSheet.absoluteFillObject}
                     facing="back"
-                    onBarcodeScanned={handleBarCodeScanned}
+                    onBarcodeScanned={(data) => { void handleBarCodeScanned(data) }}
                     barcodeScannerSettings={{
                         barcodeTypes: ['qr'],
                     }}
@@ -58,6 +52,10 @@ export default function App() {
                 </View>
             </View>
         );
+    };
+
+    if (state === 'scanning') {
+        return renderQRScanner();
     }
 
     return (
@@ -71,7 +69,7 @@ export default function App() {
             <Button title="Pair with MetaMask" onPress={() => setState('scanning')} />
 
             {secureClient && (
-                <Button title="Unpair" onPress={unpair} />
+                <Button title="Unpair" onPress={() => { void unpair() }} />
             )}
         </View>
     );

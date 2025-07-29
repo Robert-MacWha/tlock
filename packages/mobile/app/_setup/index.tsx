@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { useAccountsContext } from '../../contexts/AccountsContext';
+import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 
@@ -11,7 +11,7 @@ export default function SetupScreen() {
     const [currentStep, setCurrentStep] = useState<SetupStep>('intro');
     const [seedPhraseBackedUp, setSeedPhraseBackedUp] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
-    const { generateSeedPhrase } = useAccountsContext();
+    const { generateSeedPhrase } = useKeyringContext();
     const { setIsSetupComplete } = useSetupStatus();
 
     const completeSetup = async () => {
@@ -42,7 +42,7 @@ export default function SetupScreen() {
                 Foxguard is a secure key management app that works seamlessly with
                 MetaMask. To get started, you'll need to setup a seed phrase.
             </Text>
-            <Button title="Continue" onPress={handleNextFromIntro} />
+            <Button title="Continue" onPress={() => { void handleNextFromIntro() }} />
         </View>
     );
 
@@ -81,7 +81,7 @@ export default function SetupScreen() {
             <Text style={styles.description}>
                 You can now pair with MetaMask and start securing your transactions.
             </Text>
-            <Button title="Continue" onPress={completeSetup} />
+            <Button title="Continue" onPress={() => { void completeSetup() }} />
         </View>
     );
 

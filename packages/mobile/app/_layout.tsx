@@ -3,7 +3,7 @@ import './polyfills';
 import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import { AccountsProvider } from '../contexts/AccountsContext';
+import { KeyringProvider } from '../contexts/KeyringContext';
 import { SecureClientProvider } from '../contexts/SecureClientContext';
 import { RequestReceiverProvider } from '../contexts/RequestReciever';
 import { useSetupStatus } from '../hooks/useSetupStatus';
@@ -12,10 +12,11 @@ import SetupFlow from './_setup';
 
 export default function RootLayout() {
     const { isSetupComplete } = useSetupStatus();
-    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+    const [, requestCameraPermission] = useCameraPermissions();
+
 
     useEffect(() => {
-        requestCameraPermission();
+        void requestCameraPermission();
     }, []);
 
     if (isSetupComplete === null) {
@@ -24,14 +25,14 @@ export default function RootLayout() {
 
     if (isSetupComplete === false) {
         return (
-            <AccountsProvider>
+            <KeyringProvider>
                 <SetupFlow />
-            </AccountsProvider>
+            </KeyringProvider>
         );
     }
 
     return (
-        <AccountsProvider>
+        <KeyringProvider>
             <SecureClientProvider>
                 <RequestReceiverProvider>
                     <Tabs>
@@ -80,6 +81,6 @@ export default function RootLayout() {
                     </Tabs>
                 </RequestReceiverProvider>
             </SecureClientProvider>
-        </AccountsProvider>
+        </KeyringProvider>
     );
 }

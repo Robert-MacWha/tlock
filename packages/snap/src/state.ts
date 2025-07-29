@@ -1,5 +1,4 @@
 import { KeyringAccount, KeyringRequest } from "@metamask/keyring-api";
-import { Json } from "@metamask/snaps-sdk";
 import { SharedSecret } from "@tlock/shared";
 
 export interface SnapState {
@@ -28,22 +27,20 @@ export async function getState(d: SnapState | null = null): Promise<SnapState | 
     const stored = await snap.request({
         method: "snap_manageState",
         params: { operation: "get" },
-    })
+    });
 
-    if (stored === null) {
-        return d;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const parsedState = stored ? JSON.parse(stored.state as string) : null;
+    const state = { ...d, ...parsedState } as SnapState;
 
-    const parsed = JSON.parse(stored.state as string) as Json;
-    if (parsed === null) {
-        return d;
-    }
-
-    return parsed as SnapState;
+    console.log("Get state:", state);
+    return state;
 }
 
 async function setState(value: SnapState): Promise<void> {
     const serialized = JSON.stringify(value);
+
+    console.log("Set state:", serialized);
 
     await snap.request({
         method: "snap_manageState",
