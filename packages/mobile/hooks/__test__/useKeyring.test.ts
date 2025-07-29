@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react-native';
 import { useKeyring } from '../useKeyring';
 import * as SecureStore from 'expo-secure-store';
 import { useAuthenticator } from '../useAuthenticator';
-import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, TransactionLegacy, TransactionSerializableLegacy } from 'viem';
+import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, TransactionSerializableLegacy, TypedDataDefinition } from 'viem';
 
 // Mock only specific dependencies
 jest.mock('expo-secure-store');
@@ -97,6 +97,7 @@ describe('useSeedPhrase', () => {
         testAuthenticationFailure('sign', (result) => result.sign('0x123' as Address, '0x11223344' as Hex));
         testAuthenticationFailure('signPersonal', (result) => result.signPersonal('0x123' as Address, '0xmessage' as Hex));
         testAuthenticationFailure('signTransaction', (result) => result.signTransaction('0x123' as Address, '0x1122' as Hex));
+        testAuthenticationFailure('signTypedData', (result) => result.signTypedData('0x123' as Address, {} as TypedDataDefinition));
     });
 
     describe('Account not found errors', () => {
@@ -108,6 +109,13 @@ describe('useSeedPhrase', () => {
     describe('getSeedPhrase', () => {
         it('should throw error when seed phrase does not exist', async () => {
             setupStorageState({ seedPhrase: null });
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(result.current.getSeedPhrase()).rejects.toThrow('No seed phrase found');
+        });
+
+        it('should handle empty string seed phrase', async () => {
+            setupStorageState({ seedPhrase: '' });
             const { result } = renderHook(() => useKeyring());
 
             await expect(result.current.getSeedPhrase()).rejects.toThrow('No seed phrase found');
@@ -216,6 +224,35 @@ describe('useSeedPhrase', () => {
     });
 
     describe('sign', () => {
+        it('should handle missing accounts', async () => {
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify([])
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(result.current.sign(
+                '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' as Address,
+                '0x11223344' as Hex
+            )).rejects.toThrow('Account with address 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc not found');
+        });
+
+        it('should handle case-insensitive address matching', async () => {
+            const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify([mockAccount])
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            // Test with lowercase address
+            const signature = await result.current.sign(
+                mockAccount.address.toLowerCase() as Address,
+                '0x11223344' as Hex
+            );
+            expect(signature).toBeDefined();
+        });
+
         it('should sign hash successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
@@ -248,7 +285,7 @@ describe('useSeedPhrase', () => {
     });
 
     describe('signTransaction', () => {
-        it('should sign transaction successfully', async () => {
+        it('should sign legacy transaction successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
                 seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
@@ -284,7 +321,78 @@ describe('useSeedPhrase', () => {
     });
 
     describe('signTypedData', () => {
-        // TODO
+        it('should sign typed data successfully', async () => {
+            const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: JSON.stringify([mockAccount])
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            const typedData: TypedDataDefinition = {
+                domain: {
+                    name: 'Ether Mail',
+                    version: '1',
+                    chainId: 1,
+                    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+                },
+                types: {
+                    Person: [
+                        { name: 'name', type: 'string' },
+                        { name: 'wallet', type: 'address' },
+                    ],
+                    Mail: [
+                        { name: 'from', type: 'Person' },
+                        { name: 'to', type: 'Person' },
+                        { name: 'contents', type: 'string' },
+                    ],
+                },
+                primaryType: 'Mail',
+                message: {
+                    from: {
+                        name: 'Cow',
+                        wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+                    },
+                    to: {
+                        name: 'Bob',
+                        wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+                    },
+                    contents: 'Hello, Bob!',
+                },
+            }
+
+            const signature = await result.current.signTypedData(mockAccount.address as Address, typedData);
+            expect(signature).toBeDefined();
+            expect(signature).toBe("0x97e9bdce2d01d4ecc9091bf4df4e687e06ccd3ddfbd002d03cffe12e99ae9c6c613d334370ed3b71db4a535ddf18d34d7dfb14edd6a5b923e7b8565ee83bf02c1c");
+        });
     });
 
+    describe('SecureStore failures', () => {
+        it('should handle SecureStore getItemAsync failures in getSeedPhrase', async () => {
+            mockSecureStore.getItemAsync.mockRejectedValue(new Error('SecureStore access denied'));
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(result.current.getSeedPhrase()).rejects.toThrow('SecureStore access denied');
+        });
+
+        it('should handle SecureStore setItemAsync failures in generateSeedPhrase', async () => {
+            setupStorageState({ seedPhrase: null });
+            mockSecureStore.setItemAsync.mockRejectedValue(new Error('SecureStore write failed'));
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(result.current.generateSeedPhrase()).rejects.toThrow('SecureStore write failed');
+        });
+
+        it('should handle SecureStore failures in addAccount', async () => {
+            setupStorageState({
+                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                accounts: '[]',
+                accountCounter: '0'
+            });
+            mockSecureStore.setItemAsync.mockRejectedValue(new Error('SecureStore write failed'));
+            const { result } = renderHook(() => useKeyring());
+
+            await expect(result.current.addAccount()).rejects.toThrow('SecureStore write failed');
+        });
+    });
 });
