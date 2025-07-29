@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Account, useKeyring } from '../hooks/useKeyring';
-import type { Address, Hex, TypedDataDefinition, TransactionSerialized } from 'viem';
+import type { Address, Hex, TransactionSerialized, TypedDataDefinition } from 'viem';
 
 interface KeyringContextType {
     accounts: Account[];

@@ -2,7 +2,7 @@
 
 import { Json } from "@metamask/snaps-sdk";
 import { JSONTx } from "@ethereumjs/tx";
-import { Address, Hash, Hex, parseTransaction, toHex, TransactionSerializable, TransactionSerialized, TransactionType } from "viem";
+import { TypedData, Address, Hash, Hex, parseTransaction, TypedDataDefinition, toHex, TransactionSerializable, TransactionSerializableEIP1559, TransactionSerializableEIP2930, TransactionSerializableLegacy, TransactionSerialized } from "viem";
 
 interface AccessListItem {
     address: Address;
@@ -32,18 +32,18 @@ interface TypedDataDomain {
     salt?: Hash;
 }
 
-interface TypedDataField {
+interface TypedDataType {
     name: string;
     type: string;
 }
 
-export interface TypedData {
+export interface TypedDataRequest {
+    domain: TypedDataDomain;
     types: {
-        EIP712Domain: TypedDataField[];
-        [key: string]: TypedDataField[];
+        EIP712Domain: TypedDataType[];
+        [key: string]: TypedDataType[];
     };
     primaryType: string;
-    domain: TypedDataDomain;
     message: Record<string, unknown>;
 }
 
@@ -69,7 +69,7 @@ export type KeyringRequestParams =
     }
     | {
         method: 'eth_signTypedData_v4';
-        params: [address: Address, typedData: TypedData];
+        params: [address: Address, typedData: TypedDataRequest];
     };
 
 /**
@@ -113,7 +113,7 @@ export function mapViemTransactionType(type: "legacy" | "eip2930" | "eip1559" | 
 /**
  * Converts a custom TransactionRequest to viem's TransactionSerializable format
  */
-export function requestToViem(tx: TransactionRequest): TransactionSerializable {
+export function transactionRequestToViem(tx: TransactionRequest): TransactionSerializable {
     const mappedType = mapTransactionType(tx.type);
     const chainId = parseInt(tx.chainId, 16);
     const baseFields = {
@@ -125,50 +125,72 @@ export function requestToViem(tx: TransactionRequest): TransactionSerializable {
     };
 
     switch (mappedType) {
-        case 'legacy':
-            return {
-                ...baseFields,
-                type: 'legacy' as const,
-                gasPrice: tx.gasPrice ? BigInt(tx.gasPrice) : undefined,
-                chainId,
-            };
-
         case 'eip2930':
-            return {
-                ...baseFields,
-                type: 'eip2930' as const,
-                gasPrice: tx.gasPrice ? BigInt(tx.gasPrice) : undefined,
-                accessList: tx.accessList?.map(item => ({
-                    address: item.address,
-                    storageKeys: item.storageKeys
-                })),
-                chainId,
-            };
+            {
+                const txSerializableEIP2930: TransactionSerializableEIP2930 = {
+                    ...baseFields,
+                    type: 'eip2930',
+                    gasPrice: tx.gasPrice ? BigInt(tx.gasPrice) : undefined,
+                    accessList: tx.accessList?.map(item => ({
+                        address: item.address,
+                        storageKeys: item.storageKeys
+                    })),
+                    chainId,
+                };
+                return txSerializableEIP2930;
+            }
 
         case 'eip1559':
-            return {
-                ...baseFields,
-                type: 'eip1559' as const,
-                maxPriorityFeePerGas: tx.maxPriorityFeePerGas ? BigInt(tx.maxPriorityFeePerGas) : undefined,
-                maxFeePerGas: tx.maxFeePerGas ? BigInt(tx.maxFeePerGas) : undefined,
-                accessList: tx.accessList?.map(item => ({
-                    address: item.address,
-                    storageKeys: item.storageKeys
-                })),
-                chainId,
-            };
-
+            {
+                const txSerializableEIP1559: TransactionSerializableEIP1559 = {
+                    ...baseFields,
+                    type: 'eip1559',
+                    maxPriorityFeePerGas: tx.maxPriorityFeePerGas ? BigInt(tx.maxPriorityFeePerGas) : undefined,
+                    maxFeePerGas: tx.maxFeePerGas ? BigInt(tx.maxFeePerGas) : undefined,
+                    accessList: tx.accessList?.map(item => ({
+                        address: item.address,
+                        storageKeys: item.storageKeys
+                    })),
+                    chainId,
+                };
+                return txSerializableEIP1559;
+            }
+        case 'legacy':
         default:
-            return {
-                ...baseFields,
-                type: undefined,
-                gasPrice: tx.gasPrice ? BigInt(tx.gasPrice) : undefined,
-                chainId,
-            };
+            {
+                const txSerializableLegacy: TransactionSerializableLegacy = {
+                    ...baseFields,
+                    type: 'legacy',
+                    gasPrice: tx.gasPrice ? BigInt(tx.gasPrice) : undefined,
+                    chainId,
+                };
+                return txSerializableLegacy;
+            }
     }
 }
 
-export function viemToJson(tx: TransactionSerialized, type: number): Json {
+export function typedDataToViem(typedData: TypedDataRequest): TypedDataDefinition {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { EIP712Domain, ...customTypes } = typedData.types;
+
+    // Convert TypedDataType[] to the format expected by viem
+    const viemTypes: TypedData = {};
+    Object.entries(customTypes).forEach(([key, typeArray]) => {
+        viemTypes[key] = typeArray.map(type => ({
+            name: type.name,
+            type: type.type,
+        }));
+    });
+
+    return {
+        domain: typedData.domain,
+        types: viemTypes,
+        primaryType: typedData.primaryType,
+        message: typedData.message,
+    };
+}
+
+export function viemTxToJson(tx: TransactionSerialized, type: number): Json {
     const parsed = parseTransaction(tx);
 
     console.log('Parsed transaction:', parsed);
@@ -183,7 +205,7 @@ export function viemToJson(tx: TransactionSerialized, type: number): Json {
         data: parsed.data || '0x',
         v: toHex(parsed.yParity || 0),
         r: parsed.r || '0x0',
-        s: parsed.s,
+        s: parsed.s || '0x0',
     }
     if (parsed.to) {
         jsonTx.to = parsed.to;

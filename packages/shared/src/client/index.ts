@@ -1,4 +1,4 @@
-import { Address, Hex, SignTypedDataParameters, TransactionSerialized, TransactionSerializable } from "viem";
+import { Address, Hex, TransactionSerialized, TypedDataDefinition } from "viem";
 import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
 
@@ -45,7 +45,7 @@ export interface SignTransactionRequest {
 export interface SignTypedDataRequest {
     status: RequestStatus;
     from: Address;
-    data: SignTypedDataParameters;
+    data: TypedDataDefinition;
     signature?: Hex;
 }
 

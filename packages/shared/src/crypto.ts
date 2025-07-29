@@ -36,6 +36,6 @@ export function decryptMessage<T>(encryptedMessage: string, _sharedSecret: Share
 
 function generateSecureRandom(length: number): number[] {
     const bytes = new Uint32Array(length);
-    crypto.getRandomValues(bytes)
+    crypto.getRandomValues(bytes);
     return Array.from(bytes);
 }

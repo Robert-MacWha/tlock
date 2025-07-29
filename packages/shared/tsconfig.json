@@ -4,7 +4,10 @@
         "noEmit": false,
         "declaration": true,
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "skipLibCheck": true,
+        "incremental": true,
+        "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
     },
     "include": [
         "src/**/*.ts"

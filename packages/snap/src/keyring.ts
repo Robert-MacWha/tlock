@@ -20,13 +20,14 @@ import type {
     SignMessageRequest,
     SignPersonalRequest,
     SignTransactionRequest,
+    SignTypedDataRequest,
 } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
-import { serializeTransaction, type Address, type Hex, type TransactionSerialized } from 'viem';
+import { serializeTransaction, type Address, type Hex } from 'viem';
 
 import type { KeyringState } from './state';
 import { updateState } from './state';
-import { KeyringRequestParams, mapViemTransactionType, requestToViem as toViemTransaction, TransactionRequest, TypedData, viemToJson } from './keyringTypes';
+import { KeyringRequestParams, mapViemTransactionType, transactionRequestToViem as toViemTransaction, TransactionRequest, TypedDataRequest, typedDataToViem, viemTxToJson } from './keyringTypes';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
@@ -241,7 +242,7 @@ export class TlockKeyring implements Keyring {
     private async signPersonalMessage(
         message: Hex,
         from: Address,
-    ): Promise<string> {
+    ): Promise<Hex> {
         console.log('Signing personal message:', message, 'from:', from);
 
         const requestId = await this.client.submitRequest('signPersonal', {
@@ -299,9 +300,6 @@ export class TlockKeyring implements Keyring {
         return response.signature;
     }
 
-    // https://docs.metamask.io/services/concepts/transaction-types/
-    //? Pretty sure JSONTx is the correct type (or at least compatible), 
-    //? but I haven't found any documentation that confirms this.
     private async signTransaction(tx: TransactionRequest): Promise<Json> {
         console.log('Raw transaction from MetaMask:', tx);
         const viemTx = toViemTransaction(tx);
@@ -340,17 +338,15 @@ export class TlockKeyring implements Keyring {
             );
         }
 
-        const signed = response.signed as TransactionSerialized;
-        console.log(`Signed transaction:`, signed);
-        const json = viemToJson(signed, mapViemTransactionType(viemTx.type));
-        console.log('Serialized transaction to JSON:', json);
+        const signed = response.signed;
+        const json = viemTxToJson(signed, mapViemTransactionType(viemTx.type));
         return json;
     }
 
     private async signTypedData(
         from: Address,
-        data: TypedData,
-    ): Promise<string> {
+        data: TypedDataRequest,
+    ): Promise<Hex> {
         console.log(
             'Signing typed data V4:',
             data,
@@ -358,39 +354,35 @@ export class TlockKeyring implements Keyring {
             from,
         );
 
-        throw new Error("signTypedData is not implemented yet");
+        let response: SignTypedDataRequest;
+        try {
+            const requestId = await this.client.submitRequest('signTypedData', {
+                status: 'pending',
+                from,
+                data: typedDataToViem(data),
+            });
 
-        // const castData: TypedDataDefinition = data as TypedDataDefinition;
-        // const requestId = await this.client.submitRequest('signTypedData', {
-        //     status: 'pending',
-        //     from,
-        //     data: castData,
-        // });
+            response = await this.client.pollUntil(
+                requestId,
+                'signTypedData',
+                500, // ms
+                60, // s
+                (r: SignTypedDataRequest) => r.status !== 'pending',
+            );
+        } catch (error) {
+            console.error('Error signing typed data:', error);
+            throw new Error('Failed to sign typed data. Please try again.');
+        }
 
-        // let response: SignTypedDataRequest;
-        // try {
-        //     response = await this.client.pollUntil(
-        //         requestId,
-        //         'signTypedData',
-        //         500, // ms
-        //         60, // s
-        //         (r: SignTypedDataRequest) => r.status !== 'pending',
-        //     );
-        //     await this.client.deleteRequest(requestId);
-        // } catch (error) {
-        //     console.error('Error signing typed data:', error);
-        //     throw new Error('Failed to sign typed data. Please try again.');
-        // }
+        if (!response.signature) {
+            console.log('Typed data signing failed, no signature returned');
+            throw new Error('Typed data signing failed, no signature returned');
+        }
 
-        // if (!response.signature) {
-        //     console.log('Typed data signing failed, no signature returned');
-        //     throw new Error('Typed data signing failed, no signature returned');
-        // }
-
-        // return response.signature;
+        return response.signature;
     }
 
-    private async signMessage(from: Address, data: Hex): Promise<string> {
+    private async signMessage(from: Address, data: Hex): Promise<Hex> {
         console.log('Signing message:', data, 'from:', from);
 
         const requestId = await this.client.submitRequest('signMessage', {
