@@ -10,22 +10,19 @@ export default function App() {
     const { secureClient, savePairing, unpair } = useSecureClientContext();
     const [isScanningBarCode, setIsScanningBarCode] = useState(false);
 
-    const registerDevice = async (client: Client) => {
-        // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
-        const fcmToken = "new-fcm-token";
-        await client.submitDevice(fcmToken, 'React Native App');
-        console.log('Device registered successfully');
-    };
-
     const handleBarCodeScanned = async ({ data }: { data: string }) => {
         if (isScanningBarCode) return;
         setIsScanningBarCode(true);
 
         try {
             const sharedSecret = await parseQrCode(data);
-            const newClient = await savePairing(sharedSecret);
-            await registerDevice(newClient);
+            const client = await savePairing(sharedSecret);
+
+            // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
+            const fcmToken = "new-fcm-token";
+            await client.submitDevice(fcmToken, 'React Native App');
             setState('paired');
+
             Alert.alert('Success', 'Device paired successfully!');
         } catch (error) {
             console.error('Pairing failed:', error);
