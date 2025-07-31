@@ -1,57 +1,81 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleProp, ViewStyle } from 'react-native';
+import { Text, Surface } from 'react-native-paper';
 
 interface SeedPhraseDisplayProps {
     seedPhrase: string;
-    style?: any;
+    style?: StyleProp<ViewStyle>;
 }
 
 export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps) {
+    const words = seedPhrase.split(' ');
+
     return (
-        <View style={[styles.seedPhraseContainer, style]}>
-            {seedPhrase.split(' ').map((word, index) => (
-                <View key={index} style={styles.seedWord}>
-                    <Text style={styles.seedWordNumber}>{index + 1}</Text>
-                    <Text style={styles.seedWordText}>{word}</Text>
-                </View>
-            ))}
-        </View>
+        <Surface
+            style={[
+                {
+                    padding: 16,
+                    borderRadius: 16,
+                    elevation: 1
+                },
+                style
+            ]}
+        >
+            <View style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 8
+            }}>
+                {words.map((word, index) => (
+                    <Surface
+                        key={index}
+                        style={{
+                            flexGrow: 1,
+                            flexBasis: '30%', // Roughly 3 columns, but flexible
+                            minWidth: 120,     // Minimum width to prevent too narrow
+                            maxWidth: '48%',  // Maximum width for very wide screens
+                            minHeight: 40,
+                            borderRadius: 12,
+                            elevation: 0,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            paddingHorizontal: 12,
+                            paddingVertical: 8
+                        }}
+                    >
+                        <Text
+                            variant="labelSmall"
+                            style={{
+                                minWidth: 16,
+                                marginRight: 8
+                            }}
+                        >
+                            {index + 1}
+                        </Text>
+                        <Text
+                            variant="bodyMedium"
+                            style={{
+                                fontWeight: '500',
+                                flex: 1
+                            }}
+                        >
+                            {word}
+                        </Text>
+                    </Surface>
+                ))}
+            </View>
+
+            <Text
+                variant="bodySmall"
+                style={{
+                    marginTop: 16,
+                    textAlign: 'center',
+                    fontStyle: 'italic'
+                }}
+            >
+                Keep this phrase secure and private
+            </Text>
+        </Surface>
     );
 }
-
-const styles = StyleSheet.create({
-    seedPhraseContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginVertical: 20,
-        padding: 20,
-        backgroundColor: '#f8f9fa',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e9ecef',
-    },
-    seedWord: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        marginBottom: 8,
-        padding: 8,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#dee2e6',
-        width: '32%', // Approximately 1/3 with some spacing
-    },
-    seedWordNumber: {
-        fontSize: 12,
-        color: '#6c757d',
-        marginRight: 8,
-        minWidth: 16,
-    },
-    seedWordText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#333',
-        flex: 1,
-    },
-});

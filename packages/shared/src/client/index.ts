@@ -3,12 +3,14 @@ import { FirebaseClient } from "./firebaseClient";
 import { SharedSecret } from "../crypto";
 
 /**
- * PendingRequest represents a request currently pending in the backend.
+ * Request represents a request currently pending in the backend.
  */
-export interface PendingRequest {
-    id: string;
-    type: RequestType;
-}
+export type Request =
+    { id: string; lastUpdated: number; type: 'importAccount'; request: ImportAccountRequest } |
+    { id: string; lastUpdated: number; type: 'signPersonal'; request: SignPersonalRequest } |
+    { id: string; lastUpdated: number; type: 'signTransaction'; request: SignTransactionRequest } |
+    { id: string; lastUpdated: number; type: 'signTypedData'; request: SignTypedDataRequest } |
+    { id: string; lastUpdated: number; type: 'signMessage'; request: SignMessageRequest };
 
 /**
  * DeviceRegistration used for pairing devices with the backend.
@@ -30,6 +32,7 @@ export interface ImportAccountRequest {
 
 export interface SignPersonalRequest {
     status: RequestStatus;
+    origin: string;
     from: Address;
     message: Hex;
     signature?: Hex;
@@ -37,6 +40,7 @@ export interface SignPersonalRequest {
 
 export interface SignTransactionRequest {
     status: RequestStatus;
+    origin: string;
     from: Address;
     transaction: Hex;
     signed?: TransactionSerialized;
@@ -44,6 +48,7 @@ export interface SignTransactionRequest {
 
 export interface SignTypedDataRequest {
     status: RequestStatus;
+    origin: string;
     from: Address;
     data: TypedDataDefinition;
     signature?: Hex;
@@ -51,6 +56,7 @@ export interface SignTypedDataRequest {
 
 export interface SignMessageRequest {
     status: RequestStatus;
+    origin: string;
     from: Address;
     message: Hex;
     signature?: Hex;
@@ -77,7 +83,7 @@ export interface Client {
     submitRequest<T extends RequestType>(type: T, data: RequestTypeMap[T]): Promise<string>;
     updateRequest<T extends RequestType>(id: string, type: T, data: Partial<RequestTypeMap[T]>): Promise<void>;
     getRequest<T extends RequestType>(id: string, requestType: T): Promise<RequestTypeMap[T]>;
-    getRequests(): Promise<PendingRequest[]>;
+    getRequests(): Promise<Request[]>;
     deleteRequest(id: string): Promise<void>;
 
     pollUntil<T extends RequestType>(

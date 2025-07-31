@@ -1,4 +1,4 @@
-import { Client, DeviceRegistration, PendingRequest, RequestType, RequestTypeMap } from ".";
+import { Client, DeviceRegistration, Request, RequestType, RequestTypeMap } from ".";
 import { decryptMessage, deriveRoomId, encryptMessage, SharedSecret } from "../crypto";
 import { FirebaseHttpClient, HttpClient } from "./http";
 
@@ -115,7 +115,7 @@ export class FirebaseClient implements Client {
         return decryptMessage<RequestTypeMap[T]>(storedRequest.data, this.sharedSecret);
     }
 
-    async getRequests(): Promise<PendingRequest[]> {
+    async getRequests(): Promise<Request[]> {
         const data = await this.http.get<{ [requestId: string]: StoredRequest }>(
             FIREBASE_URL,
             FirebasePaths.requests(this.roomId)
@@ -123,12 +123,19 @@ export class FirebaseClient implements Client {
 
         if (!data) return [];
 
-        const requests: PendingRequest[] = [];
+        const requests: Request[] = [];
         for (const [requestId, storedRequest] of Object.entries(data)) {
-            requests.push({
+            const requestType = storedRequest.type;
+            const requestData = decryptMessage(storedRequest.data, this.sharedSecret);
+
+            const request: Request = {
                 id: requestId,
-                type: storedRequest.type
-            });
+                type: requestType,
+                request: requestData,
+                lastUpdated: storedRequest.lastUpdated,
+            } as Request
+
+            requests.push(request);
         }
 
         return requests;

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { PendingRequest, RequestType } from '@tlock/shared';
+import { Request, RequestType } from '@tlock/shared';
 import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
+import { ClientRequest } from '../contexts/RequestRecieverContext';
 
 /**
  * Central service for handling incoming requests from push notifications or in-app events.
@@ -23,7 +24,7 @@ export class RequestHandlerService {
         this.isAppInForeground = AppState.currentState === 'active';
 
         this.appStateSubscription = this.setupAppStateListener();
-        this.setupNotificationHandlers();
+        // this.setupNotificationHandlers();
     }
 
     cleanup() {
@@ -33,7 +34,7 @@ export class RequestHandlerService {
     /**
      * Handles a request by navigating to the appropriate screen
      */
-    async handleRequest(request: PendingRequest) {
+    async handleRequest(request: ClientRequest) {
         console.log('Handling request:', request);
 
         if (!this.isAppInForeground) {
@@ -43,16 +44,16 @@ export class RequestHandlerService {
         }
     }
 
-    private async showPushNotification(request: PendingRequest) {
-        const notificationContent = this.getNotificationContent(request);
+    private async showPushNotification(request: ClientRequest) {
+        const notificationContent = this.getNotificationContent(request.request);
 
         await Notifications.scheduleNotificationAsync({
             content: {
                 title: notificationContent.title,
                 body: notificationContent.body,
                 data: {
-                    requestId: request.id,
-                    requestType: request.type,
+                    requestId: request.request.id,
+                    requestType: request.request.type,
                 },
                 sound: true,
             },
@@ -60,14 +61,14 @@ export class RequestHandlerService {
         });
     }
 
-    private async navigateToRequestScreen(request: PendingRequest) {
+    private async navigateToRequestScreen(request: ClientRequest) {
         router.push({
-            pathname: `/_requests/${request.type}`,
-            params: { requestId: request.id }
+            pathname: `/_requests/${request.request.type}`,
+            params: { clientId: request.clientId, requestId: request.request.id }
         });
     }
 
-    private getNotificationContent(request: PendingRequest) {
+    private getNotificationContent(request: Request) {
         const contentMap: Record<RequestType, { title: string; body: string }> = {
             'importAccount': {
                 title: 'Account Request',
@@ -97,17 +98,17 @@ export class RequestHandlerService {
         };
     }
 
-    private setupNotificationHandlers() {
-        Notifications.addNotificationResponseReceivedListener(response => {
-            const data = response.notification.request.content.data;
-            if (data.requestId && data.requestType) {
-                void this.navigateToRequestScreen({
-                    id: data.requestId as string,
-                    type: data.requestType as RequestType,
-                });
-            }
-        });
-    }
+    // private setupNotificationHandlers() {
+    //     Notifications.addNotificationResponseReceivedListener(response => {
+    //         const data = response.notification.request.content.data;
+    //         if (data.requestId && data.requestType) {
+    //             void this.navigateToRequestScreen({
+    //                 id: data.requestId as string,
+    //                 type: data.requestType as RequestType,
+    //             });
+    //         }
+    //     });
+    // }
 
     private setupAppStateListener() {
         const handleAppStateChange = (nextAppState: AppStateStatus) => {

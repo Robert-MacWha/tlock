@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { Account, useKeyring } from '../hooks/useKeyring';
 import type { Address, Hex, TransactionSerialized, TypedDataDefinition } from 'viem';
 
@@ -8,6 +8,8 @@ interface KeyringContextType {
     getSeedPhrase: () => Promise<string>;
     generateSeedPhrase: (override?: boolean) => Promise<string>;
     addAccount: () => Promise<Address>;
+    renameAccount: (address: Address, name: string) => Promise<void>;
+    hideAccount: (address: Address, hide: boolean) => Promise<void>;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
     signTypedData: (from: Address, data: TypedDataDefinition) => Promise<Hex>;
@@ -23,11 +25,17 @@ export function KeyringProvider({ children }: { children: ReactNode }) {
         getSeedPhrase,
         generateSeedPhrase,
         addAccount,
+        renameAccount,
+        hideAccount,
         sign,
         signPersonal,
         signTypedData,
         signTransaction
     } = useKeyring();
+
+    useEffect(() => {
+        void refreshAccounts();
+    }, []);
 
     const refreshAccounts = async () => {
         const loadedAccounts = await getAccounts();
@@ -39,6 +47,16 @@ export function KeyringProvider({ children }: { children: ReactNode }) {
         await refreshAccounts();
         return address;
     };
+
+    const renameAccountWithRefresh = async (address: Address, name: string) => {
+        await renameAccount(address, name);
+        await refreshAccounts();
+    }
+
+    const hideAccountWithRefresh = async (address: Address, hide: boolean) => {
+        await hideAccount(address, hide);
+        await refreshAccounts();
+    }
 
     const generateSeedPhraseWithRefresh = async (override?: boolean): Promise<string> => {
         const seedPhrase = await generateSeedPhrase(override);
@@ -53,6 +71,8 @@ export function KeyringProvider({ children }: { children: ReactNode }) {
             getSeedPhrase,
             generateSeedPhrase: generateSeedPhraseWithRefresh,
             addAccount: addAccountWithRefresh,
+            renameAccount: renameAccountWithRefresh,
+            hideAccount: hideAccountWithRefresh,
             sign,
             signPersonal,
             signTypedData,

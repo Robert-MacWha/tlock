@@ -1,47 +1,76 @@
 import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity } from 'react-native';
+import { View, ScrollView } from 'react-native';
+import {
+    Text,
+    Card,
+    RadioButton,
+    useTheme
+} from 'react-native-paper';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { Address } from 'viem';
+import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { Stack } from 'expo-router';
+import { ErrorScreen } from '../../components/ErrorScreen';
 
 type AccountItemProps = {
+    name?: string;
     address: Address;
     isSelected: boolean;
     onSelect: (address: Address) => void;
 };
 
-function AccountItem({ address, isSelected, onSelect }: AccountItemProps) {
+function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) {
+    const theme = useTheme();
+
     return (
-        <TouchableOpacity
+        <Card
+            mode="outlined"
             style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: 10,
-                marginVertical: 5,
-                backgroundColor: isSelected ? '#e6f3ff' : '#f5f5f5',
-                borderRadius: 5,
+                marginVertical: 4,
+                backgroundColor: isSelected ? theme.colors.primaryContainer : theme.colors.surface
             }}
             onPress={() => onSelect(address)}
         >
-            <View
-                style={{
-                    width: 20,
-                    height: 20,
-                    borderWidth: 2,
-                    borderColor: isSelected ? '#007AFF' : '#ccc',
-                    backgroundColor: isSelected ? '#007AFF' : 'transparent',
-                    marginRight: 10,
-                    borderRadius: 3,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-            >
-                {isSelected && (
-                    <Text style={{ color: 'white', fontSize: 12 }}>✓</Text>
-                )}
-            </View>
-            <Text style={{ flex: 1 }}>{address}</Text>
-        </TouchableOpacity>
+            <Card.Content style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: 12
+            }}>
+                <RadioButton
+                    value={address}
+                    status={isSelected ? 'checked' : 'unchecked'}
+                    onPress={() => onSelect(address)}
+                />
+                <View style={{
+                    flex: 1,
+                    marginLeft: 8,
+                    justifyContent: name ? 'flex-start' : 'center'
+                }}>
+                    {name && (
+                        <Text
+                            variant="bodyMedium"
+                            numberOfLines={1}
+                            style={{
+                                color: isSelected ? theme.colors.onPrimaryContainer : theme.colors.onSurface
+                            }}
+                        >
+                            {name}
+                        </Text>
+                    )}
+                    <Text
+                        variant="bodyMedium"
+                        numberOfLines={1}
+                        ellipsizeMode="middle"
+                        style={{
+                            color: theme.colors.onSurfaceVariant
+                        }}
+                    >
+                        {address}
+                    </Text>
+                </View>
+            </Card.Content>
+        </Card>
     );
 }
 
@@ -49,7 +78,7 @@ export default function ImportAccountScreen() {
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
     const { accounts } = useKeyringContext();
-    const { loading, error, handleApprove, handleReject } = useRequestHandler({
+    const { client, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {
             if (!selectedAddress) {
@@ -59,50 +88,45 @@ export default function ImportAccountScreen() {
         },
     });
 
-    if (loading) {
-        return <Text>Loading...</Text>;
-    }
-    if (error) {
-        return <Text>Error: {error}</Text>;
-    }
+    if (!client) return <ErrorScreen error="Client not found" />;
+    const clientName = client.name ?? client.id;
+
+    const displayedAccounts = accounts.filter(account => !account.isHidden);
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-            <Text style={{ fontSize: 24, marginBottom: 20 }}>
-                Import Account
-            </Text>
-            <Text style={{ marginBottom: 30 }}>
-                MetaMask is requesting to import an existing account. Do you approve?
-            </Text>
-
-            <View style={{ marginBottom: 20 }}>
-                {accounts.map((account) => (
-                    <AccountItem
-                        key={account.address}
-                        address={account.address}
-                        isSelected={selectedAddress === account.address}
-                        onSelect={setSelectedAddress}
-                    />
-                ))}
-            </View>
-
-            <Button
-                title="Create New Account"
-                onPress={() => {
-                    // Handle create new account logic
-                    console.log('Create new account pressed');
+        <>
+            <Stack.Screen
+                options={{
+                    headerRight: () => (
+                        useRequestTemplateHeader(loading)
+                    ),
                 }}
-                color="#28a745"
             />
 
-            <View style={{ flexDirection: 'row', marginTop: 20 }}>
-                <Button
-                    title="Approve"
-                    onPress={() => { void handleApprove() }}
-                    disabled={!selectedAddress}
-                />
-                <Button title="Reject" onPress={() => { void handleReject }} color="red" />
-            </View>
-        </View>
+            <RequestTemplate
+                title="Import Account"
+                description={clientName + " is requesting to import an existing account. Do you approve?"}
+                onApprove={() => void handleApprove()}
+                onReject={() => void handleReject()}
+                canApprove={!!selectedAddress}
+                loading={loading}
+                error={error}
+            >
+                <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                    Select Account
+                </Text>
+                <ScrollView style={{ flex: 1 }}>
+                    {displayedAccounts.map((account) => (
+                        <AccountItem
+                            key={account.address}
+                            address={account.address}
+                            {...(account.name && { name: account.name })}
+                            isSelected={selectedAddress === account.address}
+                            onSelect={setSelectedAddress}
+                        />
+                    ))}
+                </ScrollView>
+            </RequestTemplate>
+        </>
     );
 }

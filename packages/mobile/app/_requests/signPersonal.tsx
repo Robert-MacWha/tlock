@@ -1,12 +1,18 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
+import { Text, Card, Divider, useTheme } from 'react-native-paper';
+import { KeyValueRow } from '../../components/Row';
+import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { ErrorScreen } from '../../components/ErrorScreen';
+import { View } from 'react-native';
+import { Stack } from 'expo-router';
 
 export default function SignPersonalScreen() {
     const { signPersonal } = useKeyringContext();
-    const { request, loading, error, handleApprove, handleReject } = useRequestHandler({
+    const { accounts } = useKeyringContext();
+    const { client, request, loading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'signPersonal',
         onApprove: async (request) => {
             const signature = await signPersonal(request.from, request.message);
@@ -14,21 +20,49 @@ export default function SignPersonalScreen() {
         },
     });
 
-    if (loading) return <Text>Loading...</Text>;
-    if (error) return <Text>Error: {error}</Text>;
-    if (!request) return <Text>No request available</Text>;
+    if (!request) return <ErrorScreen error="Request not found" />
+    if (!client) return <ErrorScreen error="Client not found" />;
+    const clientName = client.name ?? client.id;
+
+    const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
+    if (!account) return <ErrorScreen error="Account not found" />;
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-            <Text style={{ fontSize: 24, marginBottom: 20 }}>Personal Sign</Text>
-            <Text style={{ marginBottom: 30 }}>
-                MetaMask is requesting to sign a text challenge. Do you approve?
-            </Text>
-            <Text>
-                Message: {fromHex(request.message || '0x', 'string')}
-            </Text>
-            <Button title="Approve" onPress={() => { void handleApprove() }} />
-            <Button title="Reject" onPress={() => { void handleReject() }} />
-        </View>
+        <>
+            <Stack.Screen
+                options={{
+                    headerRight: () => (
+                        useRequestTemplateHeader(loading)
+                    ),
+                }}
+            />
+            <RequestTemplate
+                title="Approve Personal Signature"
+                description={clientName + " asks you to sign a personal message. Do you approve?"}
+                onApprove={() => void handleApprove()}
+                onReject={() => void handleReject()}
+                loading={loading}
+                error={error}
+            >
+                <Card mode='contained' style={{ padding: 16 }}>
+                    <View style={{ gap: 4 }}>
+                        {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                        <KeyValueRow label="From" value={clientName} />
+                        <KeyValueRow label="Account" value={account.name ?? account.address} />
+                    </View>
+
+                    <Divider style={{ marginVertical: 12 }} />
+
+                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                        Message to sign:
+                    </Text>
+                    <Text variant="bodyLarge" selectable style={{
+                        fontFamily: 'monospace',
+                    }}>
+                        {fromHex(request.message || '0x', 'string')}
+                    </Text>
+                </Card>
+            </RequestTemplate>
+        </>
     );
 }

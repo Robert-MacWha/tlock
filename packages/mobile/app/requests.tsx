@@ -1,83 +1,65 @@
-import React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
-import { useSecureClientContext } from "../contexts/SecureClientContext";
-import { useRequestReceiverContext } from "../contexts/RequestReciever";
-import { requestHandler } from "../services/RequestHandlerService";
+import React, { useState } from "react";
+import { ScrollView, View } from "react-native";
+import { Text, Surface, IconButton, ActivityIndicator } from "react-native-paper";
+import { useRequestReceiverContext } from "../contexts/RequestRecieverContext";
+import { RequestCard } from "../components/RequestCard";
+import { Stack } from "expo-router";
+import { ErrorScreen } from "../components/ErrorScreen";
 
-export default function RequestsScreen() {
-    const { pendingRequests, getPendingRequests } = useRequestReceiverContext();
-    const { secureClient } = useSecureClientContext();
+export default function AccountsScreen() {
+    const { clientRequests, fetchRequests } = useRequestReceiverContext();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    async function handleRefresh() {
+        if (loading) return;
+        setLoading(true);
+
+        await fetchRequests().catch((error) => {
+            console.error('Failed to fetch requests:', error);
+            setError('Failed to fetch requests. Please try again later.');
+        });
+
+        // Otherwise the loading indicator flashes annoyingly.
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        setLoading(false);
+    }
+
+    if (error) return <ErrorScreen error={error} />;
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Requests View</Text>
-
-            {!secureClient && (
-                <Text>Unpaired</Text>
-            )}
-
-            {secureClient && (
-                <View>
-                    <Text>Paired with Room ID: {secureClient.roomId.substring(0, 4)}</Text>
-                    <Button title="Get Requests" onPress={() => void getPendingRequests()} />
-                </View>
-            )}
-
-            {pendingRequests.length > 0 && (
-                <View>
-                    <Text style={styles.title}>Requests</Text>
-                    {pendingRequests.map((request) => (
-                        <View key={request.id} style={styles.requestItem}>
-                            <Text>Type: {request.type}</Text>
-                            <Text>ID: {request.id}</Text>
-                            <View style={styles.buttonRow}>
-                                <Button title="Handle" onPress={() => void requestHandler.handleRequest(request)} />
-                            </View>
+        <>
+            <Stack.Screen
+                options={{
+                    headerRight: () => (
+                        <View style={{ flexDirection: 'row' }}>
+                            <IconButton
+                                icon="refresh"
+                                onPress={() => void handleRefresh()}
+                            />
                         </View>
-                    ))}
-                </View>
-            )}
-        </View>
-    );
-}
+                    ),
+                }}
+            />
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    overlay: {
-        position: 'absolute',
-        bottom: 50,
-        left: 20,
-        right: 20,
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        padding: 20,
-        borderRadius: 10,
-    },
-    scanText: {
-        fontSize: 18,
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    requestItem: {
-        backgroundColor: '#f0f0f0',
-        padding: 15,
-        marginBottom: 10,
-        borderRadius: 5,
-        width: '100%',
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginTop: 10,
-    },
-});
+            <Surface style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
+                    {clientRequests.length === 0 ? (
+                        <Text>No open requests</Text>
+                    ) : (
+                        clientRequests.map(request => (
+                            <RequestCard
+                                key={request.request.id}
+                                request={request}
+                            />
+                        ))
+
+                    )}
+
+                    {loading && <ActivityIndicator animating={true} style={{ marginTop: 32 }} />}
+                </ScrollView>
+            </Surface>
+        </>
+    )
+}
