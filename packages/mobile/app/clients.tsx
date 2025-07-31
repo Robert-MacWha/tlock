@@ -55,7 +55,7 @@ export default function App() {
             <Surface style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
                     {clients.length === 0 ? (
-                        <Text variant="bodyMedium">No devices connected. Tap the + button to add a device.</Text>
+                        <Text variant="bodyMedium">No wallets connected. Tap the + button then follow the on-screen instructions to add a wallet.</Text>
                     ) : (
                         clients.map((client) => {
                             return (

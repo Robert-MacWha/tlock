@@ -56,6 +56,12 @@ export function RequestReceiverProvider({
 
     const fetchRequests = async (): Promise<void> => {
         let newClientRequests: ClientRequest[] = [];
+
+        if (clientsRef.current.length === 0) {
+            setClientRequests([]);
+            return;
+        }
+
         for (const clientInstance of clientsRef.current) {
             try {
                 const client = clients.find(c => c.id === clientInstance.id);

@@ -4,9 +4,14 @@ import { Badge, BottomNavigation } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { View } from 'react-native';
 import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
+import { useClientsContext } from '../../contexts/ClientContext';
 
 export default function TabLayout() {
     const { clientRequests } = useRequestReceiverContext();
+    const { clients } = useClientsContext();
+
+    const hasRequests = clientRequests.length > 0;
+    const hasClients = clients.length > 0;
 
     return (
         <Tabs
@@ -53,7 +58,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => (
                         <View>
                             <MaterialCommunityIcons name="cog-outline" color={color} size={24} />
-                            {clientRequests && (
+                            {(hasRequests || !hasClients) && (
                                 <Badge
                                     size={8}
                                     style={{

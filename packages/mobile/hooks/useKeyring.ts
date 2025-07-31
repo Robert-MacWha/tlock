@@ -52,7 +52,6 @@ export function useKeyring() {
             throw new Error('Failed to generate seed phrase');
         }
 
-        console.log('Generated new seed phrase:', seedPhrase);
         await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
 
         // Reset accounts and counter

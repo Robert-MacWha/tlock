@@ -8,6 +8,7 @@ import { useAuthenticator } from '../../hooks/useAuthenticator';
 import { Badge, Button, List, Modal, Portal, Surface } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
 import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
+import { useClientsContext } from '../../contexts/ClientContext';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
@@ -17,6 +18,10 @@ export default function SettingsScreen() {
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const { alert } = useAlert();
     const { clientRequests } = useRequestReceiverContext();
+    const { clients } = useClientsContext();
+
+    const hasRequests = clientRequests.length > 0;
+    const hasClients = clients.length > 0;
 
     const resetApp = async () => {
         try {
@@ -49,7 +54,7 @@ export default function SettingsScreen() {
                 },
                 {
                     text: 'Show',
-                    style: 'default',
+                    mode: 'outlined',
                     onPress: () => { void showSeedPhrase() },
                 },
             ]
@@ -66,7 +71,7 @@ export default function SettingsScreen() {
                 },
                 {
                     text: 'Reset',
-                    style: 'destructive',
+                    mode: 'outlined',
                     onPress: () => { void resetApp(); },
                 },
             ]
@@ -80,13 +85,24 @@ export default function SettingsScreen() {
                     <List.Item
                         title="Connected Wallets"
                         left={props => <List.Icon {...props} icon="devices" />}
+                        right={() =>
+                            !hasClients ? (
+                                <Badge
+                                    size={8}
+                                    style={{
+                                        alignSelf: 'center',
+                                        backgroundColor: 'red'
+                                    }}
+                                />
+                            ) : null
+                        }
                         onPress={() => router.push('/clients')}
                     />
                     <List.Item
                         title="Request"
                         left={props => <List.Icon {...props} icon="clipboard-check-outline" />}
                         right={() =>
-                            clientRequests ? (
+                            hasRequests ? (
                                 <Badge
                                     size={8}
                                     style={{

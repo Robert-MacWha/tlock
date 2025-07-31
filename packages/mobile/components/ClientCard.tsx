@@ -39,7 +39,7 @@ export function ClientCard({ id }: ClientCardProps) {
                 },
                 {
                     text: 'Remove',
-                    style: 'destructive',
+                    mode: 'outlined',
                     onPress: () => void removeClient(id),
                 },
             ],

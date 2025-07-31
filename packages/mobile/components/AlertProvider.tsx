@@ -3,7 +3,7 @@ import { Dialog, Portal, Button, Text } from 'react-native-paper';
 
 interface AlertButton {
     text: string;
-    style?: 'default' | 'cancel' | 'destructive';
+    mode?: 'text' | 'outlined' | 'contained' | 'elevated' | 'contained-tonal';
     onPress?: () => void;
 }
 
@@ -31,7 +31,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         setAlertData({
             title,
             message,
-            buttons: buttons || [{ text: 'OK', style: 'default' }]
+            buttons: buttons || [{ text: 'OK', mode: 'text' }]
         });
         setVisible(true);
     };
@@ -40,26 +40,6 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         setVisible(false);
         if (button.onPress) {
             button.onPress();
-        }
-    };
-
-    const getButtonMode = (style: AlertButton['style']) => {
-        switch (style) {
-            case 'destructive':
-                return 'contained';
-            case 'cancel':
-                return 'outlined';
-            default:
-                return 'text';
-        }
-    };
-
-    const getButtonColor = (style: AlertButton['style']) => {
-        switch (style) {
-            case 'destructive':
-                return 'error';
-            default:
-                return undefined;
         }
     };
 
@@ -76,12 +56,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                     )}
                     <Dialog.Actions>
                         {alertData.buttons?.map((button, index) => {
-                            const buttonColor = getButtonColor(button.style);
                             return (
                                 <Button
                                     key={index}
-                                    mode={getButtonMode(button.style)}
-                                    {...(buttonColor && { buttonColor })}
+                                    mode={button.mode ?? 'text'}
                                     onPress={() => handleButtonPress(button)}
                                 >
                                     {button.text}

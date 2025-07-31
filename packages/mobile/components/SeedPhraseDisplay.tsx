@@ -21,16 +21,6 @@ export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps)
                 style
             ]}
         >
-            <Text
-                variant="titleMedium"
-                style={{
-                    marginBottom: 16,
-                    textAlign: 'center',
-                }}
-            >
-                Seed Phrase
-            </Text>
-
             <View style={{
                 flexDirection: 'row',
                 flexWrap: 'wrap',

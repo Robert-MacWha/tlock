@@ -43,13 +43,15 @@ export default function RootLayout() {
 
     if (isSetupComplete === false) {
         return (
-            <PaperProvider theme={lightTheme}>
-                <KeyringProvider>
-                    <AlertProvider>
-                        <SetupFlow />
-                    </AlertProvider>
-                </KeyringProvider>
-            </PaperProvider>
+            <ThemeProvider value={{ ...LightTheme, fonts: NavLightTheme.fonts }}>
+                <PaperProvider theme={lightTheme}>
+                    <KeyringProvider>
+                        <AlertProvider>
+                            <SetupFlow />
+                        </AlertProvider>
+                    </KeyringProvider>
+                </PaperProvider>
+            </ThemeProvider>
         );
     }
 
@@ -63,6 +65,7 @@ export default function RootLayout() {
                                 <Stack>
                                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                                     <Stack.Screen name="_requests" options={{ headerShown: false }} />
+                                    <Stack.Screen name="_setup" options={{ headerShown: false }} />
                                     <Stack.Screen name="clients" options={{
                                         title: 'Connected Wallets',
                                     }} />
