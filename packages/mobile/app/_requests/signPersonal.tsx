@@ -1,10 +1,13 @@
 import React from 'react';
-import { View } from 'react-native';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
-import { Button, Text, Card, ActivityIndicator, Divider } from 'react-native-paper';
+import { Text, Card, Divider, useTheme } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
+import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { ErrorScreen } from '../../components/ErrorScreen';
+import { View } from 'react-native';
+import { Stack } from 'expo-router';
 
 export default function SignPersonalScreen() {
     const { signPersonal } = useKeyringContext();
@@ -17,60 +20,49 @@ export default function SignPersonalScreen() {
         },
     });
 
-    if (!request) return <Text>No request available</Text>;
-    if (!client) return <Text>Client not found</Text>;
-
-    const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
-    if (!account) return <Text>Account not found</Text>;
-
+    if (!request) return <ErrorScreen error="Request not found" />
+    if (!client) return <ErrorScreen error="Client not found" />;
     const clientName = client.name ?? client.id;
 
+    const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
+    if (!account) return <ErrorScreen error="Account not found" />;
+
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 32, marginBottom: 64 }}>
+        <>
+            <Stack.Screen
+                options={{
+                    headerRight: () => (
+                        useRequestTemplateHeader(loading)
+                    ),
+                }}
+            />
+            <RequestTemplate
+                title="Approve Personal Signature"
+                description={clientName + " asks you to sign a personal message. Do you approve?"}
+                onApprove={() => void handleApprove()}
+                onReject={() => void handleReject()}
+                loading={loading}
+                error={error}
+            >
+                <Card mode='contained' style={{ padding: 16 }}>
+                    <View style={{ gap: 4 }}>
+                        {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                        <KeyValueRow label="From" value={clientName} />
+                        <KeyValueRow label="Account" value={account.name ?? account.address} />
+                    </View>
 
-            <Text variant="headlineSmall" style={{ textAlign: 'center', marginBottom: 16 }}>
-                Approve Signature?
-            </Text>
-            <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 32 }}>
-                <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>{clientName}</Text>
-                <Text> is requesting your personal signature</Text>
-            </Text>
+                    <Divider style={{ marginVertical: 12 }} />
 
-            <Card mode="contained" style={{ marginBottom: 16 }}>
-                <Card.Content>
-                    <KeyValueRow label="Origin:" value={request.origin ?? 'Unknown'} />
-                    <KeyValueRow label="Address:" value={account.name ?? account.address} />
-
-                    <Divider />
-
-                    <Text variant='titleMedium'>Message:</Text>
-                    <Text
-                        variant='bodyMedium'
-                    >
+                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                        Message to sign:
+                    </Text>
+                    <Text variant="bodyLarge" selectable style={{
+                        fontFamily: 'monospace',
+                    }}>
                         {fromHex(request.message || '0x', 'string')}
                     </Text>
-                </Card.Content>
-            </Card>
-
-            <View style={{ flexDirection: 'row', marginTop: 20, gap: 16 }}>
-                <Button
-                    mode='outlined'
-                    onPress={() => void handleReject()}
-                    style={{ flex: 1 }}
-                >
-                    Reject
-                </Button>
-                <Button
-                    mode='contained'
-                    onPress={() => void handleApprove()}
-                    style={{ flex: 1 }}
-                >
-                    Approve
-                </Button>
-            </View>
-
-            {error && <Text variant='titleMedium' style={{ color: 'red', marginTop: 16 }}>{error}</Text>}
-            {loading && <ActivityIndicator animating={true} style={{ marginTop: 32 }} />}
-        </View >
+                </Card>
+            </RequestTemplate>
+        </>
     );
 }

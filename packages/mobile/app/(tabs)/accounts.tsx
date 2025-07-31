@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useKeyringContext } from "../../contexts/KeyringContext";
-import { Text, IconButton, Dialog, Portal, Button } from "react-native-paper";
+import { Text, IconButton, Dialog, Portal, Button, Surface } from "react-native-paper";
 import { AccountCard } from "../../components/AccountCard";
 import { Stack } from "expo-router";
 import { useAlert } from "../../components/AlertProvider";
@@ -47,18 +47,21 @@ export default function AccountsScreen() {
                     ),
                 }}
             />
-            <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-                {displayedAccounts.length === 0 ? (
-                    <Text>No accounts available.</Text>
-                ) : (
-                    displayedAccounts.map(account => (
-                        <AccountCard
-                            key={account.address}
-                            address={account.address}
-                        />
-                    ))
-                )}
-            </ScrollView>
+
+            <Surface style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+                    {displayedAccounts.length === 0 ? (
+                        <Text>No accounts available.</Text>
+                    ) : (
+                        displayedAccounts.map(account => (
+                            <AccountCard
+                                key={account.address}
+                                address={account.address}
+                            />
+                        ))
+                    )}
+                </ScrollView>
+            </Surface>
 
             <Portal>
                 <Dialog visible={helpVisible} onDismiss={() => setHelpVisible(false)}>

@@ -1,36 +1,38 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Text } from "react-native-paper";
+import { MD3TypescaleKey, Text } from "react-native-paper";
 
 interface KeyValueRowProps {
     label: string;
     value: string;
-    labelVariant?: 'titleMedium' | 'titleSmall' | 'bodyLarge';
-    valueVariant?: 'bodyMedium' | 'bodySmall' | 'labelLarge';
-    spacing?: number;
+    labelVariant?: keyof typeof MD3TypescaleKey;
+    valueVariant?: keyof typeof MD3TypescaleKey;
+    minSpacing?: number;
 }
 
 export const KeyValueRow = ({
     label,
     value,
-    labelVariant = 'titleMedium',
-    valueVariant = 'bodyMedium',
-    spacing = 16
+    labelVariant = 'bodyMedium',
+    valueVariant = 'titleMedium',
+    minSpacing = 16
 }: KeyValueRowProps) => (
     <View style={{
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: minSpacing
     }}>
-        <Text variant={labelVariant}>{label}</Text>
+        <Text variant={labelVariant} style={{ flexShrink: 0 }}>
+            {label}
+        </Text>
         <Text
             variant={valueVariant}
             numberOfLines={1}
             ellipsizeMode="tail"
             style={{
-                marginLeft: spacing,
-                flexShrink: 1,
-                textAlign: 'right'
+                flex: 1,
+                textAlign: 'right',
+                paddingLeft: 32,
             }}
         >
             {value}

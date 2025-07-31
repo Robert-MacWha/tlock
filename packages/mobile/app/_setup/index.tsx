@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 import { useAlert } from '../../components/AlertProvider';
+import { Button, Text } from 'react-native-paper';
 
 type SetupStep = 'intro' | 'seedPhrase' | 'complete';
 
@@ -37,19 +38,19 @@ export default function SetupScreen() {
 
     const renderIntroStep = () => (
         <View style={styles.stepContainer}>
-            <Text style={styles.title}>Welcome to Foxguard</Text>
-            <Text style={styles.description}>
+            <Text variant='titleLarge'>Welcome to Foxguard</Text>
+            <Text variant="titleMedium">
                 Foxguard is a secure key management app that works seamlessly with
                 MetaMask. To get started, you'll need to setup a seed phrase.
             </Text>
-            <Button title="Continue" onPress={() => { void handleNextFromIntro() }} />
+            <Button onPress={() => { void handleNextFromIntro() }}>Continue</Button>
         </View>
     );
 
     const renderSeedPhraseStep = () => (
         <View style={styles.stepContainer}>
-            <Text style={styles.title}>Your Seed Phrase</Text>
-            <Text style={styles.description}>
+            <Text variant='titleLarge'>Your Seed Phrase</Text>
+            <Text variant="titleMedium">
                 Write down these 12 words in order and store them safely.
                 If you lose access to your seed phrase, you will lose access
                 to all of your accounts and funds.
@@ -67,21 +68,17 @@ export default function SetupScreen() {
                 <Text style={styles.checkboxLabel}>I've backed up this seed phrase</Text>
             </TouchableOpacity>
 
-            <Button
-                title="Continue"
-                onPress={handleNextFromSeedPhrase}
-                disabled={!seedPhraseBackedUp}
-            />
+            <Button onPress={handleNextFromSeedPhrase} disabled={!seedPhraseBackedUp}>Continue</Button>
         </View>
     );
 
     const renderCompleteStep = () => (
         <View style={styles.stepContainer}>
-            <Text style={styles.title}>Setup Complete!</Text>
-            <Text style={styles.description}>
+            <Text variant='titleLarge'>Setup Complete!</Text>
+            <Text variant="titleMedium">
                 You can now pair with MetaMask and start securing your transactions.
             </Text>
-            <Button title="Continue" onPress={() => { void completeSetup() }} />
+            <Button onPress={() => { void completeSetup() }}>Continue</Button>
         </View>
     );
 
@@ -108,21 +105,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-        color: '#333',
-    },
-    description: {
-        fontSize: 16,
-        lineHeight: 24,
-        marginBottom: 20,
-        textAlign: 'center',
-        color: '#666',
-        paddingHorizontal: 10,
     },
     checkboxContainer: {
         flexDirection: 'row',

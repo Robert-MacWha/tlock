@@ -4,8 +4,12 @@ import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { formatEther, parseTransaction, extractChain } from 'viem';
 import * as chains from 'viem/chains';
-import { Button, Text, Card, ActivityIndicator } from 'react-native-paper';
+import { Text, Divider, Card } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
+import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { ErrorScreen } from '../../components/ErrorScreen';
+import { formatAddressForDisplay } from '../../lib/address';
+import { Stack } from 'expo-router';
 
 export default function SignTransaction() {
     const { signTransaction } = useKeyringContext();
@@ -18,11 +22,11 @@ export default function SignTransaction() {
         },
     });
 
-    if (!request) return <Text>No request available</Text>;
-    if (!client) return <Text>Client not found</Text>;
+    if (!request) return <ErrorScreen error="Request not found" />;
+    if (!client) return <ErrorScreen error="Client not found" />;
 
     const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
-    if (!account) return <Text>Account not found</Text>;
+    if (!account) return <ErrorScreen error="Account not found" />;
 
     const clientName = client.name ?? client.id;
     const transaction = parseTransaction(request.transaction);
@@ -31,52 +35,47 @@ export default function SignTransaction() {
     const chain = transaction.chainId ? extractChain({ chains: Object.values(chains), id: transaction.chainId as any }).name : "Unknown Chain";
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 32, marginBottom: 64 }}>
+        <>
+            <Stack.Screen
+                options={{
+                    headerRight: () => (
+                        useRequestTemplateHeader(loading)
+                    ),
+                }}
+            />
+            <RequestTemplate
+                title="Sign Transaction"
+                description={`${clientName} is requesting you to sign a transaction. Do you approve?`}
+                onApprove={() => void handleApprove()}
+                onReject={() => void handleReject()}
+                loading={loading}
+                error={error}
+            >
+                <Card mode='contained' style={{ padding: 16, }}>
+                    <Text variant="labelMedium" style={{ marginBottom: 12 }}>
+                        Transaction Details:
+                    </Text>
 
-            <Text variant="headlineSmall" style={{ textAlign: 'center', marginBottom: 16 }}>
-                Sign Transaction?
-            </Text>
-            <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 32 }}>
-                <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>{clientName}</Text>
-                <Text> is requesting you to sign a transaction</Text>
-            </Text>
+                    <View style={{ gap: 4, marginBottom: 16 }}>
+                        {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                        <KeyValueRow label="Chain" value={chain} />
+                        <KeyValueRow label="From" value={account.name ?? formatAddressForDisplay(account.address)} />
+                        <KeyValueRow label="To" value={formatAddressForDisplay(account.address) ?? 'Create Contract'} />
+                        <KeyValueRow label="Value" value={`${valueWei} ETH`} />
+                    </View>
 
-            <Card mode="contained" style={{ marginBottom: 16 }}>
-                <Card.Content>
-                    <KeyValueRow label="Origin:" value={request.origin ?? 'Unknown'} />
-                    <KeyValueRow label="Chain:" value={chain} />
-                    <KeyValueRow label="From:" value={account.name ?? account.address} />
-                    <KeyValueRow label="To:" value={transaction.to ?? 'Create'} />
-                    <KeyValueRow label="Value:" value={valueWei + 'ETH'} />
+                    <Divider style={{ marginBottom: 12 }} />
 
-                    <Text variant='titleMedium'>Data:</Text>
-                    <Text
-                        variant='bodyMedium'
-                    >
+                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                        Transaction Data:
+                    </Text>
+                    <Text variant="bodyLarge" selectable style={{
+                        fontFamily: 'monospace',
+                    }}>
                         {transaction.data ?? '0x'}
                     </Text>
-                </Card.Content>
-            </Card>
-
-            <View style={{ flexDirection: 'row', marginTop: 20, gap: 16 }}>
-                <Button
-                    mode='outlined'
-                    onPress={() => void handleReject()}
-                    style={{ flex: 1 }}
-                >
-                    Reject
-                </Button>
-                <Button
-                    mode='contained'
-                    onPress={() => void handleApprove()}
-                    style={{ flex: 1 }}
-                >
-                    Approve
-                </Button>
-            </View>
-
-            {error && <Text variant='titleMedium' style={{ color: 'red', marginTop: 16 }}>{error}</Text>}
-            {loading && <ActivityIndicator animating={true} style={{ marginTop: 32 }} />}
-        </View >
+                </Card>
+            </RequestTemplate>
+        </>
     );
 }

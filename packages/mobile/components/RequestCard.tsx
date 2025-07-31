@@ -36,10 +36,10 @@ export function RequestCard({ request }: RequestCardProps) {
                     {request.request.type}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 16, gap: 8 }}>
-                    <Button mode="outlined" onPress={() => { console.log('Reject logic here'); }}>
+                    <Button mode='outlined' onPress={() => { console.log('Reject logic here'); }}>
                         Reject
                     </Button>
-                    <Button mode="outlined" onPress={() => { void requestHandler.handleRequest(request) }}>
+                    <Button mode="contained" onPress={() => { void requestHandler.handleRequest(request) }}>
                         Handle
                     </Button>
                 </View>

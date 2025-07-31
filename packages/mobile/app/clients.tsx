@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Text, IconButton, Dialog, Portal, Button } from 'react-native-paper';
+import { Text, IconButton, Dialog, Portal, Button, Surface } from 'react-native-paper';
 import { Stack } from 'expo-router';
 // import * as Notifications from 'expo-notifications';
 import { parseQrCode } from '@tlock/shared';
@@ -51,20 +51,23 @@ export default function App() {
                     ),
                 }}
             />
-            <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-                {clients.length === 0 ? (
-                    <Text variant="bodyMedium">No devices connected. Tap the + button to add a device.</Text>
-                ) : (
-                    clients.map((client) => {
-                        return (
-                            <ClientCard
-                                key={client.id}
-                                id={client.id}
-                            />
-                        );
-                    })
-                )}
-            </ScrollView>
+
+            <Surface style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{ gap: 16, padding: 24 }}>
+                    {clients.length === 0 ? (
+                        <Text variant="bodyMedium">No devices connected. Tap the + button to add a device.</Text>
+                    ) : (
+                        clients.map((client) => {
+                            return (
+                                <ClientCard
+                                    key={client.id}
+                                    id={client.id}
+                                />
+                            );
+                        })
+                    )}
+                </ScrollView>
+            </Surface>
 
             <Portal>
                 <Dialog visible={helpVisible} onDismiss={() => setHelpVisible(false)}>

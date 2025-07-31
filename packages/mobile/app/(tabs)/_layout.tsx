@@ -1,9 +1,13 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { BottomNavigation } from 'react-native-paper';
+import { Badge, BottomNavigation } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { View } from 'react-native';
+import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
 
 export default function TabLayout() {
+    const { clientRequests } = useRequestReceiverContext();
+
     return (
         <Tabs
             screenOptions={{
@@ -46,7 +50,22 @@ export default function TabLayout() {
                 name="settings"
                 options={{
                     title: "Settings",
-                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog-outline" color={color} size={24} />
+                    tabBarIcon: ({ color }) => (
+                        <View>
+                            <MaterialCommunityIcons name="cog-outline" color={color} size={24} />
+                            {clientRequests && (
+                                <Badge
+                                    size={8}
+                                    style={{
+                                        position: 'absolute',
+                                        top: -2,
+                                        right: -2,
+                                        backgroundColor: 'red'
+                                    }}
+                                />
+                            )}
+                        </View>
+                    )
                 }}
             />
         </Tabs >

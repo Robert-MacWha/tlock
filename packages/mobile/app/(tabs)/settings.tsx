@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View } from "react-native";
 import { useSetupStatus } from "../../hooks/useSetupStatus";
 import { useKeyringContext } from "../../contexts/KeyringContext";
 import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 import { useAuthenticator } from '../../hooks/useAuthenticator';
-import { Button, List, Modal, Portal } from 'react-native-paper';
+import { Badge, Button, List, Modal, Portal, Surface } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
+import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
@@ -16,6 +16,7 @@ export default function SettingsScreen() {
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const { alert } = useAlert();
+    const { clientRequests } = useRequestReceiverContext();
 
     const resetApp = async () => {
         try {
@@ -73,30 +74,43 @@ export default function SettingsScreen() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 16, gap: 16 }}>
-            <List.Section>
-                <List.Item
-                    title="Connected Wallets"
-                    left={props => <List.Icon {...props} icon="devices" />}
-                    onPress={() => router.push('/clients')}
-                />
-                <List.Item
-                    title="Request"
-                    left={props => <List.Icon {...props} icon="clipboard-check-outline" />}
-                    onPress={() => router.push('/requests')}
-                />
-                <List.Subheader>Advanced</List.Subheader>
-                <List.Item
-                    title="Show Seed Phrase"
-                    left={props => <List.Icon {...props} icon="key-outline" />}
-                    onPress={() => void alertShowSeedPhrase()}
-                />
-                <List.Item
-                    title="Reset Setup"
-                    left={props => <List.Icon {...props} icon="refresh" />}
-                    onPress={() => void alertReset()}
-                />
-            </List.Section>
+        <>
+            <Surface style={{ flex: 1, padding: 16, gap: 16 }}>
+                <List.Section>
+                    <List.Item
+                        title="Connected Wallets"
+                        left={props => <List.Icon {...props} icon="devices" />}
+                        onPress={() => router.push('/clients')}
+                    />
+                    <List.Item
+                        title="Request"
+                        left={props => <List.Icon {...props} icon="clipboard-check-outline" />}
+                        right={() =>
+                            clientRequests ? (
+                                <Badge
+                                    size={8}
+                                    style={{
+                                        alignSelf: 'center',
+                                        backgroundColor: 'red'
+                                    }}
+                                />
+                            ) : null
+                        }
+                        onPress={() => router.push('/requests')}
+                    />
+                    <List.Subheader>Advanced</List.Subheader>
+                    <List.Item
+                        title="Show Seed Phrase"
+                        left={props => <List.Icon {...props} icon="key-outline" />}
+                        onPress={() => void alertShowSeedPhrase()}
+                    />
+                    <List.Item
+                        title="Reset Setup"
+                        left={props => <List.Icon {...props} icon="refresh" />}
+                        onPress={() => void alertReset()}
+                    />
+                </List.Section>
+            </Surface>
 
             <Portal>
                 <Modal
@@ -116,6 +130,6 @@ export default function SettingsScreen() {
                     </Button>
                 </Modal>
             </Portal>
-        </View>
+        </>
     );
 }
