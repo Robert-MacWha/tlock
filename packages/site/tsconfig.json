@@ -7,8 +7,5 @@
   },
   "include": [
     "src",
-    "gatsby-browser.tsx",
-    "gatsby-config.ts",
-    "gatsby-ssr.tsx"
   ]
 }

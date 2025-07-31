@@ -66,8 +66,10 @@ export async function getMetaMaskEIP6963Provider() {
         return;
       }
 
-      const { info, provider } = detail;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+      const { info, provider } = detail as { info: any, provider: MetaMaskInpageProvider | null };
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       if (info.rdns.includes('io.metamask')) {
         resolveWithCleanup(provider);
       }

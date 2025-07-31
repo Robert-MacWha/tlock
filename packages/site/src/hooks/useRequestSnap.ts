@@ -1,6 +1,5 @@
 import { useMetaMaskContext } from './MetamaskContext';
 import { useRequest } from './useRequest';
-import { defaultSnapOrigin } from '../config';
 import type { Snap } from '../types';
 
 /**
@@ -12,7 +11,7 @@ import type { Snap } from '../types';
  * @returns The `wallet_requestSnaps` wrapper.
  */
 export const useRequestSnap = (
-  snapId = defaultSnapOrigin,
+  snapId: string,
   version?: string,
 ) => {
   const request = useRequest();
