@@ -67,7 +67,7 @@ export default function ImportAccountScreen() {
     }
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 32 }}>
             <Text style={{ fontSize: 24, marginBottom: 20 }}>
                 Import Account
             </Text>

@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 interface SeedPhraseDisplayProps {
     seedPhrase: string;
-    style?: any;
+    style?: StyleProp<ViewStyle>;
 }
 
 export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps) {
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         marginVertical: 20,
-        padding: 20,
+        padding: 32,
         backgroundColor: '#f8f9fa',
         borderRadius: 12,
         borderWidth: 1,

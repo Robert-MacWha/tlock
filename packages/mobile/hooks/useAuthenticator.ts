@@ -2,15 +2,19 @@ import * as LocalAuthentication from 'expo-local-authentication';
 
 export function useAuthenticator() {
     const authenticate = async (): Promise<void> => {
+        console.log('Starting authentication process...');
+
         const compatible = await LocalAuthentication.hasHardwareAsync();
         if (!compatible) {
-            throw new Error('Biometric authentication not available');
+            console.warn('Authentication not supported on this device');
+            throw new Error('Authentication not available');
         }
 
         const enrolled = await LocalAuthentication.isEnrolledAsync();
 
         if (!enrolled) {
-            throw new Error('Biometric authentication not enrolled');
+            console.warn('Authentication not enrolled');
+            // throw new Error('Authentication not enrolled');
         }
 
         const result = await LocalAuthentication.authenticateAsync({
@@ -20,8 +24,11 @@ export function useAuthenticator() {
         });
 
         if (!result.success) {
+            console.warn('Authentication failed', result.error);
             throw new Error('Authentication failed');
         }
+
+        console.log('Authentication successful');
     };
 
     return {

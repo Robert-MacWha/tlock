@@ -5343,7 +5343,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:^7.1.6":
+"@react-navigation/native@npm:^7.1.16, @react-navigation/native@npm:^7.1.6":
   version: 7.1.16
   resolution: "@react-navigation/native@npm:7.1.16"
   dependencies:
@@ -5958,6 +5958,7 @@ __metadata:
   resolution: "@tlock/mobile@workspace:packages/mobile"
   dependencies:
     "@babel/core": ^7.25.2
+    "@react-navigation/native": ^7.1.16
     "@scure/bip32": ^1.7.0
     "@testing-library/react-native": ^13.2.0
     "@tlock/shared": "workspace:*"
@@ -5966,6 +5967,7 @@ __metadata:
     bip39: ^3.1.0
     expo: ~53.0.17
     expo-camera: ~16.1.10
+    expo-clipboard: ~7.1.5
     expo-constants: ~17.1.7
     expo-crypto: ~14.1.5
     expo-linking: ~7.1.7
@@ -12309,6 +12311,17 @@ __metadata:
     react-native-web:
       optional: true
   checksum: 8e2bd082686bb8d24b88992247963e57a41814773264c94b1c9400a45c0cd16bd13a3037f474313e44ee7c6159d801aba48b23dea5061593e73d3a666949fd0f
+  languageName: node
+  linkType: hard
+
+"expo-clipboard@npm:~7.1.5":
+  version: 7.1.5
+  resolution: "expo-clipboard@npm:7.1.5"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: de691f1b93b4edec6150db7fca3cd5cec89d2f4ceff1c936b4c3b9f078a8cae0743c5e0dc02e846f1bf2443baa4fd8b687dc68eb8cfff2198bd238f5d6d6a560
   languageName: node
   linkType: hard
 

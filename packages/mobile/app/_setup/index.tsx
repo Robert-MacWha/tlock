@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
+import { useAlert } from '../../components/AlertProvider';
 
 type SetupStep = 'intro' | 'seedPhrase' | 'complete';
 
@@ -13,6 +14,7 @@ export default function SetupScreen() {
     const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
     const { generateSeedPhrase } = useKeyringContext();
     const { setIsSetupComplete } = useSetupStatus();
+    const { alert } = useAlert();
 
     const completeSetup = async () => {
         await setIsSetupComplete(true);
@@ -20,16 +22,14 @@ export default function SetupScreen() {
     };
 
     const handleNextFromIntro = async () => {
-        console.log('Generating seed phrase...');
         const seedPhrase = await generateSeedPhrase(true);
         setSeedPhrase(seedPhrase);
         setCurrentStep('seedPhrase');
-        console.log('Current step:', currentStep);
     };
 
     const handleNextFromSeedPhrase = () => {
         if (!seedPhraseBackedUp) {
-            Alert.alert('Backup Required', 'Please confirm you have backed up your seed phrase before continuing.');
+            alert('Backup Required', 'Please confirm you have backed up your seed phrase before continuing.');
             return;
         }
         setCurrentStep('complete');
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
         justifyContent: 'center',
-        padding: 20,
+        padding: 32,
     },
     stepContainer: {
         flex: 1,

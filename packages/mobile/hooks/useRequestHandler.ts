@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { RequestType, RequestTypeMap } from '@tlock/shared';
-import { useSecureClientContext } from '../contexts/SecureClientContext';
-import { useAuthenticator } from './useAuthenticator';
+import { useClientsContext } from '../contexts/ClientContext';
 
 interface RequestHandlerConfig<T extends RequestType> {
     type: T;
@@ -11,23 +10,26 @@ interface RequestHandlerConfig<T extends RequestType> {
 
 export function useRequestHandler<T extends RequestType>(config: RequestHandlerConfig<T>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const { requestId } = useLocalSearchParams() as { requestId: string };
-    const { secureClient } = useSecureClientContext();
-    const { authenticate } = useAuthenticator();
+    const { clientId, requestId } = useLocalSearchParams() as { clientId: string, requestId: string };
+    const { clients } = useClientsContext();
 
-    const [request, setRequest] = useState<RequestTypeMap[T] | undefined>();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [request, setRequest] = useState<RequestTypeMap[T] | null>(null);
+
+    const client = clients.find(c => c.id === clientId);
 
     useEffect(() => {
         const fetchRequest = async () => {
-            if (!secureClient) return;
-
+            setLoading(true);
+            setError(null);
             try {
-                setLoading(true);
-                const req = await secureClient.getRequest(requestId, config.type);
+                if (!client) {
+                    throw new Error('Client not found');
+                }
+
+                const req = await client.client.getRequest(requestId, config.type);
                 setRequest(req);
-                setError(null);
             } catch (err) {
                 console.error('Failed to fetch request:', err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch request');
@@ -37,37 +39,57 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
         };
 
         void fetchRequest();
-    }, [requestId, config.type, secureClient]);
+    }, [clientId, requestId]);
+
 
     const handleApprove = async () => {
-        if (!request || !secureClient) {
-            throw new Error('No request data available');
+        if (!client || !request) {
+            setError('Request not found');
+            return;
         }
 
-        await authenticate();
-
         setLoading(true);
-        const updates = await config.onApprove(request);
-        await secureClient.updateRequest(requestId, config.type, {
-            ...request,
-            ...updates,
-            status: 'approved',
-        });
-        router.back();
+        try {
+            const updates = await config.onApprove(request);
+            await client.client.updateRequest(requestId, config.type, {
+                ...request,
+                ...updates,
+                status: 'approved',
+            });
+            router.replace({
+                pathname: '/_requests/success',
+                params: { type: config.type }
+            });
+        } catch (err) {
+            console.error('Failed to approve request:', err);
+            setError(err instanceof Error ? err.message : 'Failed to approve request');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleReject = async () => {
-        if (!secureClient || !request) return;
+        if (!client || !request) {
+            return;
+        }
 
         setLoading(true);
-        await secureClient.updateRequest(requestId, config.type, {
-            ...request,
-            status: 'rejected',
-        });
-        router.back();
+        try {
+            await client.client.updateRequest(requestId, config.type, {
+                ...request,
+                status: 'rejected',
+            });
+            router.back();
+        } catch (err) {
+            console.error('Failed to reject request:', err);
+            setError(err instanceof Error ? err.message : 'Failed to reject request');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return {
+        client,
         request,
         loading,
         error,
