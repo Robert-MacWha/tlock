@@ -2,9 +2,9 @@ import React from 'react';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
-import { Text, Card, Divider, useTheme } from 'react-native-paper';
+import { Text, Card, Divider, ActivityIndicator, MD3Colors } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
-import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
@@ -27,12 +27,18 @@ export default function SignPersonalScreen() {
     const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
     if (!account) return <ErrorScreen error="Account not found" />;
 
+    console.log('time, loading, error', { time: new Date().toISOString(), loading, error });
+
     return (
         <>
             <Stack.Screen
                 options={{
                     headerRight: () => (
-                        useRequestTemplateHeader(loading)
+                        <ActivityIndicator
+                            size={16}
+                            animating={loading}
+                            hidesWhenStopped={true}
+                        />
                     ),
                 }}
             />

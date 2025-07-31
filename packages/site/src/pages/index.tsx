@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
+import QRCode from 'qrcode';
 import { MetaMaskProvider } from '../hooks/MetamaskContext';
 import { useMetaMask } from '../hooks/useMetaMask';
 import { useMetaMaskContext } from '../hooks/MetamaskContext';
 import { useRequest } from '../hooks/useRequest';
 import { useRequestSnap } from '../hooks/useRequestSnap';
-import { SNAP_ORIGIN } from '../config';
+import { EXPO_URL, SNAP_ORIGIN } from '../config';
 
-// Simple QR Code Component
-const QRCode = ({ value, size = 200 }: { value: string; size?: number }) => {
-    return (
-        <div
-            className="d-flex align-items-center justify-content-center border"
-            style={{ width: size, height: size, fontSize: '12px', textAlign: 'center' }}
-        >
-            QR Code<br />
-            <small>{value}</small>
+// QR Code Component with actual generation
+const QRCodeDisplay = ({ value, size = 200 }: { value: string; size?: number }) => {
+    const [qrDataUrl, setQrDataUrl] = useState<string>('');
+
+    React.useEffect(() => {
+        QRCode.toDataURL(value, { width: size, margin: 2 })
+            .then(setQrDataUrl)
+            .catch(console.error);
+    }, [value, size]);
+
+    return qrDataUrl ? (
+        <img src={qrDataUrl} alt="QR Code" className="img-fluid" />
+    ) : (
+        <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
         </div>
     );
 };
 
-// Main Demo Component
 const SnapDemo = () => {
     const { isFlask, snapsDetected, installedSnap, getSnap } = useMetaMask();
     const { error } = useMetaMaskContext();
@@ -39,18 +45,13 @@ const SnapDemo = () => {
     };
 
     const handleSignPersonal = async () => {
-        if (!installedSnap) return;
-
         try {
+            const accounts = await request({ method: 'eth_requestAccounts' }) as string[];
+            if (!accounts?.length) throw new Error('No accounts available');
+
             const result = await request({
-                method: 'wallet_invokeSnap',
-                params: {
-                    snapId: SNAP_ORIGIN,
-                    request: {
-                        method: 'personal_sign',
-                        params: [message, '0x' + '0'.repeat(40)]
-                    }
-                }
+                method: 'personal_sign',
+                params: [message, accounts[0]]
             });
             setSignatureResult(result as string);
         } catch (err) {
@@ -59,76 +60,61 @@ const SnapDemo = () => {
     };
 
     return (
-        <div className="container-fluid">
-            <div className="row">
-                <div className="col-12">
-                    <header className="py-4 mb-4 border-bottom">
-                        <h1 className="display-4">MetaMask Snap Demo</h1>
-                        <p className="lead">Developer demonstration for MetaMask Snap integration</p>
-                    </header>
+        <div className="container">
+            <header className="py-3 mb-4 border-bottom">
+                <h1 className="h2">Foxguard Snap Demo</h1>
+                <p className="text-muted">Follow these 17-ish* steps to install the Foxguard metamask snap and the companion app so you can see what Robert's been going on about!</p>
+            </header>
+
+            {error && (
+                <div className="alert alert-danger">
+                    <strong>Error:</strong> {error.message}
                 </div>
-            </div>
+            )}
 
-            <div className="row">
-                <div className="col-md-8">
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            <strong>Error:</strong> {error.message}
-                        </div>
-                    )}
-
-                    {/* MetaMask Flask Detection */}
-                    <div className="card mb-4">
+            <div className="row g-4">
+                {/* MetaMask Flask Detection */}
+                <div className="col-12">
+                    <div className="card h-100">
                         <div className="card-header">
-                            <h3>1. MetaMask Flask Detection</h3>
+                            <h5>1. MetaMask Flask</h5>
                         </div>
                         <div className="card-body">
                             {!snapsDetected ? (
-                                <div className="alert alert-warning">
-                                    <h5>MetaMask not detected</h5>
-                                    <p>Please install MetaMask Flask to continue.</p>
-                                    <a
-                                        href="https://metamask.io/flask/"
-                                        className="btn btn-primary"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                <div className="alert alert-warning mb-0">
+                                    <p className="mb-2">MetaMask not detected</p>
+                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
                                         Install MetaMask Flask
                                     </a>
                                 </div>
                             ) : !isFlask ? (
-                                <div className="alert alert-warning">
-                                    <h5>MetaMask Flask required</h5>
-                                    <p>This demo requires MetaMask Flask.</p>
-                                    <a
-                                        href="https://metamask.io/flask/"
-                                        className="btn btn-primary"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Install MetaMask Flask
+                                <div className="alert alert-warning mb-0">
+                                    <p className="mb-2">Flask required</p>
+                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                        Install Flask
                                     </a>
                                 </div>
                             ) : (
-                                <div className="alert alert-success">
-                                    <h5>✓ MetaMask Flask detected</h5>
-                                    <p>Ready to install snap.</p>
+                                <div className="alert alert-success mb-0">
+                                    <p className="mb-0">✓ MetaMask Flask detected</p>
                                 </div>
                             )}
                         </div>
                     </div>
+                </div>
 
-                    {/* Snap Installation */}
-                    <div className="card mb-4">
+                {/* Snap Installation */}
+                <div className="col-12">
+                    <div className="card h-100">
                         <div className="card-header">
-                            <h3>2. Snap Installation</h3>
+                            <h5>2. Foxguard Snap</h5>
                         </div>
                         <div className="card-body">
                             {!installedSnap ? (
                                 <div>
-                                    <p>Install the snap to enable signing functionality.</p>
+                                    <p className="mb-2">Install the Foxguard snap</p>
                                     <button
-                                        className="btn btn-primary"
+                                        className="btn btn-primary btn-sm"
                                         onClick={() => void handleInstallSnap()}
                                         disabled={!isFlask || !snapsDetected}
                                     >
@@ -136,96 +122,129 @@ const SnapDemo = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="alert alert-success">
-                                    <h5>✓ Snap installed</h5>
-                                    <p>Version: {installedSnap.version}</p>
+                                <div className="alert alert-success mb-0">
+                                    <p className="mb-1">✓ Snap installed</p>
                                 </div>
                             )}
                         </div>
                     </div>
+                </div>
 
-                    {/* Personal Sign */}
-                    <div className="card mb-4">
+                {/* Install Expo Go */}
+                <div className="col-12">
+                    <div className="card h-100">
                         <div className="card-header">
-                            <h3>3. Personal Sign Request</h3>
+                            <h5>3. Install Expo Go</h5>
                         </div>
                         <div className="card-body">
-                            <div className="mb-3">
-                                <label className="form-label">Message to sign:</label>
+                            <p className="mb-2">Install the Expo Go app on your mobile device. Expo go is a sandbox for react-native apps, that's actually kind of incredible for distributing testing apps across various platforms.</p>
+                            <a href="https://expo.dev/client" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                Download Expo Go
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* QR Code */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>4. Foxguard Companion App</h5>
+                        </div>
+                        <div className="card-body text-center">
+                            <QRCodeDisplay value={EXPO_URL} size={150} />
+                            <p className="mt-2 mb-0 text-muted small">Open Expo Go and scan the QR code to launch the sandboxed app</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/*  Foxguard Setup */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>5. Foxguard Setup</h5>
+                        </div>
+                        <div className="card-body">
+                            <p className="mb-2">Follow the setup instructions within the Foxguard companion app, then pair it with the snap in metamask.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Personal Sign */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>6. Personal Sign</h5>
+                            <p className="mb-2">Test your connection with a personal_sign request, or try sending a transaction (TESTNET) from the account!</p>
+                        </div>
+                        <div className="card-body">
+                            <div className="mb-2">
                                 <input
                                     type="text"
-                                    className="form-control"
+                                    className="form-control form-control-sm"
+                                    placeholder="Message to sign"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                 />
                             </div>
                             <button
-                                className="btn btn-success"
+                                className="btn btn-success btn-sm mb-2"
                                 onClick={() => void handleSignPersonal()}
-                                disabled={!installedSnap}
+                                disabled={!snapsDetected}
                             >
                                 Sign Message
                             </button>
                             {signatureResult && (
-                                <div className="mt-3">
-                                    <label className="form-label">Signature Result:</label>
-                                    <textarea
-                                        className="form-control"
-                                        rows={3}
-                                        value={signatureResult}
-                                        readOnly
-                                    />
-                                </div>
+                                <textarea
+                                    className="form-control form-control-sm"
+                                    rows={2}
+                                    value={signatureResult}
+                                    readOnly
+                                    placeholder="Signature will appear here"
+                                />
                             )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-md-4">
-                    {/* QR Code */}
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <h3>4. Expo App QR Code</h3>
-                        </div>
-                        <div className="card-body text-center">
-                            <QRCode value="expo://your-app-url" size={200} />
-                            <p className="mt-2 text-muted">Scan with Expo app</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Documentation Section */}
-            <div className="row">
+            {/* Documentation */}
+            <div className="row mt-4">
                 <div className="col-12">
                     <div className="card">
                         <div className="card-header">
-                            <h3>Documentation</h3>
+                            <h5>Documentation</h5>
                         </div>
                         <div className="card-body">
-                            <h5>Setup Instructions:</h5>
-                            <ol>
-                                <li>Install MetaMask Flask browser extension</li>
-                                <li>Update <code>SNAP_ORIGIN</code> constant with your snap package name</li>
-                                <li>Deploy your snap and update the package reference</li>
-                                <li>Test the signing functionality</li>
-                            </ol>
-
-                            <h5>API Reference:</h5>
-                            <ul>
-                                <li><code>wallet_requestSnaps</code> - Install the snap</li>
-                                <li><code>wallet_getSnaps</code> - Check installed snaps</li>
-                                <li><code>wallet_invokeSnap</code> - Call snap methods</li>
-                                <li><code>personal_sign</code> - Sign messages via snap</li>
-                            </ul>
-
-                            <h5>Development Notes:</h5>
-                            <ul>
-                                <li>Replace placeholder QR code with actual Expo app URL</li>
-                                <li>Update snap origin to match your published snap</li>
-                                <li>Add proper error handling for production use</li>
-                                <li>Consider adding loading states for better UX</li>
-                            </ul>
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <h6>Setup:</h6>
+                                    <ol className="small">
+                                        <li>Install MetaMask Flask</li>
+                                        <li>Install Foxguard snap</li>
+                                        <li>Test signing functionality</li>
+                                        <li>Connect Expo app via QR</li>
+                                    </ol>
+                                </div>
+                                <div className="col-md-4">
+                                    <h6>API Methods:</h6>
+                                    <ul className="small">
+                                        <li><code>wallet_requestSnaps</code></li>
+                                        <li><code>wallet_getSnaps</code></li>
+                                        <li><code>personal_sign</code></li>
+                                        <li><code>eth_requestAccounts</code></li>
+                                    </ul>
+                                </div>
+                                <div className="col-md-4">
+                                    <h6>Notes:</h6>
+                                    <ul className="small">
+                                        <li>Flask required for snaps</li>
+                                        <li>Update Expo URL as needed</li>
+                                        <li>Error handling included</li>
+                                        <li>Production-ready hooks</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -234,7 +253,6 @@ const SnapDemo = () => {
     );
 };
 
-// Main App
 export default function App() {
     return (
         <MetaMaskProvider>

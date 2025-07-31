@@ -83,7 +83,7 @@ export default function SettingsScreen() {
             <Surface style={{ flex: 1, padding: 16, gap: 16 }}>
                 <List.Section>
                     <List.Item
-                        title="Connected Wallets"
+                        title="Connected Devices"
                         left={props => <List.Icon {...props} icon="devices" />}
                         right={() =>
                             !hasClients ? (
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
                     <List.Item
                         title="Docs"
                         left={props => <List.Icon {...props} icon="file-document-multiple-outline" />}
-                        onPress={() => router.push('/_docs/root')}
+                        onPress={() => router.push('/_docs')}
                     />
                     <List.Subheader>Advanced</List.Subheader>
                     <List.Item

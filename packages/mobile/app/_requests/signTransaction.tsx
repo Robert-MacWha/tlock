@@ -4,9 +4,9 @@ import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { formatEther, parseTransaction, extractChain } from 'viem';
 import * as chains from 'viem/chains';
-import { Text, Divider, Card } from 'react-native-paper';
+import { Text, Divider, Card, ActivityIndicator } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
-import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
 import { formatAddressForDisplay } from '../../lib/address';
 import { Stack } from 'expo-router';
@@ -39,7 +39,13 @@ export default function SignTransaction() {
             <Stack.Screen
                 options={{
                     headerRight: () => (
-                        useRequestTemplateHeader(loading)
+                        <View style={{ flexDirection: 'row' }}>
+                            <ActivityIndicator
+                                size={16}
+                                animating={loading}
+                                hidesWhenStopped={true}
+                            />
+                        </View>
                     ),
                 }}
             />

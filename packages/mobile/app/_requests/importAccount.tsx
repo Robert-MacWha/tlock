@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import {
     Text,
     Card,
     RadioButton,
-    useTheme
+    useTheme,
+    IconButton,
+    ActivityIndicator
 } from 'react-native-paper';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { Address } from 'viem';
-import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { RequestTemplate } from '../../components/RequestTemplate';
 import { Stack } from 'expo-router';
 import { ErrorScreen } from '../../components/ErrorScreen';
+import { useAlert } from '../../components/AlertProvider';
 
 type AccountItemProps = {
     name?: string;
@@ -76,9 +79,11 @@ function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) 
 
 export default function ImportAccountScreen() {
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const { accounts, addAccount } = useKeyringContext();
+    const { alert } = useAlert();
+    const [loading, setLoading] = useState(false);
 
-    const { accounts } = useKeyringContext();
-    const { client, loading, error, handleApprove, handleReject } = useRequestHandler({
+    const { client, loading: reqLoading, error, handleApprove, handleReject } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {
             if (!selectedAddress) {
@@ -87,6 +92,26 @@ export default function ImportAccountScreen() {
             return { address: selectedAddress };
         },
     });
+
+    useEffect(() => {
+        if (reqLoading) {
+            setLoading(true);
+        } else {
+            setLoading(false);
+        }
+    }, [reqLoading]);
+
+    async function handleAddAccount() {
+        setLoading(true);
+        try {
+            await addAccount();
+        } catch (error) {
+            console.error('Failed to create account:', error);
+            alert('Error', 'Failed to create new account. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     if (!client) return <ErrorScreen error="Client not found" />;
     const clientName = client.name ?? client.id;
@@ -98,7 +123,17 @@ export default function ImportAccountScreen() {
             <Stack.Screen
                 options={{
                     headerRight: () => (
-                        useRequestTemplateHeader(loading)
+                        <View style={{ flexDirection: 'row' }}>
+                            <ActivityIndicator
+                                size={16}
+                                animating={loading}
+                                hidesWhenStopped={true}
+                            />
+                            <IconButton
+                                icon="plus"
+                                onPress={() => void handleAddAccount()}
+                            />
+                        </View>
                     ),
                 }}
             />
@@ -112,10 +147,15 @@ export default function ImportAccountScreen() {
                 loading={loading}
                 error={error}
             >
-                <Text variant="titleMedium" style={{ marginBottom: 12 }}>
-                    Select Account
-                </Text>
+                {displayedAccounts.length === 0 ? (
+                    <Text>Add an account with the + button</Text>
+                ) : (
+                    <Text variant="bodyMedium" style={{ marginBottom: 8 }}>
+                        Select an account to import:
+                    </Text>
+                )}
                 <ScrollView style={{ flex: 1 }}>
+
                     {displayedAccounts.map((account) => (
                         <AccountItem
                             key={account.address}
