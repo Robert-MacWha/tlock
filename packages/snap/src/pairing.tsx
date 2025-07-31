@@ -12,12 +12,11 @@ export async function handlePair(interfaceId: string) {
     console.log('Handling pairing logic');
 
     try {
-        // Generate random 128-bit secret
+        // Generate & save 128-bit secret
         const sharedSecret = generateSharedSecret();
         const qrData = await createQrCode(sharedSecret);
         const secretQR = await qrcode.toString(qrData);
 
-        // Save shared secret to persistent storage
         await updateState({
             sharedSecret,
         });
@@ -26,11 +25,10 @@ export async function handlePair(interfaceId: string) {
         await showScreen(
             interfaceId,
             <Box>
-                <Heading>Pair Your Device</Heading>
-                <Text>Scan this QR code with your mobile app:</Text>
+                <Heading>Pair Your Wallet</Heading>
+                <Text>Open the Foxguard mobile app and scan this QR code to pair:</Text>
                 <Image src={secretQR} alt="Pairing QR Code" />
                 <Button name="confirm-pair">I've Scanned the Code</Button>
-                <Button name="home">Home</Button>
             </Box>,
         );
     } catch (error) {
@@ -94,7 +92,7 @@ export async function handleConfirmPair(interfaceId: string) {
         <Box>
             <Heading>Pairing Successful!</Heading>
             <Text>Your device has been successfully paired.</Text>
-            <Button name="home">Home</Button>
+            <Button name="import-account">Import First Account</Button>
         </Box>,
     );
 }

@@ -32,7 +32,7 @@ export interface ImportAccountRequest {
 
 export interface SignPersonalRequest {
     status: RequestStatus;
-    origin: string;
+    origin?: string | undefined;
     from: Address;
     message: Hex;
     signature?: Hex;
@@ -40,7 +40,7 @@ export interface SignPersonalRequest {
 
 export interface SignTransactionRequest {
     status: RequestStatus;
-    origin: string;
+    origin?: string | undefined;
     from: Address;
     transaction: Hex;
     signed?: TransactionSerialized;
@@ -48,7 +48,7 @@ export interface SignTransactionRequest {
 
 export interface SignTypedDataRequest {
     status: RequestStatus;
-    origin: string;
+    origin?: string | undefined;
     from: Address;
     data: TypedDataDefinition;
     signature?: Hex;
@@ -56,7 +56,7 @@ export interface SignTypedDataRequest {
 
 export interface SignMessageRequest {
     status: RequestStatus;
-    origin: string;
+    origin?: string | undefined;
     from: Address;
     message: Hex;
     signature?: Hex;

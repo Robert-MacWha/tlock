@@ -3,7 +3,7 @@
   "description": "A solution for storing private keys and signing transactions remotely",
   "proposedName": "Foxguard",
   "source": {
-    "shasum": "d0zMYQBkPL7LcmiD5B+LerBqLyg/3o82UuSQSThZAmI=",
+    "shasum": "f2tN8AiYfxBL2VKUvbbbNZ7NwgmwDNC6UJRGWxJTxAQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -16,7 +16,9 @@
     "snap_dialog": {},
     "snap_notify": {},
     "snap_manageState": {},
-    "snap_manageAccounts": {},
+    "snap_manageAccounts": {
+      "maxRequestTime": 180000
+    },
     "endowment:network-access": {},
     "endowment:page-home": {},
     "endowment:keyring": {}

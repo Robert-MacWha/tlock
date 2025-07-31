@@ -114,6 +114,11 @@ export default function SettingsScreen() {
                         }
                         onPress={() => router.push('/requests')}
                     />
+                    <List.Item
+                        title="Docs"
+                        left={props => <List.Icon {...props} icon="file-document-multiple-outline" />}
+                        onPress={() => router.push('/_docs/root')}
+                    />
                     <List.Subheader>Advanced</List.Subheader>
                     <List.Item
                         title="Show Seed Phrase"

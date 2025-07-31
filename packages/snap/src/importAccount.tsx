@@ -1,5 +1,4 @@
-import { Box, Heading, Text } from "@metamask/snaps-sdk/jsx";
-import { showErrorScreen, showScreen, showTextScreen } from "./screen";
+import { showErrorScreen, showTextScreen } from "./screen";
 import { createClient } from "@tlock/shared";
 import { getState } from "./state";
 import { TlockKeyring } from "./keyring";

@@ -50,7 +50,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, reques
     }
 
     const client = createClient(state.sharedSecret, state.fcmToken);
-    const keyring = new TlockKeyring(client, state.keyringState);
+    const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
     return (await handleKeyringRequest(keyring, request)) ?? null;
 }
@@ -107,22 +107,19 @@ async function handleHomeScreen(interfaceId: string) {
 
     await showScreen(interfaceId, (
         <Box>
-            <Heading>2FA Wallet</Heading>
-            <Text>Your device is not paired.</Text>
-            <Button name="pair">Pair Device</Button>
+            <Heading>Foxguard</Heading>
+            <Text>Your wallet is not paired. Pair it with the app to start using Foxguard accounts.</Text>
+            <Button name="pair">Pair Wallet</Button>
         </Box>
     ));
 }
 
 async function showPairedScreen(state: SnapState, interfaceId: string) {
-    const roomId = deriveRoomId(state.sharedSecret || []).substring(0, 4);
     await showScreen(interfaceId, (
         <Box>
-            <Heading>2FA Wallet Test</Heading>
-            <Text>Paired to device</Text>
-            <Text>Room ID: {roomId}</Text>
-            <Button name="pair">Replace Paired Device</Button>
+            <Heading>Foxguard</Heading>
             <Button name="import-account">Import Account</Button>
+            <Button name="pair">Re-pair wallet</Button>
         </Box>
     ));
 }

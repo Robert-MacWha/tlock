@@ -29,17 +29,22 @@ import type { KeyringState } from './state';
 import { updateState } from './state';
 import { KeyringRequestParams, mapViemTransactionType, transactionRequestToViem as toViemTransaction, TransactionRequest, TypedDataRequest, typedDataToViem, viemTxToJson } from './keyringTypes';
 
+const POLL_INTERVAL = 500; // ms
+const POLL_TIMEOUT = 120; // s
+
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
     private client: Client;
     private state: KeyringState;
+    private origin?: string | undefined;
 
-    constructor(client: Client, state?: KeyringState) {
+    constructor(client: Client, state?: KeyringState, origin?: string) {
         this.client = client;
         this.state = state ?? {
             wallets: {},
             pendingRequests: {},
         };
+        this.origin = origin;
     }
 
     async listAccounts(): Promise<KeyringAccount[]> {
@@ -73,8 +78,8 @@ export class TlockKeyring implements Keyring {
             response = await this.client.pollUntil(
                 requestId,
                 'importAccount',
-                500, // ms
-                60, // s
+                POLL_INTERVAL, // ms
+                POLL_TIMEOUT, // s
                 (r: ImportAccountRequest) => r.status !== 'pending',
             );
             await this.client.deleteRequest(requestId);
@@ -247,6 +252,7 @@ export class TlockKeyring implements Keyring {
 
         const requestId = await this.client.submitRequest('signPersonal', {
             status: 'pending',
+            origin: this.origin,
             message,
             from,
         });
@@ -256,8 +262,8 @@ export class TlockKeyring implements Keyring {
             response = await this.client.pollUntil(
                 requestId,
                 'signPersonal',
-                500, // ms
-                60, // s
+                POLL_INTERVAL, // ms
+                POLL_TIMEOUT, // s
                 (r: SignPersonalRequest) => r.status !== 'pending',
             );
             await this.client.deleteRequest(requestId);
@@ -309,6 +315,7 @@ export class TlockKeyring implements Keyring {
         try {
             const requestId = await this.client.submitRequest('signTransaction', {
                 status: 'pending',
+                origin: this.origin,
                 from: tx.from,
                 transaction: serializeTransaction(viemTx),
             });
@@ -316,8 +323,8 @@ export class TlockKeyring implements Keyring {
             response = await this.client.pollUntil(
                 requestId,
                 'signTransaction',
-                500, // ms
-                60, // s
+                POLL_INTERVAL, // ms
+                POLL_TIMEOUT, // s
                 (r: SignTransactionRequest) => r.status !== 'pending',
             );
             await this.client.deleteRequest(requestId);
@@ -358,6 +365,7 @@ export class TlockKeyring implements Keyring {
         try {
             const requestId = await this.client.submitRequest('signTypedData', {
                 status: 'pending',
+                origin: this.origin,
                 from,
                 data: typedDataToViem(data),
             });
@@ -365,8 +373,8 @@ export class TlockKeyring implements Keyring {
             response = await this.client.pollUntil(
                 requestId,
                 'signTypedData',
-                500, // ms
-                60, // s
+                POLL_INTERVAL, // ms
+                POLL_TIMEOUT, // s
                 (r: SignTypedDataRequest) => r.status !== 'pending',
             );
         } catch (error) {
@@ -387,6 +395,7 @@ export class TlockKeyring implements Keyring {
 
         const requestId = await this.client.submitRequest('signMessage', {
             status: 'pending',
+            origin: this.origin,
             from,
             message: data,
         });
@@ -396,8 +405,8 @@ export class TlockKeyring implements Keyring {
             response = await this.client.pollUntil(
                 requestId,
                 'signMessage',
-                500, // ms
-                60, // s
+                POLL_INTERVAL, // ms
+                POLL_TIMEOUT, // s
                 (r: SignMessageRequest) => r.status !== 'pending',
             );
             await this.client.deleteRequest(requestId);
