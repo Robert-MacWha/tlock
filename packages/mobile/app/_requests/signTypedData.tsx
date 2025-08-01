@@ -34,32 +34,32 @@ export default function SignTypedDataScreen() {
             loading={loading}
             error={error}
         >
-            <Card style={{ padding: 16, }}>
-                <Text variant="labelMedium" style={{ marginBottom: 12, }}>
-                    Structured Data:
-                </Text>
+            <Card>
+                <Card.Content>
+                    <KeyValueRow label="From" value={clientName} />
+                    <KeyValueRow label="Account" value={account.name ?? account.address} />
+                    <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
 
-                <KeyValueRow label="From" value={clientName} />
-                <KeyValueRow label="Account" value={account.name ?? account.address} />
-                <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
-
-                <Text variant="labelMedium" style={{
-                    marginTop: 16,
-                    marginBottom: 8,
-                }}>
-                    Data to sign:
-                </Text>
-                <Card style={{ padding: 12, }}>
-                    <Text
-                        variant="bodySmall"
-                        selectable
-                        style={{
-                            fontFamily: 'monospace'
-                        }}
-                    >
-                        {JSON.stringify(request.data, null, 2)}
+                    <Text variant="labelMedium" style={{
+                        marginTop: 16,
+                        marginBottom: 8,
+                    }}>
+                        Data to sign:
                     </Text>
-                </Card>
+                    <Card mode='contained'>
+                        <Card.Content>
+                            <Text
+                                variant="bodySmall"
+                                selectable
+                                style={{
+                                    fontFamily: 'monospace'
+                                }}
+                            >
+                                {JSON.stringify(request.data, null, 2)}
+                            </Text>
+                        </Card.Content>
+                    </Card>
+                </Card.Content>
             </Card>
         </RequestTemplate>
     );

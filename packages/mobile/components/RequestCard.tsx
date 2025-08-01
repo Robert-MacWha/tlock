@@ -10,7 +10,9 @@ interface RequestCardProps {
 }
 
 export function RequestCard({ request }: RequestCardProps) {
+    const [hidden, setHidden] = React.useState(false);
     const { clients } = useClientsContext();
+
     const client = clients.find(client => client.id === request.clientId);
     if (!client) {
         return (
@@ -22,8 +24,23 @@ export function RequestCard({ request }: RequestCardProps) {
         );
     }
 
+    if (hidden) {
+        return null;
+    }
+
     const clientName = client.name || client.id;
     const lastUpdated = new Date(request.request.lastUpdated).toLocaleString();
+
+    function handleRequest() {
+        void requestHandler.handleRequest(request);
+    }
+
+    function handleReject() {
+        setHidden(true);
+        void client?.client.updateRequest(request.request.id, request.request.type, {
+            status: 'rejected',
+        })
+    }
 
     return (
         <Card mode="elevated">
@@ -36,10 +53,10 @@ export function RequestCard({ request }: RequestCardProps) {
                     {request.request.type}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 16, gap: 8 }}>
-                    <Button mode='outlined' onPress={() => { console.log('Reject logic here'); }}>
+                    <Button mode='outlined' onPress={handleReject}>
                         Reject
                     </Button>
-                    <Button mode="contained" onPress={() => { void requestHandler.handleRequest(request) }}>
+                    <Button mode="contained" onPress={handleReject}>
                         Handle
                     </Button>
                 </View>

@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "allow-scripts": "",
-    "dev": "expo start --host 0.0.0.0",
+    "dev": "expo start",
     "test": "jest"
   },
   "jest": {

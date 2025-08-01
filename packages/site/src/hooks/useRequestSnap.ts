@@ -4,33 +4,35 @@ import type { Snap } from '../types';
 
 /**
  * Utility hook to wrap the `wallet_requestSnaps` method.
- *
- * @param snapId - The requested Snap ID. Defaults to the snap ID specified in the
- * config.
- * @param version - The requested version.
- * @returns The `wallet_requestSnaps` wrapper.
  */
 export const useRequestSnap = (
-  snapId: string,
-  version?: string,
+    snapId: string,
+    version?: string,
 ) => {
-  const request = useRequest();
-  const { setInstalledSnap } = useMetaMaskContext();
+    const request = useRequest();
+    const { setInstalledSnap } = useMetaMaskContext();
 
-  /**
-   * Request the Snap.
-   */
-  const requestSnap = async () => {
-    const snaps = (await request({
-      method: 'wallet_requestSnaps',
-      params: {
-        [snapId]: version ? { version } : {},
-      },
-    })) as Record<string, Snap>;
+    const requestSnap = async () => {
+        try {
+            const snaps = (await request({
+                method: 'wallet_requestSnaps',
+                params: {
+                    [snapId]: version ? { version } : {},
+                },
+            })) as Record<string, Snap>;
 
-    // Updates the `installedSnap` context variable since we just installed the Snap.
-    setInstalledSnap(snaps?.[snapId] ?? null);
-  };
+            const installedSnap = snaps?.[snapId];
+            if (!installedSnap) {
+                throw new Error(`Snap ${snapId} was not installed`);
+            }
 
-  return requestSnap;
+            setInstalledSnap(installedSnap);
+            return installedSnap;
+        } catch (error) {
+            console.error('Failed to install snap:', error);
+            throw error;
+        }
+    };
+
+    return requestSnap;
 };

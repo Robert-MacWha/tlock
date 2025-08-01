@@ -10,6 +10,7 @@ import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
 import { formatAddressForDisplay } from '../../lib/address';
 import { Stack } from 'expo-router';
+import { TxSimulation } from '../../components/TxSimulation';
 
 export default function SignTransaction() {
     const { signTransaction } = useKeyringContext();
@@ -57,30 +58,41 @@ export default function SignTransaction() {
                 loading={loading}
                 error={error}
             >
-                <Card mode='contained' style={{ padding: 16, }}>
-                    <Text variant="labelMedium" style={{ marginBottom: 12 }}>
-                        Transaction Details:
-                    </Text>
+                <Card mode='contained' style={{ marginBottom: 16 }}>
+                    <Card.Title
+                        title="Transaction Details"
+                    />
+                    <Card.Content>
+                        <View style={{ gap: 4 }}>
+                            {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                            <KeyValueRow label="Chain" value={chain} />
+                            <KeyValueRow label="From" value={account.name ?? formatAddressForDisplay(account.address)} />
+                            <KeyValueRow label="To" value={formatAddressForDisplay(account.address) ?? 'Create Contract'} />
+                            <KeyValueRow label="Value" value={`${valueWei} ETH`} />
+                        </View>
 
-                    <View style={{ gap: 4, marginBottom: 16 }}>
-                        {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
-                        <KeyValueRow label="Chain" value={chain} />
-                        <KeyValueRow label="From" value={account.name ?? formatAddressForDisplay(account.address)} />
-                        <KeyValueRow label="To" value={formatAddressForDisplay(account.address) ?? 'Create Contract'} />
-                        <KeyValueRow label="Value" value={`${valueWei} ETH`} />
-                    </View>
+                        {transaction.data && (
+                            <>
+                                <Divider style={{ marginVertical: 12 }} />
 
-                    <Divider style={{ marginBottom: 12 }} />
-
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>
-                        Transaction Data:
-                    </Text>
-                    <Text variant="bodyLarge" selectable style={{
-                        fontFamily: 'monospace',
-                    }}>
-                        {transaction.data ?? '0x'}
-                    </Text>
+                                <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                                    Transaction Data:
+                                </Text>
+                                <Text variant="bodyLarge" selectable style={{
+                                    fontFamily: 'monospace',
+                                }}>
+                                    {transaction.data ?? '0x'}
+                                </Text>
+                            </>
+                        )}
+                    </Card.Content>
                 </Card>
+
+                <TxSimulation
+                    network={chain}
+                    transaction={transaction}
+                    from={request.from}
+                />
             </RequestTemplate>
         </>
     );

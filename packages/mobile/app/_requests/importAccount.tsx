@@ -155,7 +155,6 @@ export default function ImportAccountScreen() {
                     </Text>
                 )}
                 <ScrollView style={{ flex: 1 }}>
-
                     {displayedAccounts.map((account) => (
                         <AccountItem
                             key={account.address}
