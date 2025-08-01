@@ -37,10 +37,6 @@ export default function SignTypedDataScreen() {
         >
             <Card>
                 <Card.Content>
-                    <Text variant="labelMedium" style={{ marginBottom: 12, }}>
-                        Structured Data:
-                    </Text>
-
                     <KeyValueRow label="From" value={clientName} />
                     <KeyValueRow label="Account" value={account.name ?? account.address} />
                     <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
