@@ -9,20 +9,13 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach --parallel --topological run build",
-    "build:shared": "yarn workspace @tlock/shared build",
-    "dev": "yarn dev:snap",
     "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
     "dev:mobile": "yarn workspace @tlock/mobile dev",
-    "dev:site": "yarn workspace @tlock/site dev",
-    "dev:all": "yarn workspaces foreach --parallel --interlaced run dev",
-    "clean": "yarn workspaces foreach run clean",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "yarn lint --fix",
-    "type-check": "yarn workspaces foreach run type-check",
+    "build:shared": "yarn workspace @tlock/shared build",
+    "build:snap": "yarn workspace @tlock/snap build",
+    "build:mobile:android": "yarn workspace @tlock/mobile build:android",
     "deploy:functions": "yarn workspace @tlock/firebase/functions deploy",
-    "deploy:snap": "yarn build:snap && yarn workspace @tlock/snap deploy",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test": "jest"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",
