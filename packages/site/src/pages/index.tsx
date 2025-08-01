@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import QRCode from 'qrcode';
 import { useMetaMask } from '../hooks/useMetaMask';
-import { useMetaMaskContext } from '../hooks/MetamaskContext';
+import { MetaMaskProvider, useMetaMaskContext } from '../hooks/MetamaskContext';
 import { useRequest } from '../hooks/useRequest';
 import { useRequestSnap } from '../hooks/useRequestSnap';
 import { EXPO_URL, SNAP_ORIGIN } from '../config';
@@ -115,7 +115,6 @@ const SnapDemo = () => {
                                     <button
                                         className="btn btn-primary btn-sm"
                                         onClick={() => void handleInstallSnap()}
-                                        disabled={!isFlask || !snapsDetected}
                                     >
                                         Install Snap
                                     </button>
@@ -210,4 +209,12 @@ const SnapDemo = () => {
     );
 };
 
-export default SnapDemo;
+const Page = () => {
+    return (
+        <MetaMaskProvider>
+            <SnapDemo />
+        </MetaMaskProvider>
+    );
+};
+
+export default Page;

@@ -11,48 +11,47 @@ import { SNAP_ORIGIN } from '../config';
  * @returns The information.
  */
 export const useMetaMask = () => {
-  const { provider, setInstalledSnap, installedSnap } = useMetaMaskContext();
-  const request = useRequest();
+    const { provider, setInstalledSnap, installedSnap } = useMetaMaskContext();
+    const request = useRequest();
 
-  const [isFlask, setIsFlask] = useState(false);
+    const [isFlask, setIsFlask] = useState(false);
 
-  const snapsDetected = provider !== null;
+    const snapsDetected = provider !== null;
 
-  /**
-   * Detect if the version of MetaMask is Flask.
-   */
-  const detectFlask = async () => {
-    const clientVersion = await request({
-      method: 'web3_clientVersion',
-    });
+    /**
+     * Detect if the version of MetaMask is Flask.
+     */
+    const detectFlask = async () => {
+        const clientVersion = await request({
+            method: 'web3_clientVersion',
+        });
 
-    const isFlaskDetected = (clientVersion as string[])?.includes('flask');
+        const isFlaskDetected = (clientVersion as string[])?.includes('flask');
 
-    setIsFlask(isFlaskDetected);
-  };
-
-  /**
-   * Get the Snap informations from MetaMask.
-   */
-  const getSnap = async () => {
-    const snaps = (await request({
-      method: 'wallet_getSnaps',
-    })) as GetSnapsResponse;
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    setInstalledSnap(snaps[SNAP_ORIGIN] ?? null);
-  };
-
-  useEffect(() => {
-    const detect = async () => {
-      if (provider) {
-        await detectFlask();
-        await getSnap();
-      }
+        setIsFlask(isFlaskDetected);
     };
 
-    detect().catch(console.error);
-  }, [provider]);
+    /**
+     * Get the Snap informations from MetaMask.
+     */
+    const getSnap = async () => {
+        const snaps = (await request({
+            method: 'wallet_getSnaps',
+        })) as GetSnapsResponse;
 
-  return { isFlask, snapsDetected, installedSnap, getSnap };
+        setInstalledSnap(snaps[SNAP_ORIGIN] ?? null);
+    };
+
+    useEffect(() => {
+        const detect = async () => {
+            if (provider) {
+                await detectFlask();
+                await getSnap();
+            }
+        };
+
+        detect().catch(console.error);
+    }, [provider]);
+
+    return { isFlask, snapsDetected, installedSnap, getSnap };
 };
