@@ -207,48 +207,6 @@ const SnapDemo = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Documentation */}
-            <div className="row mt-4">
-                <div className="col-12">
-                    <div className="card">
-                        <div className="card-header">
-                            <h5>Documentation</h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-md-4">
-                                    <h6>Setup:</h6>
-                                    <ol className="small">
-                                        <li>Install MetaMask Flask</li>
-                                        <li>Install Foxguard snap</li>
-                                        <li>Test signing functionality</li>
-                                        <li>Connect Expo app via QR</li>
-                                    </ol>
-                                </div>
-                                <div className="col-md-4">
-                                    <h6>API Methods:</h6>
-                                    <ul className="small">
-                                        <li><code>wallet_requestSnaps</code></li>
-                                        <li><code>wallet_getSnaps</code></li>
-                                        <li><code>personal_sign</code></li>
-                                        <li><code>eth_requestAccounts</code></li>
-                                    </ul>
-                                </div>
-                                <div className="col-md-4">
-                                    <h6>Notes:</h6>
-                                    <ul className="small">
-                                        <li>Flask required for snaps</li>
-                                        <li>Update Expo URL as needed</li>
-                                        <li>Error handling included</li>
-                                        <li>Production-ready hooks</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
