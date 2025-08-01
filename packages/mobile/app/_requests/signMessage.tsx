@@ -60,23 +60,25 @@ export default function SignPersonalScreen() {
                     </Card.Content>
                 </Card>
 
-                <Card mode="contained" style={{ padding: 16, }}>
-                    <View style={{ gap: 4 }}>
-                        {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
-                        <KeyValueRow label="From" value={clientName} />
-                        <KeyValueRow label="Account" value={account.name ?? account.address} />
-                    </View>
+                <Card mode="contained">
+                    <Card.Content>
+                        <View style={{ gap: 4 }}>
+                            {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                            <KeyValueRow label="From" value={clientName} />
+                            <KeyValueRow label="Account" value={account.name ?? account.address} />
+                        </View>
 
-                    <Divider style={{ marginVertical: 12 }} />
+                        <Divider style={{ marginVertical: 12 }} />
 
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>
-                        Message to sign:
-                    </Text>
-                    <Text variant="bodyLarge" selectable style={{
-                        fontFamily: 'monospace',
-                    }}>
-                        {fromHex(request.message || '0x', 'string')}
-                    </Text>
+                        <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                            Message to sign:
+                        </Text>
+                        <Text variant="bodyLarge" selectable style={{
+                            fontFamily: 'monospace',
+                        }}>
+                            {fromHex(request.message || '0x', 'string')}
+                        </Text>
+                    </Card.Content>
                 </Card>
             </RequestTemplate>
         </>

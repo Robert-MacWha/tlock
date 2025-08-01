@@ -5,6 +5,7 @@ import { Card, Text } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
 import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
+import CardTitle from 'react-native-paper/lib/typescript/components/Card/CardTitle';
 
 export default function SignTypedDataScreen() {
     const { signTypedData } = useKeyringContext();
@@ -34,32 +35,36 @@ export default function SignTypedDataScreen() {
             loading={loading}
             error={error}
         >
-            <Card style={{ padding: 16, }}>
-                <Text variant="labelMedium" style={{ marginBottom: 12, }}>
-                    Structured Data:
-                </Text>
-
-                <KeyValueRow label="From" value={clientName} />
-                <KeyValueRow label="Account" value={account.name ?? account.address} />
-                <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
-
-                <Text variant="labelMedium" style={{
-                    marginTop: 16,
-                    marginBottom: 8,
-                }}>
-                    Data to sign:
-                </Text>
-                <Card style={{ padding: 12, }}>
-                    <Text
-                        variant="bodySmall"
-                        selectable
-                        style={{
-                            fontFamily: 'monospace'
-                        }}
-                    >
-                        {JSON.stringify(request.data, null, 2)}
+            <Card>
+                <Card.Content>
+                    <Text variant="labelMedium" style={{ marginBottom: 12, }}>
+                        Structured Data:
                     </Text>
-                </Card>
+
+                    <KeyValueRow label="From" value={clientName} />
+                    <KeyValueRow label="Account" value={account.name ?? account.address} />
+                    <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
+
+                    <Text variant="labelMedium" style={{
+                        marginTop: 16,
+                        marginBottom: 8,
+                    }}>
+                        Data to sign:
+                    </Text>
+                    <Card mode='contained'>
+                        <Card.Content>
+                            <Text
+                                variant="bodySmall"
+                                selectable
+                                style={{
+                                    fontFamily: 'monospace'
+                                }}
+                            >
+                                {JSON.stringify(request.data, null, 2)}
+                            </Text>
+                        </Card.Content>
+                    </Card>
+                </Card.Content>
             </Card>
         </RequestTemplate>
     );
