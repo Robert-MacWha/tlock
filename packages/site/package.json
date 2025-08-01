@@ -7,7 +7,7 @@
     "allow-scripts": "yarn workspace root allow-scripts",
     "build": "GATSBY_TELEMETRY_DISABLED=1 gatsby build",
     "clean": "rimraf public",
-    "dev": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop"
+    "dev": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop --host 0.0.0.0 --port 8000"
   },
   "browserslist": {
     "production": [

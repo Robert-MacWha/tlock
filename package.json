@@ -13,7 +13,6 @@
     "dev:mobile": "yarn workspace @tlock/mobile dev",
     "build:shared": "yarn workspace @tlock/shared build",
     "build:snap": "yarn workspace @tlock/snap build",
-    "build:mobile:android": "yarn workspace @tlock/mobile build:android",
     "deploy:functions": "yarn workspace @tlock/firebase/functions deploy",
     "test": "jest"
   },
