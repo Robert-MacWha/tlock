@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import QRCode from 'qrcode';
-import { MetaMaskProvider } from '../hooks/MetamaskContext';
 import { useMetaMask } from '../hooks/useMetaMask';
 import { useMetaMaskContext } from '../hooks/MetamaskContext';
 import { useRequest } from '../hooks/useRequest';
@@ -211,14 +210,4 @@ const SnapDemo = () => {
     );
 };
 
-export default function App() {
-    return (
-        <MetaMaskProvider>
-            <link
-                href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-                rel="stylesheet"
-            />
-            <SnapDemo />
-        </MetaMaskProvider>
-    );
-}
+export default SnapDemo;

@@ -1,15 +1,11 @@
-import type { FunctionComponent, ReactNode } from 'react';
-
+import type { FunctionComponent } from 'react';
 import { MetaMaskProvider } from './hooks';
+import SnapDemo from './pages';
 
-export type AppProps = {
-    children: ReactNode;
-};
-
-export const App: FunctionComponent<AppProps> = ({ children }) => {
+export const App: FunctionComponent = () => {
     return (
         <MetaMaskProvider>
-            {children}
+            <SnapDemo />
         </MetaMaskProvider>
     );
 };
