@@ -68,7 +68,7 @@ export default function RootLayout() {
                                     <Stack.Screen name="_setup" options={{ headerShown: false }} />
                                     <Stack.Screen name="_docs" options={{ headerShown: false }} />
                                     <Stack.Screen name="clients" options={{
-                                        title: 'Connected Wallets',
+                                        title: 'Connected Devices',
                                     }} />
                                     <Stack.Screen name="requests" options={{
                                         title: 'Requests',

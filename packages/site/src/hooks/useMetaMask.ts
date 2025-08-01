@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 
 import { useMetaMaskContext } from './MetamaskContext';
 import { useRequest } from './useRequest';
-import { defaultSnapOrigin } from '../config';
 import type { GetSnapsResponse } from '../types';
+import { SNAP_ORIGIN } from '../config';
 
 /**
  * A hook to retrieve useful data from MetaMask.
@@ -39,7 +39,8 @@ export const useMetaMask = () => {
       method: 'wallet_getSnaps',
     })) as GetSnapsResponse;
 
-    setInstalledSnap(snaps[defaultSnapOrigin] ?? null);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    setInstalledSnap(snaps[SNAP_ORIGIN] ?? null);
   };
 
   useEffect(() => {

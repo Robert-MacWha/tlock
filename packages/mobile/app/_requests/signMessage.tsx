@@ -2,9 +2,9 @@ import React from 'react';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
-import { Text, Card, Divider, useTheme, Surface } from 'react-native-paper';
+import { Text, Card, Divider, useTheme, ActivityIndicator } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
-import { RequestTemplate, useRequestTemplateHeader } from '../../components/RequestTemplate';
+import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
@@ -33,7 +33,13 @@ export default function SignPersonalScreen() {
             <Stack.Screen
                 options={{
                     headerRight: () => (
-                        useRequestTemplateHeader(loading)
+                        <View style={{ flexDirection: 'row' }}>
+                            <ActivityIndicator
+                                size={16}
+                                animating={loading}
+                                hidesWhenStopped={true}
+                            />
+                        </View>
                     ),
                 }}
             />

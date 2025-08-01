@@ -99,18 +99,3 @@ export function RequestTemplate({
         </>
     );
 }
-
-export function useRequestTemplateHeader(loading: boolean, onRefresh?: () => void) {
-    return (
-        <>
-            {loading ? (
-                <ActivityIndicator size="small" style={{ marginRight: 12, marginTop: 12 }} />
-            ) : onRefresh ? (
-                <IconButton
-                    icon="refresh"
-                    onPress={() => { void onRefresh() }}
-                />
-            ) : null}
-        </>
-    )
-}

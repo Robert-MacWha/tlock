@@ -73,11 +73,17 @@ export default function App() {
                 <Dialog visible={helpVisible} onDismiss={() => setHelpVisible(false)}>
                     <Dialog.Title>Connected Devices</Dialog.Title>
                     <Dialog.Content>
-                        <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
-                            This page shows devices (like MetaMask or other wallets) that can request signatures from your accounts.
+                        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                            This page shows devices (like MetaMask or other wallets) that can request signatures from your accounts.  To connect a new device:
                         </Text>
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
-                            - Tap the + button to pair a new device by scanning its QR code
+                            - On the device you want to connect, open Metamask Flask, navigate to Settings {">"} Snaps {">"} Foxguard and click "Pair Device".
+                        </Text>
+                        <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
+                            - In this app, tap the + button to pair a new device by scanning its QR code
+                        </Text>
+                        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                            Once paired, you can manage connected devices here
                         </Text>
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
                             - Connected devices can request you to sign transactions

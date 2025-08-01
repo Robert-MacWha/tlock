@@ -1,206 +1,224 @@
-import styled from 'styled-components';
+import React, { useState } from 'react';
+import QRCode from 'qrcode';
+import { MetaMaskProvider } from '../hooks/MetamaskContext';
+import { useMetaMask } from '../hooks/useMetaMask';
+import { useMetaMaskContext } from '../hooks/MetamaskContext';
+import { useRequest } from '../hooks/useRequest';
+import { useRequestSnap } from '../hooks/useRequestSnap';
+import { EXPO_URL, SNAP_ORIGIN } from '../config';
 
-import {
-  ConnectButton,
-  InstallFlaskButton,
-  ReconnectButton,
-  SendHelloButton,
-  Card,
-} from '../components';
-import { defaultSnapOrigin } from '../config';
-import {
-  useMetaMask,
-  useInvokeSnap,
-  useMetaMaskContext,
-  useRequestSnap,
-} from '../hooks';
-import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
+// QR Code Component with actual generation
+const QRCodeDisplay = ({ value, size = 200 }: { value: string; size?: number }) => {
+    const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  margin-top: 7.6rem;
-  margin-bottom: 7.6rem;
-  ${({ theme }) => theme.mediaQueries.small} {
-    padding-left: 2.4rem;
-    padding-right: 2.4rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    width: auto;
-  }
-`;
+    React.useEffect(() => {
+        QRCode.toDataURL(value, { width: size, margin: 2 })
+            .then(setQrDataUrl)
+            .catch(console.error);
+    }, [value, size]);
 
-const Heading = styled.h1`
-  margin-top: 0;
-  margin-bottom: 2.4rem;
-  text-align: center;
-`;
-
-const Span = styled.span`
-  color: ${(props) => props.theme.colors.primary?.default};
-`;
-
-const Subtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.large};
-  font-weight: 500;
-  margin-top: 0;
-  margin-bottom: 0;
-  ${({ theme }) => theme.mediaQueries.small} {
-    font-size: ${({ theme }) => theme.fontSizes.text};
-  }
-`;
-
-const CardContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  max-width: 64.8rem;
-  width: 100%;
-  height: 100%;
-  margin-top: 1.5rem;
-`;
-
-const Notice = styled.div`
-  background-color: ${({ theme }) => theme.colors.background?.alternative};
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  color: ${({ theme }) => theme.colors.text?.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
-
-  & > * {
-    margin: 0;
-  }
-  ${({ theme }) => theme.mediaQueries.small} {
-    margin-top: 1.2rem;
-    padding: 1.6rem;
-  }
-`;
-
-const ErrorMessage = styled.div`
-  background-color: ${({ theme }) => theme.colors.error?.muted};
-  border: 1px solid ${({ theme }) => theme.colors.error?.default};
-  color: ${({ theme }) => theme.colors.error?.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
-  ${({ theme }) => theme.mediaQueries.small} {
-    padding: 1.6rem;
-    margin-bottom: 1.2rem;
-    margin-top: 1.2rem;
-    max-width: 100%;
-  }
-`;
-
-const Index = () => {
-  const { error } = useMetaMaskContext();
-  const { isFlask, snapsDetected, installedSnap } = useMetaMask();
-  const requestSnap = useRequestSnap();
-  const invokeSnap = useInvokeSnap();
-
-  const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
-    ? isFlask
-    : snapsDetected;
-
-  const handleSendHelloClick = async () => {
-    await invokeSnap({ method: 'hello' });
-  };
-
-  return (
-    <Container>
-      <Heading>
-        Welcome to <Span>template-snap</Span>
-      </Heading>
-      <Subtitle>
-        Get started by editing <code>src/index.tsx</code>
-      </Subtitle>
-      <CardContainer>
-        {error && (
-          <ErrorMessage>
-            <b>An error happened:</b> {error.message}
-          </ErrorMessage>
-        )}
-        {!isMetaMaskReady && (
-          <Card
-            content={{
-              title: 'Install',
-              description:
-                'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
-              button: <InstallFlaskButton />,
-            }}
-            fullWidth
-          />
-        )}
-        {!installedSnap && (
-          <Card
-            content={{
-              title: 'Connect',
-              description:
-                'Get started by connecting to and installing the example snap.',
-              button: (
-                <ConnectButton
-                  onClick={requestSnap}
-                  disabled={!isMetaMaskReady}
-                />
-              ),
-            }}
-            disabled={!isMetaMaskReady}
-          />
-        )}
-        {shouldDisplayReconnectButton(installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'While connected to a local running snap this button will always be displayed in order to update the snap if a change is made.',
-              button: (
-                <ReconnectButton
-                  onClick={requestSnap}
-                  disabled={!installedSnap}
-                />
-              ),
-            }}
-            disabled={!installedSnap}
-          />
-        )}
-        <Card
-          content={{
-            title: 'Send Hello message',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <SendHelloButton
-                onClick={handleSendHelloClick}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-          fullWidth={
-            isMetaMaskReady &&
-            Boolean(installedSnap) &&
-            !shouldDisplayReconnectButton(installedSnap)
-          }
-        />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
-      </CardContainer>
-    </Container>
-  );
+    return qrDataUrl ? (
+        <img src={qrDataUrl} alt="QR Code" className="img-fluid" />
+    ) : (
+        <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    );
 };
 
-export default Index;
+const SnapDemo = () => {
+    const { isFlask, snapsDetected, installedSnap, getSnap } = useMetaMask();
+    const { error } = useMetaMaskContext();
+    const request = useRequest();
+    const requestSnap = useRequestSnap(SNAP_ORIGIN);
+
+    const [signatureResult, setSignatureResult] = useState<string>('');
+    const [message, setMessage] = useState('Hello from MetaMask Snap!');
+
+    const handleInstallSnap = async () => {
+        try {
+            await requestSnap();
+            await getSnap();
+        } catch (err) {
+            console.error('Failed to install snap:', err);
+        }
+    };
+
+    const handleSignPersonal = async () => {
+        try {
+            const accounts = await request({ method: 'eth_requestAccounts' }) as string[];
+            if (!accounts?.length) throw new Error('No accounts available');
+
+            const result = await request({
+                method: 'personal_sign',
+                params: [message, accounts[0]]
+            });
+            setSignatureResult(result as string);
+        } catch (err) {
+            console.error('Failed to sign message:', err);
+        }
+    };
+
+    return (
+        <div className="container">
+            <header className="py-3 mb-4 border-bottom">
+                <h1 className="h2">Foxguard Snap Demo</h1>
+                <p className="text-muted">Follow these 17-ish* steps to install the Foxguard metamask snap and the companion app so you can see what Robert's been going on about!</p>
+            </header>
+
+            {error && (
+                <div className="alert alert-danger">
+                    <strong>Error:</strong> {error.message}
+                </div>
+            )}
+
+            <div className="row g-4">
+                {/* MetaMask Flask Detection */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>1. MetaMask Flask</h5>
+                        </div>
+                        <div className="card-body">
+                            {!snapsDetected ? (
+                                <div className="alert alert-warning mb-0">
+                                    <p className="mb-2">MetaMask not detected</p>
+                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                        Install MetaMask Flask
+                                    </a>
+                                </div>
+                            ) : !isFlask ? (
+                                <div className="alert alert-warning mb-0">
+                                    <p className="mb-2">Flask required</p>
+                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                        Install Flask
+                                    </a>
+                                </div>
+                            ) : (
+                                <div className="alert alert-success mb-0">
+                                    <p className="mb-0">✓ MetaMask Flask detected</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Snap Installation */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>2. Foxguard Snap</h5>
+                        </div>
+                        <div className="card-body">
+                            {!installedSnap ? (
+                                <div>
+                                    <p className="mb-2">Install the Foxguard snap</p>
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => void handleInstallSnap()}
+                                        disabled={!isFlask || !snapsDetected}
+                                    >
+                                        Install Snap
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="alert alert-success mb-0">
+                                    <p className="mb-1">✓ Snap installed</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Install Expo Go */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>3. Install Expo Go</h5>
+                        </div>
+                        <div className="card-body">
+                            <p className="mb-2">Install the Expo Go app on your mobile device. Expo go is a sandbox for react-native apps, that's actually kind of incredible for distributing testing apps across various platforms.</p>
+                            <a href="https://expo.dev/client" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                Download Expo Go
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* QR Code */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>4. Foxguard Companion App</h5>
+                        </div>
+                        <div className="card-body text-center">
+                            <QRCodeDisplay value={EXPO_URL} size={150} />
+                            <p className="mt-2 mb-0 text-muted small">Open Expo Go and scan the QR code to launch the sandboxed app</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/*  Foxguard Setup */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>5. Foxguard Setup</h5>
+                        </div>
+                        <div className="card-body">
+                            <p className="mb-2">Follow the setup instructions within the Foxguard companion app, then pair it with the snap in metamask.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Personal Sign */}
+                <div className="col-12">
+                    <div className="card h-100">
+                        <div className="card-header">
+                            <h5>6. Personal Sign</h5>
+                            <p className="mb-2">Test your connection with a personal_sign request, or try sending a transaction (TESTNET) from the account!</p>
+                        </div>
+                        <div className="card-body">
+                            <div className="mb-2">
+                                <input
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="Message to sign"
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                className="btn btn-success btn-sm mb-2"
+                                onClick={() => void handleSignPersonal()}
+                                disabled={!snapsDetected}
+                            >
+                                Sign Message
+                            </button>
+                            {signatureResult && (
+                                <textarea
+                                    className="form-control form-control-sm"
+                                    rows={2}
+                                    value={signatureResult}
+                                    readOnly
+                                    placeholder="Signature will appear here"
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default function App() {
+    return (
+        <MetaMaskProvider>
+            <link
+                href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                rel="stylesheet"
+            />
+            <SnapDemo />
+        </MetaMaskProvider>
+    );
+}

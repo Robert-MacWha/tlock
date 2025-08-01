@@ -7,8 +7,8 @@
       "ES2020",
       "DOM"
     ],
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "Node16",
+    "moduleResolution": "node16",
     "noEmit": true,
     "noErrorTruncation": true,
     "noUncheckedIndexedAccess": true,
@@ -24,5 +24,6 @@
     "build",
     "*.config.*",
     ".prettierrc.*"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

@@ -14,11 +14,17 @@ export async function handleImportAccount(interfaceId: string) {
 
     await showTextScreen(interfaceId, "Importing account...", "Please check your device for approval");
 
-    const client = createClient(state.sharedSecret, state.fcmToken);
-    const keyring = new TlockKeyring(client, state?.keyringState);
-    const account = await keyring.createAccount({});
+    try {
+        const client = createClient(state.sharedSecret, state.fcmToken);
+        const keyring = new TlockKeyring(client, state?.keyringState);
+        const account = await keyring.createAccount({});
+        await showTextScreen(interfaceId, "Account imported successfully", `Address: ${account.address}`);
+    } catch (error) {
+        console.error("Failed to import account:", error);
+        await showErrorScreen(interfaceId, "Failed to import account. Please try again.");
+        return;
+    }
 
-    await showTextScreen(interfaceId, "Account imported successfully", `Address: ${account.address}`);
 
     return;
 }
