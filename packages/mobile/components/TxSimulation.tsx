@@ -4,11 +4,10 @@ import {
     Text,
     Card,
     ActivityIndicator,
-    Chip,
     List,
     Divider
 } from "react-native-paper";
-import { NETWORKS, DedaubClient, Network, isNetwork, SimulationResponse, BalanceDelta, TokenInfo } from "@tlock/shared";
+import { DedaubClient, isNetwork, SimulationResponse, BalanceDelta, TokenInfo } from "@tlock/shared";
 import { TransactionSerializable, Address } from "viem";
 
 interface TxSimulationProps {
@@ -57,10 +56,13 @@ export function TxSimulation({ network, from, transaction }: TxSimulationProps) 
     const [simulation, setSimulation] = useState<SimulationResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    if (!isNetwork(network)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const isValidNetwork = isNetwork(network);
+
+    if (!isValidNetwork) {
         return (
             <Card mode='contained'>
+                <Card.Title title="Transaction Simulation" />
                 <Card.Content>
                     <Text variant="bodyMedium">Unsupported network: {network}</Text>
                 </Card.Content>
@@ -99,9 +101,7 @@ export function TxSimulation({ network, from, transaction }: TxSimulationProps) 
 
     return (
         <Card mode='contained'>
-            <Card.Title
-                title="Transaction Simulation"
-            />
+            <Card.Title title="Transaction Simulation" />
 
             <Card.Content>
                 {loading && (

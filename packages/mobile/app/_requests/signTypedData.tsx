@@ -5,7 +5,6 @@ import { Card, Text } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
 import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';
-import CardTitle from 'react-native-paper/lib/typescript/components/Card/CardTitle';
 
 export default function SignTypedDataScreen() {
     const { signTypedData } = useKeyringContext();

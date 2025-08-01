@@ -89,7 +89,7 @@ export default function SignTransaction() {
                 </Card>
 
                 <TxSimulation
-                    network={"ethereum"}
+                    network={chain}
                     transaction={transaction}
                     from={request.from}
                 />
