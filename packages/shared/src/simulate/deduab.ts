@@ -6,7 +6,7 @@ type BlockNumber = number | 'latest';
 
 export interface SimulationRequest {
     data: Hex;
-    to_a: Address;
+    to_a?: Address | undefined;
     from_a: Address;
     value: Hex;
     gas: Hex;
@@ -158,14 +158,12 @@ export interface SimulationResponse {
     tx_data: TxData | null;
 }
 
-export type Network =
-    | "ethereum"
-    | "polygon"
-    | "bsc"
-    | "arbitrum"
-    | "optimism"
-    | "avalanche"
-    | "fantom";
+export const NETWORKS = ["ethereum", "polygon", "bsc", "arbitrum", "optimism", "avalanche", "fantom"] as const;
+export type Network = typeof NETWORKS[number];
+
+export function isNetwork(value: string): value is Network {
+    return Object.values(NETWORKS).includes(value.toLowerCase() as Network);
+}
 
 export class DedaubClient {
     private readonly baseUrl = "https://api.dedaub.com/api";
