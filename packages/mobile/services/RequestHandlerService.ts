@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import * as Notifications from 'expo-notifications';
+// import * as Notifications from 'expo-notifications';
 import { Request, RequestType } from '@tlock/shared';
 import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
 import { ClientRequest } from '../contexts/RequestRecieverContext';
@@ -46,19 +46,20 @@ export class RequestHandlerService {
 
     private async showPushNotification(request: ClientRequest) {
         const notificationContent = this.getNotificationContent(request.request);
+        throw new Error('Push notifications are not implemented yet');
 
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: notificationContent.title,
-                body: notificationContent.body,
-                data: {
-                    requestId: request.request.id,
-                    requestType: request.request.type,
-                },
-                sound: true,
-            },
-            trigger: null,
-        });
+        // await Notifications.scheduleNotificationAsync({
+        //     content: {
+        //         title: notificationContent.title,
+        //         body: notificationContent.body,
+        //         data: {
+        //             requestId: request.request.id,
+        //             requestType: request.request.type,
+        //         },
+        //         sound: true,
+        //     },
+        //     trigger: null,
+        // });
     }
 
     private async navigateToRequestScreen(request: ClientRequest) {
