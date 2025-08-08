@@ -5982,7 +5982,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.79.5
     react-native-paper: ^5.14.5
-    react-native-safe-area-context: ^5.5.2
+    react-native-safe-area-context: 5.4.0
     react-native-screens: ~4.11.1
     typescript: ~5.8.3
     viem: ^2.33.1
@@ -20399,13 +20399,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:^5.5.2":
-  version: 5.5.2
-  resolution: "react-native-safe-area-context@npm:5.5.2"
+"react-native-safe-area-context@npm:5.4.0":
+  version: 5.4.0
+  resolution: "react-native-safe-area-context@npm:5.4.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 694e293b474b0738899c6e09da9f001d8087b382b5a40b8b227765c861a8137f0ff0209f1c9d8ae94337bc9c170eb114a9b897a8661b8181f48759a21baeb265
+  checksum: 7d7f9a8278048650fd207d436798bd062d6f78d771cb0665b92aef69dba870251339e6812e1d669fd1958345288bd0f9ac98fbfe353c13958d18b58dc946c341
   languageName: node
   linkType: hard
 
