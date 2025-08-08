@@ -7,7 +7,6 @@
     "snap.manifest.json"
   ],
   "scripts": {
-    "allow-scripts": "",
     "build": "mm-snap build",
     "lint": "yarn lint:eslint && yarn lint:misc --check",
     "prepublishOnly": "mm-snap manifest",

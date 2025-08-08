@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "allow-scripts": "",
     "dev": "expo start",
     "test": "jest"
   },
