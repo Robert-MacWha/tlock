@@ -5,7 +5,6 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "allow-scripts": "",
         "build": "tsc",
         "dev": "tsc --watch",
         "clean": "rm -rf dist"
