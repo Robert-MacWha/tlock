@@ -5,10 +5,11 @@ import { router } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 import { useAuthenticator } from '../../hooks/useAuthenticator';
-import { Badge, Button, List, Modal, Portal, Surface } from 'react-native-paper';
+import { Badge, Button, List, Modal, Portal, Surface, SegmentedButtons } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
 import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
 import { useClientsContext } from '../../contexts/ClientContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
@@ -19,6 +20,7 @@ export default function SettingsScreen() {
     const { alert } = useAlert();
     const { clientRequests } = useRequestReceiverContext();
     const { clients } = useClientsContext();
+    const { themeMode, setThemeMode } = useTheme();
 
     const hasRequests = clientRequests.length > 0;
     const hasClients = clients.length > 0;
@@ -49,14 +51,8 @@ export default function SettingsScreen() {
             'Security Warning',
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
-                {
-                    text: 'Cancel',
-                },
-                {
-                    text: 'Show',
-                    mode: 'outlined',
-                    onPress: () => { void showSeedPhrase() },
-                },
+                { text: 'Cancel', },
+                { text: 'Show', mode: 'outlined', onPress: () => { void showSeedPhrase() }, },
             ]
         );
     };
@@ -66,22 +62,56 @@ export default function SettingsScreen() {
             'Reset App',
             'This will clear your setup status and require you to go through initial setup again. All data within the app will be rest. Are you sure?',
             [
-                {
-                    text: 'Cancel',
-                },
-                {
-                    text: 'Reset',
-                    mode: 'outlined',
-                    onPress: () => { void resetApp(); },
-                },
+                { text: 'Cancel', },
+                { text: 'Reset', mode: 'outlined', onPress: () => { void resetApp(); }, },
             ]
         );
+    };
+
+    const handleThemeChange = async (value: string) => {
+        try {
+            await setThemeMode(value as 'light' | 'dark' | 'system');
+        } catch (error) {
+            alert('Error', 'Failed to save theme preference.');
+        }
     };
 
     return (
         <>
             <Surface style={{ flex: 1, padding: 16, gap: 16 }}>
                 <List.Section>
+                    <List.Subheader>Appearance</List.Subheader>
+
+                    <List.Item
+                        title="Theme"
+                        description="Choose your preferred theme"
+                        left={props => <List.Icon {...props} icon="palette-outline" />}
+                    />
+
+                    <SegmentedButtons
+                        value={themeMode}
+                        onValueChange={(value) => void handleThemeChange(value)}
+                        buttons={[
+                            {
+                                value: 'light',
+                                label: 'Light',
+                                icon: 'white-balance-sunny',
+                            },
+                            {
+                                value: 'dark',
+                                label: 'Dark',
+                                icon: 'moon-waning-crescent',
+                            },
+                            {
+                                value: 'system',
+                                label: 'Auto',
+                                icon: 'brightness-auto',
+                            },
+                        ]}
+                    />
+
+                    <List.Subheader>General</List.Subheader>
+
                     <List.Item
                         title="Connected Devices"
                         left={props => <List.Icon {...props} icon="devices" />}
@@ -119,14 +149,21 @@ export default function SettingsScreen() {
                         left={props => <List.Icon {...props} icon="file-document-multiple-outline" />}
                         onPress={() => router.push('/_docs')}
                     />
-                    <List.Subheader>Advanced</List.Subheader>
+
+                    <List.Subheader>Security</List.Subheader>
+
                     <List.Item
                         title="Show Seed Phrase"
+                        description="View your recovery phrase"
                         left={props => <List.Icon {...props} icon="key-outline" />}
                         onPress={() => void alertShowSeedPhrase()}
                     />
+
+                    <List.Subheader>Advanced</List.Subheader>
+
                     <List.Item
                         title="Reset Setup"
+                        description="Clear all app data and start over"
                         left={props => <List.Icon {...props} icon="refresh" />}
                         onPress={() => void alertReset()}
                     />
