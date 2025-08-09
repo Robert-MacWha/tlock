@@ -89,6 +89,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     return (
         <ThemeContext.Provider value={{ themeMode, setThemeMode, isDark }}>
+            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
             <NavThemeProvider value={currentNavTheme}>
                 <PaperProvider theme={currentPaperTheme}>
                     {children}
