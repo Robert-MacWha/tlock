@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import {
     DefaultTheme as NavLightTheme,
@@ -89,6 +90,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     return (
         <ThemeContext.Provider value={{ themeMode, setThemeMode, isDark }}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
             <NavThemeProvider value={currentNavTheme}>
                 <PaperProvider theme={currentPaperTheme}>
