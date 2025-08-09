@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useKeyring } from '../useKeyring';
 import * as SecureStore from 'expo-secure-store';
 import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, TransactionSerializableLegacy, TypedDataDefinition } from 'viem';
@@ -134,10 +134,13 @@ describe('useSeedPhrase', () => {
             setupStorageState({ seedPhrase: null });
             const { result } = renderHook(() => useKeyring());
 
-            const seedPhrase = result.current.generateSeedPhrase();
+            let seedPhrase: string;
+            act(() => {
+                seedPhrase = result.current.generateSeedPhrase();
+            });
 
-            expect(seedPhrase).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
+            expect(seedPhrase!).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase!);
             expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', '[]');
         });
 
@@ -145,10 +148,13 @@ describe('useSeedPhrase', () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
             const { result } = renderHook(() => useKeyring());
 
-            const seedPhrase = result.current.generateSeedPhrase(true);
+            let seedPhrase: string;
+            act(() => {
+                seedPhrase = result.current.generateSeedPhrase(true);
+            });
 
-            expect(seedPhrase).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase);
+            expect(seedPhrase!).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase!);
         });
     });
 
@@ -188,10 +194,13 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            const address = result.current.addAccount();
+            let address: string;
+            act(() => {
+                address = result.current.addAccount();
+            });
 
-            expect(address).toBeDefined();
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address));
+            expect(address!).toBeDefined();
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address!));
         });
 
         it('should add new accounts successfully', () => {
@@ -202,9 +211,12 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            const address = result.current.addAccount();
-            expect(address).toBeDefined();
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address));
+            let address: string;
+            act(() => {
+                address = result.current.addAccount();
+            });
+            expect(address!).toBeDefined();
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining(address!));
             expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', expect.stringContaining('0x123'));
         });
     });
@@ -361,7 +373,11 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            expect(() => result.current.generateSeedPhrase()).toThrow('SecureStore write failed');
+            expect(() => {
+                act(() => {
+                    result.current.generateSeedPhrase();
+                });
+            }).toThrow('SecureStore write failed');
         });
 
         it('should handle SecureStore failures in addAccount', () => {
@@ -374,7 +390,11 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            expect(() => result.current.addAccount()).toThrow('SecureStore write failed');
+            expect(() => {
+                act(() => {
+                    result.current.addAccount();
+                });
+            }).toThrow('SecureStore write failed');
         });
     });
 });
