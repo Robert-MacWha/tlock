@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useSetupStatus } from "../../hooks/useSetupStatus";
 import { useKeyringContext } from "../../contexts/KeyringContext";
 import { router } from "expo-router";
-import * as SecureStore from 'expo-secure-store';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
-import { useAuthenticator } from '../../hooks/useAuthenticator';
 import { Badge, Button, List, Modal, Portal, Surface, SegmentedButtons } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
 import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
@@ -14,7 +12,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
     const { getSeedPhrase } = useKeyringContext();
-    const { authenticate } = useAuthenticator();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const { alert } = useAlert();
@@ -25,11 +22,9 @@ export default function SettingsScreen() {
     const hasRequests = clientRequests.length > 0;
     const hasClients = clients.length > 0;
 
-    const resetApp = async () => {
+    const resetApp = () => {
         try {
-            await authenticate();
-            await SecureStore.deleteItemAsync('tlock_setup_complete');
-            await setIsSetupComplete(false);
+            setIsSetupComplete(false);
             router.replace('/_setup');
         } catch (_error) {
             alert('Error', 'Failed to reset setup. Please try again.');
@@ -63,7 +58,7 @@ export default function SettingsScreen() {
             'This will clear your setup status and require you to go through initial setup again. All data within the app will be rest. Are you sure?',
             [
                 { text: 'Cancel', },
-                { text: 'Reset', mode: 'outlined', onPress: () => { void resetApp(); }, },
+                { text: 'Reset', mode: 'outlined', onPress: resetApp, },
             ]
         );
     };
@@ -71,7 +66,7 @@ export default function SettingsScreen() {
     const handleThemeChange = async (value: string) => {
         try {
             await setThemeMode(value as 'light' | 'dark' | 'system');
-        } catch (error) {
+        } catch (_error) {
             alert('Error', 'Failed to save theme preference.');
         }
     };

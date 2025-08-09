@@ -10,8 +10,12 @@ export function useSetupStatus() {
             .catch(() => setIsSetupComplete(false));
     }, []);
 
-    const updateIsSetupComplete = async (isSetupComplete: boolean) => {
-        await SecureStore.setItemAsync('tlock_setup_complete', isSetupComplete ? 'true' : 'false');
+    const updateIsSetupComplete = (isSetupComplete: boolean) => {
+        if (isSetupComplete) {
+            SecureStore.setItem('tlock_setup_complete', 'true');
+        } else {
+            SecureStore.setItem('tlock_setup_complete', 'false', { requireAuthentication: true });
+        }
         setIsSetupComplete(isSetupComplete);
     };
 
