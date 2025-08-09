@@ -47,7 +47,7 @@ export default function SettingsScreen() {
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
                 { text: 'Cancel', },
-                { text: 'Show', mode: 'outlined', onPress: showSeedPhrase, },
+                { text: 'Show', mode: 'contained', onPress: showSeedPhrase, },
             ]
         );
     };
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
             'This will clear your setup status and require you to go through initial setup again. All data within the app will be rest. Are you sure?',
             [
                 { text: 'Cancel', },
-                { text: 'Reset', mode: 'outlined', onPress: resetApp, },
+                { text: 'Reset', mode: 'contained', onPress: resetApp, },
             ]
         );
     };

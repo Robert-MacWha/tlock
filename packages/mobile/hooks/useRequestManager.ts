@@ -44,7 +44,7 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
         }, pollingInterval);
 
         return () => clearInterval(interval);
-    }, [pollingInterval]);
+    }, [pollingInterval, clients]);
 
     const handleRequest = async (request: ClientRequest): Promise<void> => {
         router.push({
