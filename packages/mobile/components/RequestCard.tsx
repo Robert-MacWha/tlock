@@ -1,9 +1,9 @@
 import React from 'react';
 import { Card, Text, Button } from 'react-native-paper';
 import { View } from 'react-native';
-import { ClientRequest } from '../contexts/RequestRecieverContext';
 import { useClientsContext } from '../contexts/ClientContext';
-import { requestHandler } from '../services/RequestHandlerService';
+import { useRequestManagerContext } from '../contexts/RequestManagerContext';
+import { ClientRequest } from '../hooks/useRequestManager';
 
 interface RequestCardProps {
     request: ClientRequest
@@ -12,6 +12,7 @@ interface RequestCardProps {
 export function RequestCard({ request }: RequestCardProps) {
     const [hidden, setHidden] = React.useState(false);
     const { clients } = useClientsContext();
+    const { handleRequest, rejectRequest } = useRequestManagerContext();
 
     const client = clients.find(client => client.id === request.clientId);
     if (!client) {
@@ -31,15 +32,13 @@ export function RequestCard({ request }: RequestCardProps) {
     const clientName = client.name || client.id;
     const lastUpdated = new Date(request.request.lastUpdated).toLocaleString();
 
-    function handleRequest() {
-        void requestHandler.handleRequest(request);
+    function reject() {
+        void rejectRequest(request);
+        setHidden(true);
     }
 
-    function handleReject() {
-        setHidden(true);
-        void client?.client.updateRequest(request.request.id, request.request.type, {
-            status: 'rejected',
-        })
+    function handle() {
+        void handleRequest(request);
     }
 
     return (
@@ -53,10 +52,10 @@ export function RequestCard({ request }: RequestCardProps) {
                     {request.request.type}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 16, gap: 8 }}>
-                    <Button mode='outlined' onPress={handleReject}>
+                    <Button mode='outlined' onPress={reject}>
                         Reject
                     </Button>
-                    <Button mode="contained" onPress={handleReject}>
+                    <Button mode="contained" onPress={handle}>
                         Handle
                     </Button>
                 </View>

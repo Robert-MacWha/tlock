@@ -56,7 +56,6 @@ export function TxSimulation({ network, from, transaction }: TxSimulationProps) 
     const [simulation, setSimulation] = useState<SimulationResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const isValidNetwork = isNetwork(network);
 
     if (!isValidNetwork) {

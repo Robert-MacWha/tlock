@@ -5,9 +5,9 @@ import { router } from "expo-router";
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 import { Badge, Button, List, Modal, Portal, Surface, SegmentedButtons } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
-import { useRequestReceiverContext } from '../../contexts/RequestRecieverContext';
 import { useClientsContext } from '../../contexts/ClientContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useRequestManagerContext } from '../../contexts/RequestManagerContext';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
@@ -15,7 +15,7 @@ export default function SettingsScreen() {
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const { alert } = useAlert();
-    const { clientRequests } = useRequestReceiverContext();
+    const { clientRequests } = useRequestManagerContext();
     const { clients } = useClientsContext();
     const { themeMode, setThemeMode } = useTheme();
 

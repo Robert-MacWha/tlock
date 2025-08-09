@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Modal, Portal, Text, Button, Surface, Dialog } from 'react-native-paper';
+import { Modal, Portal, Text, Button, Dialog } from 'react-native-paper';
 import { CameraView } from 'expo-camera';
 
 interface QrCodeDialogProps {

@@ -5,12 +5,12 @@ import { Stack } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { KeyringProvider } from '../contexts/KeyringContext';
 import { ClientsProvider } from '../contexts/ClientContext';
-import { RequestReceiverProvider } from '../contexts/RequestRecieverContext';
 import { useSetupStatus } from '../hooks/useSetupStatus';
 import LoadingScreen from './_loading';
 import SetupFlow from './_setup';
 import { AlertProvider } from '../components/AlertProvider';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { RequestManagerProvider } from '../contexts/RequestManagerContext';
 
 export default function RootLayout() {
 
@@ -41,7 +41,7 @@ export default function RootLayout() {
         <ThemeProvider>
             <KeyringProvider>
                 <ClientsProvider>
-                    <RequestReceiverProvider pollingInterval={2000}>
+                    <RequestManagerProvider pollingInterval={2000}>
                         <AlertProvider>
                             <Stack>
                                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -56,7 +56,7 @@ export default function RootLayout() {
                                 }} />
                             </Stack>
                         </AlertProvider>
-                    </RequestReceiverProvider>
+                    </RequestManagerProvider>
                 </ClientsProvider>
             </KeyringProvider>
         </ThemeProvider >

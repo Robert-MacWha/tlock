@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Text, IconButton, Portal, Modal, Divider, Button, Menu, TextInput } from 'react-native-paper';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { useClientsContext } from '../contexts/ClientContext';
 import { ClientInstance } from '../hooks/useClients';
 import { useAlert } from './AlertProvider';

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { Text, Surface, IconButton, ActivityIndicator } from "react-native-paper";
-import { useRequestReceiverContext } from "../contexts/RequestRecieverContext";
 import { RequestCard } from "../components/RequestCard";
 import { Stack } from "expo-router";
 import { ErrorScreen } from "../components/ErrorScreen";
+import { useRequestManagerContext } from "../contexts/RequestManagerContext";
 
 export default function AccountsScreen() {
-    const { clientRequests, fetchRequests } = useRequestReceiverContext();
+    const { clientRequests, fetchRequests } = useRequestManagerContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

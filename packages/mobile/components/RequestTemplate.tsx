@@ -3,10 +3,8 @@ import { View } from 'react-native';
 import {
     Text,
     Button,
-    ActivityIndicator,
     Surface,
     Snackbar,
-    IconButton,
     useTheme
 } from 'react-native-paper';
 
