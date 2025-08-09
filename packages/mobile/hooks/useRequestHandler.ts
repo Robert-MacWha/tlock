@@ -8,6 +8,10 @@ interface RequestHandlerConfig<T extends RequestType> {
     onApprove: (request: RequestTypeMap[T]) => Promise<Partial<RequestTypeMap[T]>>;
 }
 
+/**
+ * RequestHandler provides methods to handle approval and rejection of requests,
+ * updating the request status and navigating accordingly.
+ */
 export function useRequestHandler<T extends RequestType>(config: RequestHandlerConfig<T>) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const { clientId, requestId } = useLocalSearchParams() as { clientId: string, requestId: string };
