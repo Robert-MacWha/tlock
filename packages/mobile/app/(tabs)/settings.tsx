@@ -31,9 +31,9 @@ export default function SettingsScreen() {
         }
     };
 
-    const showSeedPhrase = async () => {
+    const showSeedPhrase = () => {
         try {
-            const phrase = await getSeedPhrase();
+            const phrase = getSeedPhrase();
             setSeedPhrase(phrase);
             setShowSeedPhrasePopup(true);
         } catch (_error) {
@@ -47,7 +47,7 @@ export default function SettingsScreen() {
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
                 { text: 'Cancel', },
-                { text: 'Show', mode: 'outlined', onPress: () => { void showSeedPhrase() }, },
+                { text: 'Show', mode: 'outlined', onPress: showSeedPhrase, },
             ]
         );
     };

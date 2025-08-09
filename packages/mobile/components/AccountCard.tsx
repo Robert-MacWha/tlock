@@ -37,7 +37,7 @@ export function AccountCard({ address }: AccountCardProps) {
     }
 
     async function handleRenameConfirm() {
-        await renameAccount(address, nameInput);
+        renameAccount(address, nameInput);
         setRenameVisible(false);
     }
 

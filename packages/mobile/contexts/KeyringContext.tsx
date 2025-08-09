@@ -4,11 +4,11 @@ import type { Address, Hex, TransactionSerialized, TypedDataDefinition } from 'v
 
 interface KeyringContextType {
     accounts: Account[];
-    getSeedPhrase: () => Promise<string>;
-    generateSeedPhrase: (override?: boolean) => Promise<string>;
-    addAccount: () => Promise<Address>;
-    renameAccount: (address: Address, name: string) => Promise<void>;
-    hideAccount: (address: Address, hide: boolean) => Promise<void>;
+    getSeedPhrase: () => string;
+    generateSeedPhrase: (override?: boolean) => string;
+    addAccount: () => Address;
+    renameAccount: (address: Address, name: string) => void;
+    hideAccount: (address: Address, hide: boolean) => void;
     sign: (from: Address, hash: Hex) => Promise<Hex>;
     signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
     signTypedData: (from: Address, data: TypedDataDefinition) => Promise<Hex>;

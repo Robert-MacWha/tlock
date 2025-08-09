@@ -18,7 +18,7 @@ export default function SetupScreen() {
     const { alert } = useAlert();
 
     const handleNextFromIntro = async () => {
-        const seedPhrase = await generateSeedPhrase(true);
+        const seedPhrase = generateSeedPhrase(true);
         setSeedPhrase(seedPhrase);
         setCurrentStep('seedPhrase');
     };
@@ -31,8 +31,8 @@ export default function SetupScreen() {
         setCurrentStep('complete');
     };
 
-    const completeSetup = async () => {
-        await setIsSetupComplete(true);
+    const completeSetup = () => {
+        setIsSetupComplete(true);
         router.replace('/accounts');
         setTimeout(() => {
             router.push('/clients');

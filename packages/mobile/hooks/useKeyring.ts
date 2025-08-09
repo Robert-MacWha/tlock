@@ -77,7 +77,7 @@ export function useKeyring() {
         return address;
     };
 
-    const renameAccount = async (address: Address, name: string): Promise<void> => {
+    const renameAccount = (address: Address, name: string): void => {
         const updatedAccounts = accounts.map(account =>
             account.address === address ? { ...account, name } : account
         );
@@ -85,7 +85,7 @@ export function useKeyring() {
         setAccounts(updatedAccounts);
     };
 
-    const hideAccount = async (address: Address, hide: boolean): Promise<void> => {
+    const hideAccount = (address: Address, hide: boolean): void => {
         const updatedAccounts = accounts.map(account =>
             account.address === address ? { ...account, isHidden: hide } : account
         );

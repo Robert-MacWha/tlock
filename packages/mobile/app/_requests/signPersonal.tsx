@@ -2,7 +2,7 @@ import React from 'react';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
 import { fromHex } from 'viem';
-import { Text, Card, Divider, ActivityIndicator, MD3Colors } from 'react-native-paper';
+import { Text, Card, Divider, ActivityIndicator } from 'react-native-paper';
 import { KeyValueRow } from '../../components/Row';
 import { RequestTemplate } from '../../components/RequestTemplate';
 import { ErrorScreen } from '../../components/ErrorScreen';

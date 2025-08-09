@@ -104,7 +104,7 @@ export default function ImportAccountScreen() {
     async function handleAddAccount() {
         setLoading(true);
         try {
-            await addAccount();
+            addAccount();
         } catch (error) {
             console.error('Failed to create account:', error);
             alert('Error', 'Failed to create new account. Please try again.');
