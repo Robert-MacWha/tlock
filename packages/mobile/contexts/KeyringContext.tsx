@@ -18,6 +18,13 @@ interface KeyringContextType {
 
 const KeyringContext = createContext<KeyringContextType | undefined>(undefined);
 
+/**
+ * KeyringProvider is a provider context that exposes a stateful list of accounts,
+ * and keeps that list in sync with the keyring.
+ * 
+ * We basically just need to add a `refreshAccounts` call after any operation that
+ * modifies the accounts set.
+ */
 export function KeyringProvider({ children }: { children: ReactNode }) {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const {
