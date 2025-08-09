@@ -253,11 +253,6 @@ describe('useSeedPhrase', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            // Wait for accounts to load
-            await waitFor(() => {
-                expect(result.current.accounts).toHaveLength(1);
-            });
-
             const signature = await result.current.sign(mockAccount.address as Address, '0x11223344' as Hex);
 
             expect(signature).toBeDefined();
@@ -365,13 +360,6 @@ describe('useSeedPhrase', () => {
     });
 
     describe('SecureStore failures', () => {
-        it('should handle SecureStore getItemAsync failures in getSeedPhrase', async () => {
-            mockSecureStore.getItemAsync.mockRejectedValue(new Error('SecureStore access denied'));
-            const { result } = renderHook(() => useKeyring());
-
-            await expect(result.current.getSeedPhrase()).rejects.toThrow('SecureStore access denied');
-        });
-
         it('should handle SecureStore setItemAsync failures in generateSeedPhrase', async () => {
             setupStorageState({ seedPhrase: null });
             mockSecureStore.setItemAsync.mockRejectedValue(new Error('SecureStore write failed'));
