@@ -5,6 +5,7 @@ import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, Transa
 
 // Mock only specific dependencies
 jest.mock('expo-secure-store');
+//? constant mnemonic for testing
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('bip39', () => ({
     ...jest.requireActual('bip39'),
