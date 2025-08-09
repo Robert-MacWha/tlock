@@ -38,7 +38,6 @@ export function useKeyring() {
     const generateSeedPhrase = (override: boolean = false): string => {
         const existingSeedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, { requireAuthentication: true });
         if (existingSeedPhrase && !override) {
-            console.log('Seed phrase already exists, not generating new one');
             throw new Error('Seed phrase already exists. Use override to replace it.');
         }
 
@@ -49,8 +48,7 @@ export function useKeyring() {
             if (!seedPhrase) {
                 throw new Error('No seed phrase generated');
             }
-        } catch (error) {
-            console.error('Error generating seed phrase:', error);
+        } catch (_error) {
             throw new Error('Failed to generate seed phrase');
         }
 
@@ -64,8 +62,6 @@ export function useKeyring() {
     }
 
     const addAccount = (): Address => {
-        console.log('Adding new account...');
-
         const newAccountId = accounts.length + 1;
         const address = _deriveAddress(newAccountId);
 
@@ -98,51 +94,39 @@ export function useKeyring() {
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
-        console.log('Signing hash:', hash);
-
         const account = _getAccountFromAddress(from);
         try {
             return await account.sign({ hash });
-        } catch (error) {
-            console.log(error);
+        } catch (_error) {
             throw new Error(`Failed to sign hash: ${hash}`);
         }
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
-        console.log('Signing raw:', raw);
-
         const account = _getAccountFromAddress(from);
         try {
             return await account.signMessage({ message: { raw } });
-        } catch (error) {
-            console.log(error);
+        } catch (_error) {
             throw new Error(`Failed to sign raw: ${raw}`);
         }
     }
 
     const signTypedData = async (from: Address, data: TypedDataDefinition): Promise<Hex> => {
-        console.log('Signing typed data:', data);
-
         const account = _getAccountFromAddress(from);
         try {
             return await account.signTypedData(data);
-        } catch (error) {
-            console.log(error);
+        } catch (_error) {
             throw new Error(`Failed to sign typed data: ${JSON.stringify(data)}`);
         }
     }
 
     const signTransaction = async (from: Address, transaction: Hex): Promise<TransactionSerialized> => {
-        console.log('Signing transaction:', transaction);
-
         const account = _getAccountFromAddress(from);
         try {
             const parsed = parseTransaction(transaction);
             const signedTransaction = await account.signTransaction(parsed);
             return signedTransaction;
-        } catch (error) {
-            console.log(error);
+        } catch (_error) {
             throw new Error(`Failed to sign transaction from address: ${from}`);
         }
     }
@@ -164,15 +148,13 @@ export function useKeyring() {
     }
 
     const _getAccountFromAddress = (address: Address): PrivateKeyAccount => {
-        const accounts = _loadAccounts();
         let account: Account | undefined;
         try {
             account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
             if (!account) {
                 throw new Error(`Account with address ${address} not found`);
             }
-        } catch (error) {
-            console.error('Error getting account from address:', error);
+        } catch (_error) {
             throw new Error(`Failed to get account from address: ${address}`);
         }
 
