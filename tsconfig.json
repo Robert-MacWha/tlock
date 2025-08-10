@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "incremental": true,
     "strict": true,
-    "target": "es2020"
+    "target": "es2020",
+    "isolatedModules": true,
   },
   "exclude": [
     "node_modules",

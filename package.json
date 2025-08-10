@@ -14,8 +14,8 @@
     "build:shared": "yarn workspace @tlock/shared build",
     "build:snap": "yarn workspace @tlock/snap build",
     "deploy:functions": "yarn workspace @tlock/functions deploy",
-    "lint": "eslint .",
-    "test": "jest"
+    "lint": "yarn workspaces foreach run lint",
+    "test": "yarn workspaces foreach run test"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^14.0.0",
