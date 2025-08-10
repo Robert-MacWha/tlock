@@ -1,5 +1,5 @@
 import { TlockKeyring } from '../keyring';
-import { EthAccountType, EthMethod, KeyringEvent, KeyringRequest } from '@metamask/keyring-api';
+import { EthAccountType, EthMethod, KeyringAccount, KeyringEvent, KeyringRequest } from '@metamask/keyring-api';
 import { updateState } from '../state';
 import type { Client } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
@@ -119,7 +119,9 @@ describe('TlockKeyring', () => {
         });
 
         it('should use provided state', () => {
-            const state = { wallets: {}, pendingRequests: {} };
+            const state = {
+                wallets: { mockAccountId: { account: createMockAccount() } }, pendingRequests: {}
+            };
             const newKeyring = new TlockKeyring(mockClient, state);
             expect(newKeyring['state']).toBe(state);
         });
@@ -421,6 +423,55 @@ describe('TlockKeyring', () => {
                     request: {
                         method: EthMethod.PersonalSign,
                         params: ['0x123456' as Hex, mockAddress],
+                    },
+                };
+
+                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow('No signature returned');
+            });
+        });
+
+        describe('submitRequest - eth_sign', () => {
+            it('should sign message and return signature', async () => {
+                const signature = '0xabcdef' as Hex;
+                const message = '0x123456' as Hex;
+                mockClient.submitRequest.mockResolvedValue(mockRequestId);
+                mockClient.pollUntil.mockResolvedValue({
+                    status: 'approved',
+                    signature,
+                });
+
+                const mockRequest: KeyringRequest = {
+                    id: mockRequestId,
+                    account: mockAccountId,
+                    scope: 'eip155:1',
+                    request: {
+                        method: EthMethod.Sign,
+                        params: [mockAddress, message],
+                    },
+                };
+
+                const response = await keyring.submitRequest(mockRequest);
+
+                expect(response).toEqual({ pending: false, result: signature });
+                expect(mockClient.submitRequest).toHaveBeenCalledWith('signMessage', {
+                    status: 'pending',
+                    origin: undefined,
+                    from: mockAddress,
+                    message,
+                });
+            });
+
+            it('should require signature in response', async () => {
+                mockClient.submitRequest.mockResolvedValue(mockRequestId);
+                mockClient.pollUntil.mockResolvedValue({ status: 'approved' });
+
+                const mockRequest: KeyringRequest = {
+                    id: mockRequestId,
+                    account: mockAccountId,
+                    scope: 'eip155:1',
+                    request: {
+                        method: EthMethod.Sign,
+                        params: [mockAddress, '0x123456' as Hex],
                     },
                 };
 

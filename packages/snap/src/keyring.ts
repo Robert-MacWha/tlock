@@ -125,6 +125,7 @@ export class TlockKeyring implements Keyring {
                 accountNameSuggestion: ACCOUNT_NAME_SUGGESTION,
             });
         } catch (error) {
+            // TODO: Handle error where account is already registered more gracefully
             handleError(error, ERROR_CODES.ACCOUNT_CREATION_FAILED, 'Error registering account with MetaMask');
         }
 
