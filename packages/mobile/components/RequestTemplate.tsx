@@ -63,7 +63,6 @@ export function RequestTemplate({
                     justifyContent: 'space-between'
                 }}>
                     <Button
-                        mode="outlined"
                         onPress={() => { void onReject() }}
                         style={{ flex: 1 }}
                         textColor={theme.colors.error}

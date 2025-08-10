@@ -20,7 +20,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = '@theme_mode';
+const THEME_STORAGE_KEY = 'theme_mode';
 
 interface ThemeProviderProps {
     children: ReactNode;
