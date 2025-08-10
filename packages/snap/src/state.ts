@@ -33,14 +33,11 @@ export async function getState(d: SnapState | null = null): Promise<SnapState | 
     const parsedState = stored ? JSON.parse(stored.state as string) : null;
     const state = { ...d, ...parsedState } as SnapState;
 
-    console.log("Get state:", state);
     return state;
 }
 
 async function setState(value: SnapState): Promise<void> {
     const serialized = JSON.stringify(value);
-
-    console.log("Set state:", serialized);
 
     await snap.request({
         method: "snap_manageState",

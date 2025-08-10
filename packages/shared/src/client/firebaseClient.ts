@@ -57,7 +57,6 @@ export class FirebaseClient implements Client {
         );
 
         if (!data || !data.encryptedData) {
-            console.log(`No device registered for room ${this.roomId}`);
             return null;
         }
 

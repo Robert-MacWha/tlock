@@ -7,9 +7,11 @@ import { getState, updateState } from './state';
 import qrcode from 'qrcode';
 import { showErrorScreen, showScreen } from './screen';
 import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
-import { handleShowScreen } from 'src';
+import { SCREENS, ERROR_CODES } from './constants';
+import { handleError } from './errors';
+import { validateSharedSecret } from './utils';
 
-export async function handlePair(interfaceId: string) {
+export async function showPairingScreen(interfaceId: string) {
     try {
         // Generate & save 128-bit secret
         const sharedSecret = generateSharedSecret();
@@ -27,37 +29,28 @@ export async function handlePair(interfaceId: string) {
                 <Heading>Pair Your Wallet</Heading>
                 <Text>Open the Foxguard mobile app and scan this QR code to pair:</Text>
                 <Image src={secretQR} alt="Pairing QR Code" />
-                <Button name="confirm-pair">I've Scanned the Code</Button>
+                <Button name={SCREENS.CONFIRM_PAIR}>I've Scanned the Code</Button>
             </Box>,
         );
 
-        await client.pollUntilDeviceRegistered(200, 60);
-        await handleShowScreen(interfaceId, 'confirm-pair');
+        try {
+            await client.pollUntilDeviceRegistered(200, 120);
+            await showConfirmPairingScreen(interfaceId);
+        } catch (error) {
+            // Just let it fail silently since the user can select the confirm pairing button
+            console.error('Error polling for device registration:', error);
+        }
 
     } catch (error) {
-        let msg = error;
-        if (error instanceof Error) {
-            msg = error.message;
-        }
-        console.error('Error generating pairing data:', msg);
-        await showErrorScreen(interfaceId, 'Failed to generate pairing data. Please try again');
+        handleError(error, ERROR_CODES.PAIRING_FAILED, 'Error generating pairing data');
     }
 }
 
-export async function handleConfirmPair(interfaceId: string) {
+export async function showConfirmPairingScreen(interfaceId: string) {
     const state = await getState();
-    if (!state) {
-        await showErrorScreen(interfaceId, 'Error: Missing state data');
-        return;
-    }
+    validateSharedSecret(state);
 
-    const { sharedSecret } = state;
-    if (!sharedSecret) {
-        await showErrorScreen(interfaceId, 'Error: Missing shared secret',);
-        return;
-    }
-
-    const client = createClient(sharedSecret);
+    const client = createClient(state.sharedSecret);
 
     const registeredDevice = await client.getDevice();
     if (!registeredDevice) {
@@ -66,7 +59,7 @@ export async function handleConfirmPair(interfaceId: string) {
     }
 
     await updateState({
-        sharedSecret: sharedSecret,
+        sharedSecret: state.sharedSecret,
         fcmToken: registeredDevice.fcmToken,
     });
 
@@ -75,7 +68,7 @@ export async function handleConfirmPair(interfaceId: string) {
         <Box>
             <Heading>Pairing Successful!</Heading>
             <Text>Your device has been successfully paired.</Text>
-            <Button name="import-account">Import First Account</Button>
+            <Button name={SCREENS.IMPORT_ACCOUNT}>Import First Account</Button>
         </Box>,
     );
 }

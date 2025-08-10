@@ -26,7 +26,7 @@ const QRCodeDisplay = ({ value, size = 200 }: { value: string; size?: number }) 
 };
 
 const SnapDemo = () => {
-    const { isFlask, snapsDetected, installedSnap, getSnap } = useMetaMask();
+    const { isFlask, snapsDetected, getSnap } = useMetaMask();
     const { error } = useMetaMaskContext();
     const request = useRequest();
     const requestSnap = useRequestSnap(SNAP_ORIGIN);
@@ -109,21 +109,15 @@ const SnapDemo = () => {
                             <h5>2. Foxguard Snap</h5>
                         </div>
                         <div className="card-body">
-                            {!installedSnap ? (
-                                <div>
-                                    <p className="mb-2">Install the Foxguard snap</p>
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => void handleInstallSnap()}
-                                    >
-                                        Install Snap
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="alert alert-success mb-0">
-                                    <p className="mb-1">✓ Snap installed</p>
-                                </div>
-                            )}
+                            <div>
+                                <p className="mb-2">Install the Foxguard snap</p>
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => void handleInstallSnap()}
+                                >
+                                    Install Snap
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
