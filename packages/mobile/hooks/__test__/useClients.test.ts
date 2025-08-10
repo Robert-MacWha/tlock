@@ -4,20 +4,22 @@ import * as SecureStore from 'expo-secure-store';
 import { SharedSecret } from '@tlock/shared';
 import * as ExportoCrypto from 'expo-crypto';
 
+const mockClient = {
+    getRequests: jest.fn(),
+    getRequest: jest.fn(),
+    updateRequest: jest.fn(),
+    deleteRequest: jest.fn(),
+    submitRequest: jest.fn(),
+    submitDevice: jest.fn(),
+    getDevice: jest.fn(),
+    pollUntil: jest.fn(),
+    roomId: 'mock-room-id',
+}
+
 // Mock dependencies
 jest.mock('expo-secure-store');
 jest.mock('@tlock/shared', () => ({
-    createClient: jest.fn(() => ({
-        getRequests: jest.fn(),
-        getRequest: jest.fn(),
-        updateRequest: jest.fn(),
-        deleteRequest: jest.fn(),
-        submitRequest: jest.fn(),
-        submitDevice: jest.fn(),
-        getDevice: jest.fn(),
-        pollUntil: jest.fn(),
-        roomId: 'mock-room-id',
-    })),
+    createClient: jest.fn(() => mockClient),
 }));
 jest.mock('expo-crypto');
 
@@ -235,7 +237,7 @@ describe('useClients', () => {
 
         it('should handle renaming non-existent client gracefully', async () => {
             const storedClients = [
-                { id: 'client-1', name: 'Old Name', sharedSecret: mockSharedSecret }
+                { id: 'client-1', name: 'Old Name', sharedSecret: mockSharedSecret, client: mockClient }
             ];
             mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
 
@@ -250,7 +252,7 @@ describe('useClients', () => {
             });
 
             await waitFor(() => {
-                expect(result.current.clients).toEqual([]);
+                expect(result.current.clients).toEqual(storedClients);
             });
         });
     });
