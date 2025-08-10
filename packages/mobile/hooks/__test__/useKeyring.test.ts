@@ -15,7 +15,7 @@ jest.mock('bip39', () => ({
 const mockSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
 
 
-describe('useSeedPhrase', () => {
+describe('useKeyring', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 

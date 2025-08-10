@@ -6,7 +6,6 @@ interface RequestManagerContextType {
     clientRequests: ClientRequest[];
     fetchRequests: () => Promise<void>;
     handleRequest: (request: ClientRequest) => Promise<void>;
-    rejectRequest: (request: ClientRequest) => Promise<void>;
 }
 
 const RequestManagerContext = createContext<RequestManagerContextType | undefined>(undefined);
@@ -26,7 +25,7 @@ export function RequestManagerProvider({
     pollingInterval,
 }: RequestManagerProviderProps) {
     const { clients } = useClientsContext();
-    const { clientRequests, fetchRequests, handleRequest, rejectRequest } = useRequestManager({
+    const { clientRequests, fetchRequests, handleRequest } = useRequestManager({
         pollingInterval,
         clients,
     });
@@ -36,7 +35,6 @@ export function RequestManagerProvider({
             clientRequests,
             fetchRequests,
             handleRequest,
-            rejectRequest
         }}>
             {children}
         </RequestManagerContext.Provider>

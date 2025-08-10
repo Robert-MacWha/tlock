@@ -53,20 +53,6 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
         });
     };
 
-    const rejectRequest = async (request: ClientRequest): Promise<void> => {
-        const client = clientsRef.current.find(c => c.id === request.clientId);
-        if (!client) return;
-
-        try {
-            await client?.client.updateRequest(request.request.id, request.request.type, {
-                status: 'rejected',
-            })
-            setClientRequests(prev => prev.filter(r => r.request.id !== request.request.id));
-        } catch (error) {
-            console.error('Failed to reject request:', error);
-        }
-    }
-
     const fetchRequests = async (): Promise<void> => {
         const newClientRequests = await getClientRequests();
 
@@ -120,6 +106,5 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
         clientRequests,
         fetchRequests,
         handleRequest,
-        rejectRequest,
     };
 }

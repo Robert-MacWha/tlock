@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useClientsContext } from '../contexts/ClientContext';
 import { useRequestManagerContext } from '../contexts/RequestManagerContext';
 import { ClientRequest } from '../hooks/useRequestManager';
+import { useRequestHandler } from '../hooks/useRequestHandler';
 
 interface RequestCardProps {
     request: ClientRequest
@@ -12,7 +13,14 @@ interface RequestCardProps {
 export function RequestCard({ request }: RequestCardProps) {
     const [hidden, setHidden] = React.useState(false);
     const { clients } = useClientsContext();
-    const { handleRequest, rejectRequest } = useRequestManagerContext();
+    const { handleRequest } = useRequestManagerContext();
+    const { handleReject } = useRequestHandler({
+        type: request.request.type,
+        onApprove: async (_req) => {
+            //? Should never be called anyways
+            throw new Error('Cannot approve request from RequestCard');
+        }
+    });
 
     const client = clients.find(client => client.id === request.clientId);
     if (!client) {
@@ -33,7 +41,7 @@ export function RequestCard({ request }: RequestCardProps) {
     const lastUpdated = new Date(request.request.lastUpdated).toLocaleString();
 
     function reject() {
-        void rejectRequest(request);
+        void handleReject();
         setHidden(true);
     }
 
