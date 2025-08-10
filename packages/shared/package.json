@@ -7,7 +7,8 @@
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",
-        "clean": "rm -rf dist"
+        "clean": "rm -rf dist",
+        "lint": "eslint . --cache --ext js,ts"
     },
     "devDependencies": {
         "typescript": "^5.7.3"

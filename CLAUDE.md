@@ -40,9 +40,57 @@ Key architectural flows:
 - Functions: `yarn workspace @tlock/functions serve` (local Firebase emulator)
 
 ### Testing
-- Root Jest config runs tests matching `**/packages/**/*.test.{ts,tsx}`
-- Individual packages have their own test commands
-- Coverage collected from `packages/*/src/**/*.{ts,tsx}`
+
+#### Structure
+- Files: *.test.ts in __test__/ directories
+- Organization: describe() blocks for components/features, it() for specific behaviors       
+
+#### Core Patterns
+
+```
+// Setup
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+// Mocking
+jest.mock('module-name');
+const mockModule = Module as jest.Mocked<typeof Module>;
+
+// React Hooks
+const { result } = renderHook(() => useHook());
+await waitFor(() => expect(result.current.state).toBe(value));
+await act(async () => await result.current.method());
+```
+
+#### Testing Categories
+1. Happy Path: Normal operations
+2. Error Handling: Network/auth failures
+3. Edge Cases: Empty data, boundaries
+4. State Persistence: Storage operations
+5. User Interactions: Approve/reject flows
+
+#### Key Assertions
+```
+expect(result).toBe(value);                    // Exact match
+expect(result).toEqual(expect.objectContaining({})); // Partial object
+expect(fn).toHaveBeenCalledWith(args);         // Function calls
+await expect(asyncFn()).rejects.toThrow();     // Async errors
+```
+
+#### Helper Patterns
+- Setup functions for consistent test data
+- Parameterized tests for similar scenarios
+- Mock realistic data (addresses, secrets, etc.)
+- Test both success and failure paths
+
+#### Principles
+- Test behavior, not implementation
+- Independent, repeatable tests
+- Clear arrange-act-assert structure
+- Mock external dependencies
+- Descriptive test names
 
 ## Technical Requirements
 

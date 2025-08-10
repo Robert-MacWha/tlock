@@ -39,6 +39,7 @@ describe('useRequestHandler', () => {
             getRequests: jest.fn(),
             deleteRequest: jest.fn(),
             pollUntil: jest.fn(),
+            pollUntilDeviceRegistered: jest.fn(),
         },
     };
 
