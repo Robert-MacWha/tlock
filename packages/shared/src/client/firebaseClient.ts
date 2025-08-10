@@ -1,6 +1,6 @@
 import { Client, DeviceRegistration, Request, RequestType, RequestTypeMap } from ".";
 import { decryptMessage, deriveRoomId, encryptMessage, SharedSecret } from "../crypto";
-import { FirebaseHttpClient, HttpClient } from "./http";
+import { FirebaseHttpClient, HttpClient } from "./client";
 
 const FIREBASE_URL = "https://tlock-974e6-default-rtdb.firebaseio.com/"
 
@@ -65,6 +65,23 @@ export class FirebaseClient implements Client {
             return decryptMessage<DeviceRegistration>(data.encryptedData, this.sharedSecret);
         } catch {
             return null;
+        }
+    }
+
+    async pollUntilDeviceRegistered(intervalMs: number, timeoutSeconds: number): Promise<DeviceRegistration> {
+        const startTime = Date.now();
+
+        while (true) {
+            const device = await this.getDevice();
+            if (device) {
+                return device;
+            }
+
+            if ((Date.now() - startTime) / 1000 > timeoutSeconds) {
+                throw new Error(`Polling for device registration timed out after ${timeoutSeconds} seconds`);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, intervalMs));
         }
     }
 

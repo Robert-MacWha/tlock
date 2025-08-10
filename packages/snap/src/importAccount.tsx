@@ -25,6 +25,5 @@ export async function handleImportAccount(interfaceId: string) {
         return;
     }
 
-
     return;
 }

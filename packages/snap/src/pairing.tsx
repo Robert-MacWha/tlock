@@ -7,13 +7,13 @@ import { getState, updateState } from './state';
 import qrcode from 'qrcode';
 import { showErrorScreen, showScreen } from './screen';
 import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
+import { handleShowScreen } from 'src';
 
 export async function handlePair(interfaceId: string) {
-    console.log('Handling pairing logic');
-
     try {
         // Generate & save 128-bit secret
         const sharedSecret = generateSharedSecret();
+        const client = createClient(sharedSecret);
         const qrData = await createQrCode(sharedSecret);
         const secretQR = await qrcode.toString(qrData);
 
@@ -21,7 +21,6 @@ export async function handlePair(interfaceId: string) {
             sharedSecret,
         });
 
-        console.log('Show pairing screen');
         await showScreen(
             interfaceId,
             <Box>
@@ -31,62 +30,46 @@ export async function handlePair(interfaceId: string) {
                 <Button name="confirm-pair">I've Scanned the Code</Button>
             </Box>,
         );
+
+        await client.pollUntilDeviceRegistered(200, 60);
+        await handleShowScreen(interfaceId, 'confirm-pair');
+
     } catch (error) {
         let msg = error;
         if (error instanceof Error) {
             msg = error.message;
         }
         console.error('Error generating pairing data:', msg);
-        await showErrorScreen(
-            interfaceId,
-            'Failed to generate pairing data. Please try again.',
-        );
+        await showErrorScreen(interfaceId, 'Failed to generate pairing data. Please try again');
     }
 }
 
 export async function handleConfirmPair(interfaceId: string) {
-    console.log('Confirming pairing');
-
     const state = await getState();
     if (!state) {
-        console.error('No shared secret found in state');
-        await showErrorScreen(interfaceId, 'No pairing data found');
+        await showErrorScreen(interfaceId, 'Error: Missing state data');
         return;
     }
-
-    console.log('Current state:', state);
 
     const { sharedSecret } = state;
     if (!sharedSecret) {
-        console.error('Shared secret is not set in state');
-        await showErrorScreen(
-            interfaceId,
-            'Error pairing: shared secret is missing',
-        );
+        await showErrorScreen(interfaceId, 'Error: Missing shared secret',);
         return;
     }
 
-    console.log('Using shared secret:', sharedSecret);
     const client = createClient(sharedSecret);
 
     const registeredDevice = await client.getDevice();
     if (!registeredDevice) {
-        console.error('Device not registered yet');
-        await showErrorScreen(
-            interfaceId,
-            'Device not registered. Please scan the QR code with your mobile app.',
-        );
+        await showErrorScreen(interfaceId, 'Device not registered. Please re-try pairing');
         return;
     }
-
-    console.log('Device registered:', registeredDevice);
 
     await updateState({
         sharedSecret: sharedSecret,
         fcmToken: registeredDevice.fcmToken,
     });
 
-    console.log('Pairing completed successfully');
     await showScreen(
         interfaceId,
         <Box>

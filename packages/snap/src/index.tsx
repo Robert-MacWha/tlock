@@ -1,6 +1,6 @@
 import { type OnRpcRequestHandler, type OnHomePageHandler, type OnUserInputHandler, type UserInputEvent, type OnKeyringRequestHandler, type Json, UserInputEventType } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button } from '@metamask/snaps-sdk/jsx';
-import { createClient, deriveRoomId } from '@tlock/shared';
+import { createClient } from '@tlock/shared';
 import { getState, SnapState } from './state';
 import { showErrorScreen, showScreen } from './screen';
 import { handleConfirmPair, handlePair } from './pairing';
@@ -35,7 +35,8 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
     console.log('User input event:', id, event);
 
     if (event.type === UserInputEventType.ButtonClickEvent) {
-        await handleButtonClick(id, event);
+        const buttonName = event.name;
+        await handleShowScreen(id, buttonName);
         return;
     }
 }
@@ -55,12 +56,9 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, reques
     return (await handleKeyringRequest(keyring, request)) ?? null;
 }
 
-async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
-    const buttonName = event.name;
-    console.log('Button clicked:', buttonName);
-
+export async function handleShowScreen(interfaceId: string, screen: string | undefined) {
     try {
-        switch (buttonName) {
+        switch (screen) {
             case 'home':
                 await handleHomeScreen(interfaceId);
                 return;
@@ -74,11 +72,11 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
                 await handleImportAccount(interfaceId);
                 return;
             default:
-                console.log('Unknown button clicked:', buttonName);
+                console.log('Unknown button clicked:', screen);
                 return;
         }
     } catch (error) {
-        console.error(`Error handling button click button=${buttonName} err=${error as string}`);
+        console.error(`Error showing screen screen=${screen} err=${error as string}`);
         if (error instanceof Error) {
             await showErrorScreen(interfaceId, error.message);
         } else {
@@ -88,17 +86,11 @@ async function handleButtonClick(interfaceId: string, event: UserInputEvent) {
 }
 
 async function handleHomeScreen(interfaceId: string) {
-    console.log('Showing home screen');
-
     try {
-        console.log('Retrieving state for pairing check');
         const state = await getState();
-        console.log('Current state:', state);
         if (state && state.fcmToken) {
             await showPairedScreen(state, interfaceId);
             return;
-        } else {
-            console.log('Device is not paired');
         }
     } catch (error) {
         // If state retrieval fails, assume device is not paired

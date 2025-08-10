@@ -22,9 +22,11 @@ describe('FirebaseClient', () => {
         it('should encrypt and store device registration', async () => {
             await client.submitDevice('fcm-123', 'iPhone 15');
 
-            const storedData = mockHttp.getStoredData(`registrations/${testRoomId}`);
+            const storedData = mockHttp.getStoredData(`registrations/${testRoomId}`) as { encryptedData: string; registeredAt: number };
             expect(storedData).toMatchObject({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 encryptedData: expect.any(String),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 registeredAt: expect.any(Number)
             });
         });
@@ -115,8 +117,8 @@ describe('FirebaseClient', () => {
             const requestId = await client.submitRequest('importAccount', { status: 'pending' });
 
             // Set up response after a delay
-            setTimeout(async () => {
-                await client.updateRequest(requestId, 'importAccount', {
+            setTimeout(() => {
+                void client.updateRequest(requestId, 'importAccount', {
                     status: 'approved',
                     address: '0x1234567890123456789012345678901234567890'
                 });

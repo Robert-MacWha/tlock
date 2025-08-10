@@ -79,6 +79,7 @@ export interface Client {
 
     submitDevice(fcmToken: string, deviceName: string): Promise<void>;
     getDevice(): Promise<DeviceRegistration | null>;
+    pollUntilDeviceRegistered(intervalMs: number, timeoutSeconds: number): Promise<DeviceRegistration>;
 
     submitRequest<T extends RequestType>(type: T, data: RequestTypeMap[T]): Promise<string>;
     updateRequest<T extends RequestType>(id: string, type: T, data: Partial<RequestTypeMap[T]>): Promise<void>;

@@ -1,4 +1,4 @@
-import { HttpClient } from "../http";
+import { HttpClient } from "../client";
 
 export class MockHttpClient implements HttpClient {
     private storage = new Map<string, any>();
