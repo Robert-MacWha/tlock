@@ -1,4 +1,4 @@
-import { type OnRpcRequestHandler, type OnHomePageHandler, type OnUserInputHandler, type UserInputEvent, type OnKeyringRequestHandler, type Json, UserInputEventType } from '@metamask/snaps-sdk';
+import { type OnRpcRequestHandler, type OnHomePageHandler, type OnUserInputHandler, type OnKeyringRequestHandler, type Json, UserInputEventType } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Button } from '@metamask/snaps-sdk/jsx';
 import { createClient } from '@tlock/shared';
 import { getState, SnapState } from './state';
@@ -7,6 +7,7 @@ import { handleConfirmPair, handlePair } from './pairing';
 import { TlockKeyring } from './keyring';
 import { handleImportAccount } from './importAccount';
 import { handleKeyringRequest } from '@metamask/keyring-api';
+
 // Home page UI
 export const onHomePage: OnHomePageHandler = async () => {
     console.log('Rendering home page');
