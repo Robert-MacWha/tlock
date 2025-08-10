@@ -1,8 +1,8 @@
 import { SharedSecret, isValidSharedSecret } from "./crypto";
 
 export interface QrCodeData {
-    sharedSecret: SharedSecret;
     version: number;
+    sharedSecret: SharedSecret;
 }
 
 export const QR_VERSION = 1;

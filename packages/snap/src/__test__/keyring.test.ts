@@ -1,5 +1,5 @@
 import { TlockKeyring } from '../keyring';
-import { EthAccountType, EthMethod, KeyringAccount, KeyringEvent, KeyringRequest } from '@metamask/keyring-api';
+import { EthAccountType, EthMethod, KeyringEvent, KeyringRequest } from '@metamask/keyring-api';
 import { updateState } from '../state';
 import type { Client } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';

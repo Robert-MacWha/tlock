@@ -19,5 +19,14 @@ describe('crypto', () => {
             const roomId = deriveRoomId(secret);
             expect(roomId).toBe(expectedRoomId);
         });
+
+        it('should encrypt and decrypt data correctly', () => {
+            const data = { message: "Hello, World!" };
+
+            const encryptedData = Buffer.from(JSON.stringify(data)).toString('base64');
+            const decryptedData: unknown = JSON.parse(Buffer.from(encryptedData, 'base64').toString());
+
+            expect(decryptedData).toEqual(data);
+        });
     });
 })

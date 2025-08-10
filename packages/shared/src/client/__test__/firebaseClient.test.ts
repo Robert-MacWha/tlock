@@ -1,28 +1,44 @@
 import { DeviceRegistration } from "..";
 import { deriveRoomId, generateSharedSecret } from "../../crypto";
 import { FirebaseClient } from "../firebaseClient";
-import { MockHttpClient } from "./mockHttpClient";
+import { HttpClient } from "../client";
 
 describe('FirebaseClient', () => {
-    let mockHttp: MockHttpClient;
+    let mockHttp: jest.Mocked<HttpClient>;
     let client: FirebaseClient;
     const testSecret = generateSharedSecret();
     const testRoomId = deriveRoomId(testSecret);
+    const mockStorage = new Map<string, unknown>();
 
     beforeEach(() => {
-        mockHttp = new MockHttpClient();
-        client = new FirebaseClient(testSecret, 'test-fcm-token', mockHttp);
-    });
+        jest.clearAllMocks();
+        mockStorage.clear();
 
-    afterEach(() => {
-        mockHttp.clear();
+        mockHttp = {
+            get: jest.fn().mockImplementation(async (url: string, path: string) => {
+                return mockStorage.get(path) || null;
+            }),
+            put: jest.fn().mockImplementation(async (url: string, path: string, data: unknown) => {
+                mockStorage.set(path, data);
+            }),
+            delete: jest.fn().mockImplementation(async (url: string, path: string) => {
+                const existed = mockStorage.has(path);
+                mockStorage.delete(path);
+                if (!existed) {
+                    throw new Error('Request not found');
+                }
+            }),
+            post: jest.fn().mockResolvedValue({ success: true })
+        };
+
+        client = new FirebaseClient(testSecret, 'test-fcm-token', mockHttp);
     });
 
     describe('submitDevice', () => {
         it('should encrypt and store device registration', async () => {
             await client.submitDevice('fcm-123', 'iPhone 15');
 
-            const storedData = mockHttp.getStoredData(`registrations/${testRoomId}`) as { encryptedData: string; registeredAt: number };
+            const storedData = mockStorage.get(`registrations/${testRoomId}`) as { encryptedData: string; registeredAt: number };
             expect(storedData).toMatchObject({
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 encryptedData: expect.any(String),
@@ -55,7 +71,7 @@ describe('FirebaseClient', () => {
         });
 
         it('should return null when decryption fails', async () => {
-            mockHttp.setStoredData('registrations/ROOM_1234', {
+            mockStorage.set('registrations/ROOM_1234', {
                 encryptedData: 'invalid-encrypted-data',
                 registeredAt: Date.now()
             });
@@ -133,6 +149,52 @@ describe('FirebaseClient', () => {
             );
 
             expect(result.status).toBe('approved');
+        });
+    });
+
+    describe('pollUntilDeviceRegistered', () => {
+        it('should return device when already registered', async () => {
+            // Register device first
+            await client.submitDevice('fcm-token', 'iPhone 15');
+
+            const device = await client.pollUntilDeviceRegistered(100, 1);
+            expect(device).toEqual({
+                fcmToken: 'fcm-token',
+                deviceName: 'iPhone 15'
+            });
+        });
+
+        it('should poll until device is registered', async () => {
+            // Register device after a delay
+            setTimeout(() => {
+                void client.submitDevice('fcm-delayed', 'iPad Pro');
+            }, 50);
+
+            const device = await client.pollUntilDeviceRegistered(10, 1);
+            expect(device).toEqual({
+                fcmToken: 'fcm-delayed',
+                deviceName: 'iPad Pro'
+            });
+        });
+
+        it('should timeout when device is never registered', async () => {
+            await expect(
+                client.pollUntilDeviceRegistered(10, 0.1)
+            ).rejects.toThrow('Polling for device registration timed out after 0.1 seconds');
+        });
+
+        it('should handle registration with decryption errors', async () => {
+            // Set up invalid device registration data
+            setTimeout(() => {
+                mockStorage.set(`registrations/${testRoomId}`, {
+                    encryptedData: 'invalid-encrypted-data',
+                    registeredAt: Date.now()
+                });
+            }, 50);
+
+            await expect(
+                client.pollUntilDeviceRegistered(10, 0.2)
+            ).rejects.toThrow('Polling for device registration timed out after 0.2 seconds');
         });
     });
 });

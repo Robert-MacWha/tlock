@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { Text, Surface, Card, Divider, Chip } from 'react-native-paper';
+import { Text, Surface, Divider } from 'react-native-paper';
 
 export default function DocsScreen() {
     return (
