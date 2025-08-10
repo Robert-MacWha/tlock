@@ -368,6 +368,54 @@ describe('useKeyring', () => {
         });
     });
 
+    describe('Account ', () => {
+        it('should rename an existing account', () => {
+            const existingAccounts = [
+                { id: 1, address: '0x123', name: 'Account 1' },
+                { id: 2, address: '0x456', name: 'Account 2' }
+            ];
+            setupStorageState({
+                seedPhrase: MOCK_SEED_PHRASE,
+                accounts: JSON.stringify(existingAccounts),
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            act(() => {
+                result.current.renameAccount('0x123' as Address, 'New Name');
+            });
+
+            const expectedAccounts = [
+                { id: 1, address: '0x123', name: 'New Name' },
+                { id: 2, address: '0x456', name: 'Account 2' }
+            ];
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', JSON.stringify(expectedAccounts));
+        });
+    });
+
+    describe('hideAccount', () => {
+        it('should hide an existing account', () => {
+            const existingAccounts = [
+                { id: 1, address: '0x123', isHidden: false },
+                { id: 2, address: '0x456', isHidden: false }
+            ];
+            setupStorageState({
+                seedPhrase: MOCK_SEED_PHRASE,
+                accounts: JSON.stringify(existingAccounts),
+            });
+            const { result } = renderHook(() => useKeyring());
+
+            act(() => {
+                result.current.hideAccount('0x123' as Address, true);
+            });
+
+            const expectedAccounts = [
+                { id: 1, address: '0x123', isHidden: true },
+                { id: 2, address: '0x456', isHidden: false }
+            ];
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', JSON.stringify(expectedAccounts));
+        });
+    });
+
     describe('SecureStore failures', () => {
         it('should handle SecureStore setItem failures in generateSeedPhrase', () => {
             setupStorageState({ seedPhrase: null });
