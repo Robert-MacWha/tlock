@@ -68,6 +68,22 @@ describe('useRequestHandler', () => {
         mockUpdateRequest.mockResolvedValue(undefined);
     });
 
+    it('should fetch request successfully', async () => {
+        const { result } = renderHook(() =>
+            useRequestHandler({
+                type: 'signPersonal',
+                onApprove: jest.fn(),
+            })
+        );
+
+        await waitFor(() => expect(result.current.loading).toBe(false));
+
+        expect(mockGetRequest).toHaveBeenCalledWith('test-request-id', 'signPersonal');
+        expect(result.current.request).toEqual(mockRequest);
+        expect(result.current.client).toEqual(mockClient);
+        expect(result.current.error).toBeNull();
+    });
+
     describe('handleApprove', () => {
         it('should update request and redirect on approval', async () => {
             const mockOnApprove = jest.fn().mockResolvedValue({ signature: '0xsignature' as Hex });

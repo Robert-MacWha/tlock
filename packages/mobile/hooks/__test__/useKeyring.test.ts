@@ -3,13 +3,15 @@ import { useKeyring } from '../useKeyring';
 import * as SecureStore from 'expo-secure-store';
 import { Address, Hex, parseGwei, parseTransaction, serializeTransaction, TransactionSerializableLegacy, TypedDataDefinition } from 'viem';
 
+const MOCK_SEED_PHRASE = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+
 // Mock only specific dependencies
 jest.mock('expo-secure-store');
 //? constant mnemonic for testing
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('bip39', () => ({
     ...jest.requireActual('bip39'),
-    entropyToMnemonic: jest.fn(() => 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'),
+    entropyToMnemonic: jest.fn(() => MOCK_SEED_PHRASE),
 }));
 
 const mockSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
@@ -53,7 +55,7 @@ describe('useKeyring', () => {
         it(`${methodName} should throw error when authentication fails`, async () => {
             const existingAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify(existingAccounts)
             });
 
@@ -76,7 +78,7 @@ describe('useKeyring', () => {
             setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
 
-            await expect(methodCall(result.current)).rejects.toThrow('Failed to get account from address: 0x123');
+            await expect(methodCall(result.current)).rejects.toThrow('Account with address 0x123 not found');
         });
     };
 
@@ -140,7 +142,7 @@ describe('useKeyring', () => {
                 seedPhrase = result.current.generateSeedPhrase();
             });
 
-            expect(seedPhrase!).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+            expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
             expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase!);
             expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_accounts', '[]');
         });
@@ -154,7 +156,7 @@ describe('useKeyring', () => {
                 seedPhrase = result.current.generateSeedPhrase(true);
             });
 
-            expect(seedPhrase!).toBe('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+            expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
             expect(mockSecureStore.setItem).toHaveBeenCalledWith('tlock_seed_phrase', seedPhrase!);
         });
     });
@@ -190,7 +192,7 @@ describe('useKeyring', () => {
 
         it('should add first account successfully', () => {
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: '[]',
             });
             const { result } = renderHook(() => useKeyring());
@@ -207,7 +209,7 @@ describe('useKeyring', () => {
         it('should add new accounts successfully', () => {
             const existingAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify(existingAccounts),
             });
             const { result } = renderHook(() => useKeyring());
@@ -225,7 +227,7 @@ describe('useKeyring', () => {
     describe('sign', () => {
         it('should handle missing accounts', async () => {
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([])
             });
             const { result } = renderHook(() => useKeyring());
@@ -233,13 +235,13 @@ describe('useKeyring', () => {
             await expect(result.current.sign(
                 '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' as Address,
                 '0x11223344' as Hex
-            )).rejects.toThrow('Failed to get account from address: 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc');
+            )).rejects.toThrow('Account with address 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc not found');
         });
 
         it('should handle case-insensitive address matching', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([mockAccount])
             });
             const { result } = renderHook(() => useKeyring());
@@ -255,7 +257,7 @@ describe('useKeyring', () => {
         it('should sign hash successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([mockAccount])
             });
             const { result } = renderHook(() => useKeyring());
@@ -271,7 +273,7 @@ describe('useKeyring', () => {
         it('should sign personal message successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([mockAccount])
             });
             const { result } = renderHook(() => useKeyring());
@@ -287,7 +289,7 @@ describe('useKeyring', () => {
         it('should sign legacy transaction successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([mockAccount])
             });
             const { result } = renderHook(() => useKeyring());
@@ -323,7 +325,7 @@ describe('useKeyring', () => {
         it('should sign typed data successfully', async () => {
             const mockAccount = { id: 1, address: '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc' };
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify([mockAccount])
             });
             const { result } = renderHook(() => useKeyring());
@@ -383,7 +385,7 @@ describe('useKeyring', () => {
 
         it('should handle SecureStore failures in addAccount', () => {
             setupStorageState({
-                seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+                seedPhrase: MOCK_SEED_PHRASE,
                 accounts: '[]',
             });
             mockSecureStore.setItem.mockImplementation(() => {
