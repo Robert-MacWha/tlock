@@ -329,6 +329,42 @@ describe('TlockKeyring', () => {
             testRequestNotFound('getRequest', () => keyring.getRequest!('non-existent'));
         });
 
+        describe('approveRequest', () => {
+            it('should approve request and emit event', async () => {
+                const signature = '0xabcdef' as Hex;
+                const message = '0x123456' as Hex;
+                const request: KeyringRequest = {
+                    id: mockRequestId,
+                    account: mockAccountId,
+                    scope: 'eip155:1',
+                    request: {
+                        method: EthMethod.PersonalSign,
+                        params: [message, mockAddress],
+                    },
+                };
+                setupKeyringState({ pendingRequests: { [mockRequestId]: request } });
+
+                mockClient.submitRequest.mockResolvedValue(mockRequestId);
+                mockClient.pollUntil.mockResolvedValue({
+                    status: 'approved',
+                    signature,
+                    message,
+                });
+                mockRecoverPersonalSignature.mockReturnValue(mockAddress);
+
+                await keyring.approveRequest!(mockRequestId, { pending: false, result: signature });
+
+                expect(keyring['state'].pendingRequests[mockRequestId]).toBeUndefined();
+                expect(mockEmitSnapKeyringEvent).toHaveBeenCalledWith(
+                    snap,
+                    KeyringEvent.RequestApproved,
+                    { id: mockRequestId, result: signature }
+                );
+            });
+
+            testRequestNotFound('approveRequest', () => keyring.approveRequest!('non-existent', { pending: false, result: 'test' }));
+        });
+
         describe('rejectRequest', () => {
             it('should remove request and emit event', async () => {
                 const request: KeyringRequest = {
