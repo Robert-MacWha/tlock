@@ -15,15 +15,27 @@ export class TlockSnapError extends Error {
     }
 }
 
-export function throwError(code: ErrorCode, message: string, originalError?: Error): never {
+export function throwError(
+    code: ErrorCode,
+    message: string,
+    originalError?: Error,
+): never {
     throw new TlockSnapError(code, message, originalError);
 }
 
-export function handleError(error: unknown, code: ErrorCode, context?: string): never {
+export function handleError(
+    error: unknown,
+    code: ErrorCode,
+    context?: string,
+): never {
     const contextMessage = context ? `${context}: ` : '';
 
     if (error instanceof Error) {
-        throw new TlockSnapError(code, `${contextMessage}${error.message}`, error);
+        throw new TlockSnapError(
+            code,
+            `${contextMessage}${error.message}`,
+            error,
+        );
     } else {
         throw new TlockSnapError(code, `${contextMessage}${String(error)}`);
     }

@@ -7,7 +7,10 @@ interface SeedPhraseDisplayProps {
     style?: StyleProp<ViewStyle>;
 }
 
-export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps) {
+export function SeedPhraseDisplay({
+    seedPhrase,
+    style,
+}: SeedPhraseDisplayProps) {
     const words = seedPhrase.split(' ');
 
     return (
@@ -16,24 +19,26 @@ export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps)
                 {
                     padding: 16,
                     borderRadius: 16,
-                    elevation: 1
+                    elevation: 1,
                 },
-                style
+                style,
             ]}
         >
-            <View style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: 8
-            }}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                }}
+            >
                 {words.map((word, index) => (
                     <Surface
                         key={index}
                         style={{
                             flexGrow: 1,
                             flexBasis: '30%', // Roughly 3 columns, but flexible
-                            minWidth: 120,     // Minimum width to prevent too narrow
-                            maxWidth: '48%',  // Maximum width for very wide screens
+                            minWidth: 120, // Minimum width to prevent too narrow
+                            maxWidth: '48%', // Maximum width for very wide screens
                             minHeight: 40,
                             borderRadius: 12,
                             elevation: 0,
@@ -41,14 +46,14 @@ export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps)
                             flexDirection: 'row',
                             alignItems: 'center',
                             paddingHorizontal: 12,
-                            paddingVertical: 8
+                            paddingVertical: 8,
                         }}
                     >
                         <Text
                             variant="labelSmall"
                             style={{
                                 minWidth: 16,
-                                marginRight: 8
+                                marginRight: 8,
                             }}
                         >
                             {index + 1}
@@ -57,7 +62,7 @@ export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps)
                             variant="bodyMedium"
                             style={{
                                 fontWeight: '500',
-                                flex: 1
+                                flex: 1,
                             }}
                         >
                             {word}
@@ -71,7 +76,7 @@ export function SeedPhraseDisplay({ seedPhrase, style }: SeedPhraseDisplayProps)
                 style={{
                     marginTop: 16,
                     textAlign: 'center',
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
                 }}
             >
                 Keep this phrase secure and private

@@ -1,5 +1,10 @@
 import { TlockKeyring } from '../keyring';
-import { EthAccountType, EthMethod, KeyringEvent, KeyringRequest } from '@metamask/keyring-api';
+import {
+    EthAccountType,
+    EthMethod,
+    KeyringEvent,
+    KeyringRequest,
+} from '@metamask/keyring-api';
 import { updateState } from '../state';
 import type { Client } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
@@ -19,8 +24,13 @@ jest.mock('@metamask/eth-sig-util');
 
 const mockUpdateState = updateState as jest.MockedFunction<typeof updateState>;
 const mockUuid = uuid as jest.MockedFunction<() => string>;
-const mockEmitSnapKeyringEvent = emitSnapKeyringEvent as jest.MockedFunction<typeof emitSnapKeyringEvent>;
-const mockRecoverPersonalSignature = recoverPersonalSignature as jest.MockedFunction<typeof recoverPersonalSignature>;
+const mockEmitSnapKeyringEvent = emitSnapKeyringEvent as jest.MockedFunction<
+    typeof emitSnapKeyringEvent
+>;
+const mockRecoverPersonalSignature =
+    recoverPersonalSignature as jest.MockedFunction<
+        typeof recoverPersonalSignature
+    >;
 
 // Mock the snap global variable
 declare const snap: unknown;
@@ -37,8 +47,8 @@ describe('TlockKeyring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => { });
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'log').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockUuid.mockImplementation(() => mockAccountId);
         mockUpdateState.mockResolvedValue();
@@ -64,7 +74,10 @@ describe('TlockKeyring', () => {
 
     // Helper function to setup keyring state
     const setupKeyringState = (options: {
-        wallets?: Record<string, { account: ReturnType<typeof createMockAccount> }>;
+        wallets?: Record<
+            string,
+            { account: ReturnType<typeof createMockAccount> }
+        >;
         pendingRequests?: Record<string, KeyringRequest>;
     }) => {
         keyring['state'] = {
@@ -90,22 +103,38 @@ describe('TlockKeyring', () => {
     });
 
     // Helper function to test common error scenarios across methods
-    const testAccountNotFound = (methodName: string, methodCall: () => Promise<unknown>) => {
+    const testAccountNotFound = (
+        methodName: string,
+        methodCall: () => Promise<unknown>,
+    ) => {
         it(`${methodName} should throw when account does not exist`, async () => {
-            await expect(methodCall()).rejects.toThrow('Account with ID non-existent not found');
+            await expect(methodCall()).rejects.toThrow(
+                'Account with ID non-existent not found',
+            );
         });
     };
 
-    const testRequestNotFound = (methodName: string, methodCall: () => Promise<unknown>) => {
+    const testRequestNotFound = (
+        methodName: string,
+        methodCall: () => Promise<unknown>,
+    ) => {
         it(`${methodName} should throw when request does not exist`, async () => {
-            await expect(methodCall()).rejects.toThrow('Request with ID non-existent not found');
+            await expect(methodCall()).rejects.toThrow(
+                'Request with ID non-existent not found',
+            );
         });
     };
 
-    const testClientPollingFailure = (methodName: string, setupMocks: () => void, methodCall: () => Promise<unknown>) => {
+    const testClientPollingFailure = (
+        methodName: string,
+        setupMocks: () => void,
+        methodCall: () => Promise<unknown>,
+    ) => {
         it(`${methodName} should handle client polling failure`, async () => {
             setupMocks();
-            mockClient.pollUntil.mockRejectedValue(new Error('Network timeout'));
+            mockClient.pollUntil.mockRejectedValue(
+                new Error('Network timeout'),
+            );
             await expect(methodCall()).rejects.toThrow('Network timeout');
         });
     };
@@ -120,7 +149,8 @@ describe('TlockKeyring', () => {
 
         it('should use provided state', () => {
             const state = {
-                wallets: { mockAccountId: { account: createMockAccount() } }, pendingRequests: {}
+                wallets: { mockAccountId: { account: createMockAccount() } },
+                pendingRequests: {},
             };
             const newKeyring = new TlockKeyring(mockClient, state);
             expect(newKeyring['state']).toBe(state);
@@ -142,7 +172,9 @@ describe('TlockKeyring', () => {
 
             it('should return accounts from state', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
                 const accounts = await keyring.listAccounts();
                 expect(accounts).toEqual([account]);
@@ -152,13 +184,17 @@ describe('TlockKeyring', () => {
         describe('getAccount', () => {
             it('should return existing account', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
                 const result = await keyring.getAccount(mockAccountId);
                 expect(result).toBe(account);
             });
 
-            testAccountNotFound('getAccount', () => keyring.getAccount('non-existent'));
+            testAccountNotFound('getAccount', () =>
+                keyring.getAccount('non-existent'),
+            );
         });
 
         describe('createAccount', () => {
@@ -173,7 +209,9 @@ describe('TlockKeyring', () => {
 
                 expect(account.id).toBe(mockAccountId);
                 expect(account.address).toBe(mockAddress);
-                expect(keyring['state'].wallets[mockAccountId]?.account).toBe(account);
+                expect(keyring['state'].wallets[mockAccountId]?.account).toBe(
+                    account,
+                );
             });
 
             it('should emit account creation event', async () => {
@@ -204,7 +242,7 @@ describe('TlockKeyring', () => {
                             type: EthAccountType.Eoa,
                         },
                         accountNameSuggestion: 'Tlock Account',
-                    }
+                    },
                 );
             });
 
@@ -212,44 +250,64 @@ describe('TlockKeyring', () => {
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({ status: 'approved' });
 
-                await expect(keyring.createAccount()).rejects.toThrow('No address returned from mobile device');
+                await expect(keyring.createAccount()).rejects.toThrow(
+                    'No address returned from mobile device',
+                );
             });
 
             testClientPollingFailure(
                 'createAccount',
                 () => mockClient.submitRequest.mockResolvedValue(mockRequestId),
-                () => keyring.createAccount()
+                () => keyring.createAccount(),
             );
         });
 
         describe('updateAccount', () => {
             it('should update account in state', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
-                const updatedAccount = { ...account, options: { name: 'New Name' } };
+                const updatedAccount = {
+                    ...account,
+                    options: { name: 'New Name' },
+                };
                 await keyring.updateAccount(updatedAccount);
 
-                expect(keyring['state'].wallets[mockAccountId]?.account).toEqual(updatedAccount);
+                expect(
+                    keyring['state'].wallets[mockAccountId]?.account,
+                ).toEqual(updatedAccount);
             });
 
             it('should preserve original address', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
-                const updatedAccount = { ...account, address: '0xdifferent' as Address };
+                const updatedAccount = {
+                    ...account,
+                    address: '0xdifferent' as Address,
+                };
                 await keyring.updateAccount(updatedAccount);
 
-                expect(keyring['state'].wallets[mockAccountId]?.account.address).toBe(mockAddress);
+                expect(
+                    keyring['state'].wallets[mockAccountId]?.account.address,
+                ).toBe(mockAddress);
             });
 
-            testAccountNotFound('updateAccount', () => keyring.updateAccount(createMockAccount('non-existent')));
+            testAccountNotFound('updateAccount', () =>
+                keyring.updateAccount(createMockAccount('non-existent')),
+            );
         });
 
         describe('deleteAccount', () => {
             it('should remove account from state', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
                 await keyring.deleteAccount(mockAccountId);
 
@@ -258,14 +316,16 @@ describe('TlockKeyring', () => {
 
             it('should emit deletion event', async () => {
                 const account = createMockAccount();
-                setupKeyringState({ wallets: { [mockAccountId]: { account } } });
+                setupKeyringState({
+                    wallets: { [mockAccountId]: { account } },
+                });
 
                 await keyring.deleteAccount(mockAccountId);
 
                 expect(mockEmitSnapKeyringEvent).toHaveBeenCalledWith(
                     snap,
                     KeyringEvent.AccountDeleted,
-                    { id: mockAccountId }
+                    { id: mockAccountId },
                 );
             });
         });
@@ -273,14 +333,25 @@ describe('TlockKeyring', () => {
 
     describe('Chain filtering', () => {
         it('should return only EVM chains', async () => {
-            const chains = ['eip155:1', 'eip155:137', 'cosmos:hub-4', 'solana:mainnet'];
-            const filtered = await keyring.filterAccountChains(mockAccountId, chains);
+            const chains = [
+                'eip155:1',
+                'eip155:137',
+                'cosmos:hub-4',
+                'solana:mainnet',
+            ];
+            const filtered = await keyring.filterAccountChains(
+                mockAccountId,
+                chains,
+            );
             expect(filtered).toEqual(['eip155:1', 'eip155:137']);
         });
 
         it('should return empty for non-EVM chains', async () => {
             const chains = ['cosmos:hub-4', 'solana:mainnet'];
-            const filtered = await keyring.filterAccountChains(mockAccountId, chains);
+            const filtered = await keyring.filterAccountChains(
+                mockAccountId,
+                chains,
+            );
             expect(filtered).toEqual([]);
         });
     });
@@ -302,7 +373,9 @@ describe('TlockKeyring', () => {
                         params: ['0x123456' as Hex, mockAddress],
                     },
                 };
-                setupKeyringState({ pendingRequests: { [mockRequestId]: request } });
+                setupKeyringState({
+                    pendingRequests: { [mockRequestId]: request },
+                });
 
                 const requests = await keyring.listRequests!();
                 expect(requests).toEqual([request]);
@@ -320,13 +393,17 @@ describe('TlockKeyring', () => {
                         params: ['0x123456' as Hex, mockAddress],
                     },
                 };
-                setupKeyringState({ pendingRequests: { [mockRequestId]: request } });
+                setupKeyringState({
+                    pendingRequests: { [mockRequestId]: request },
+                });
 
                 const result = await keyring.getRequest!(mockRequestId);
                 expect(result).toBe(request);
             });
 
-            testRequestNotFound('getRequest', () => keyring.getRequest!('non-existent'));
+            testRequestNotFound('getRequest', () =>
+                keyring.getRequest!('non-existent'),
+            );
         });
 
         describe('approveRequest', () => {
@@ -342,7 +419,9 @@ describe('TlockKeyring', () => {
                         params: [message, mockAddress],
                     },
                 };
-                setupKeyringState({ pendingRequests: { [mockRequestId]: request } });
+                setupKeyringState({
+                    pendingRequests: { [mockRequestId]: request },
+                });
 
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({
@@ -352,17 +431,27 @@ describe('TlockKeyring', () => {
                 });
                 mockRecoverPersonalSignature.mockReturnValue(mockAddress);
 
-                await keyring.approveRequest!(mockRequestId, { pending: false, result: signature });
+                await keyring.approveRequest!(mockRequestId, {
+                    pending: false,
+                    result: signature,
+                });
 
-                expect(keyring['state'].pendingRequests[mockRequestId]).toBeUndefined();
+                expect(
+                    keyring['state'].pendingRequests[mockRequestId],
+                ).toBeUndefined();
                 expect(mockEmitSnapKeyringEvent).toHaveBeenCalledWith(
                     snap,
                     KeyringEvent.RequestApproved,
-                    { id: mockRequestId, result: signature }
+                    { id: mockRequestId, result: signature },
                 );
             });
 
-            testRequestNotFound('approveRequest', () => keyring.approveRequest!('non-existent', { pending: false, result: 'test' }));
+            testRequestNotFound('approveRequest', () =>
+                keyring.approveRequest!('non-existent', {
+                    pending: false,
+                    result: 'test',
+                }),
+            );
         });
 
         describe('rejectRequest', () => {
@@ -376,19 +465,25 @@ describe('TlockKeyring', () => {
                         params: ['0x123456' as Hex, mockAddress],
                     },
                 };
-                setupKeyringState({ pendingRequests: { [mockRequestId]: request } });
+                setupKeyringState({
+                    pendingRequests: { [mockRequestId]: request },
+                });
 
                 await keyring.rejectRequest(mockRequestId);
 
-                expect(keyring['state'].pendingRequests[mockRequestId]).toBeUndefined();
+                expect(
+                    keyring['state'].pendingRequests[mockRequestId],
+                ).toBeUndefined();
                 expect(mockEmitSnapKeyringEvent).toHaveBeenCalledWith(
                     snap,
                     KeyringEvent.RequestRejected,
-                    { id: mockRequestId }
+                    { id: mockRequestId },
                 );
             });
 
-            testRequestNotFound('rejectRequest', () => keyring.rejectRequest('non-existent'));
+            testRequestNotFound('rejectRequest', () =>
+                keyring.rejectRequest('non-existent'),
+            );
         });
     });
 
@@ -445,7 +540,11 @@ describe('TlockKeyring', () => {
                     },
                 };
 
-                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow(`Recovered address 0x999 does not match from address ${mockAddress}`);
+                await expect(
+                    keyring.submitRequest(mockRequest),
+                ).rejects.toThrow(
+                    `Recovered address 0x999 does not match from address ${mockAddress}`,
+                );
             });
 
             it('should require signature in response', async () => {
@@ -462,7 +561,9 @@ describe('TlockKeyring', () => {
                     },
                 };
 
-                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow('No signature returned');
+                await expect(
+                    keyring.submitRequest(mockRequest),
+                ).rejects.toThrow('No signature returned');
             });
         });
 
@@ -489,12 +590,15 @@ describe('TlockKeyring', () => {
                 const response = await keyring.submitRequest(mockRequest);
 
                 expect(response).toEqual({ pending: false, result: signature });
-                expect(mockClient.submitRequest).toHaveBeenCalledWith('signMessage', {
-                    status: 'pending',
-                    origin: undefined,
-                    from: mockAddress,
-                    message,
-                });
+                expect(mockClient.submitRequest).toHaveBeenCalledWith(
+                    'signMessage',
+                    {
+                        status: 'pending',
+                        origin: undefined,
+                        from: mockAddress,
+                        message,
+                    },
+                );
             });
 
             it('should require signature in response', async () => {
@@ -511,13 +615,16 @@ describe('TlockKeyring', () => {
                     },
                 };
 
-                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow('No signature returned');
+                await expect(
+                    keyring.submitRequest(mockRequest),
+                ).rejects.toThrow('No signature returned');
             });
         });
 
         describe('submitRequest - transaction', () => {
             it('should sign transaction', async () => {
-                const signedTx = '0x02ef83aa36a7068459682f008459763ba982520894309d83b27c0c19933f33d20a9539e1d5618b371585e8d4a5100080c0' as TransactionSerializedLegacy;
+                const signedTx =
+                    '0x02ef83aa36a7068459682f008459763ba982520894309d83b27c0c19933f33d20a9539e1d5618b371585e8d4a5100080c0' as TransactionSerializedLegacy;
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({
                     status: 'approved',
@@ -528,12 +635,12 @@ describe('TlockKeyring', () => {
                     nonce: '0x6' as Hex,
                     chainId: '0xaa36a7' as Hex,
                     from: mockAddress,
-                    to: "0x309d83b27c0c19933f33d20a9539e1d5618b3715",
+                    to: '0x309d83b27c0c19933f33d20a9539e1d5618b3715',
                     value: '0xe8d4a51000' as Hex,
                     data: '0x' as Hex,
-                    gasLimit: "0x5208",
-                    maxFeePerGas: "0x59763ba9",
-                    maxPriorityFeePerGas: "0x59682f00",
+                    gasLimit: '0x5208',
+                    maxFeePerGas: '0x59763ba9',
+                    maxPriorityFeePerGas: '0x59682f00',
                 };
 
                 const mockRequest: KeyringRequest = {
@@ -551,26 +658,30 @@ describe('TlockKeyring', () => {
                 expect(response).toEqual({
                     pending: false,
                     result: {
-                        nonce: "0x6",
-                        chainId: "0xaa36a7",
-                        to: "0x309d83b27c0c19933f33d20a9539e1d5618b3715",
-                        value: "0xe8d4a51000",
-                        data: "0x",
-                        gasLimit: "0x5208",
-                        maxFeePerGas: "0x59763ba9",
-                        maxPriorityFeePerGas: "0x59682f00",
+                        nonce: '0x6',
+                        chainId: '0xaa36a7',
+                        to: '0x309d83b27c0c19933f33d20a9539e1d5618b3715',
+                        value: '0xe8d4a51000',
+                        data: '0x',
+                        gasLimit: '0x5208',
+                        maxFeePerGas: '0x59763ba9',
+                        maxPriorityFeePerGas: '0x59682f00',
                         type: 0,
-                        r: "0x0",
-                        s: "0x0",
-                        v: "0x0",
+                        r: '0x0',
+                        s: '0x0',
+                        v: '0x0',
                     },
                 });
-                expect(mockClient.submitRequest).toHaveBeenCalledWith('signTransaction', {
-                    status: 'pending',
-                    origin: undefined,
-                    from: mockAddress,
-                    transaction: "0xe7068082520894309d83b27c0c19933f33d20a9539e1d5618b371585e8d4a510008083aa36a78080",
-                });
+                expect(mockClient.submitRequest).toHaveBeenCalledWith(
+                    'signTransaction',
+                    {
+                        status: 'pending',
+                        origin: undefined,
+                        from: mockAddress,
+                        transaction:
+                            '0xe7068082520894309d83b27c0c19933f33d20a9539e1d5618b371585e8d4a510008083aa36a78080',
+                    },
+                );
             });
 
             it('should require signed transaction in response', async () => {
@@ -598,7 +709,9 @@ describe('TlockKeyring', () => {
                     },
                 };
 
-                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow('No signed transaction returned');
+                await expect(
+                    keyring.submitRequest(mockRequest),
+                ).rejects.toThrow('No signed transaction returned');
             });
         });
 
@@ -636,17 +749,22 @@ describe('TlockKeyring', () => {
                 const response = await keyring.submitRequest(mockRequest);
 
                 expect(response).toEqual({ pending: false, result: signature });
-                expect(mockClient.submitRequest).toHaveBeenCalledWith('signTypedData', {
-                    status: 'pending',
-                    origin: undefined,
-                    from: mockAddress,
-                    data: {
-                        domain: { name: 'Test', version: '1' },
-                        types: { Test: [{ name: 'value', type: 'string' }] },
-                        primaryType: 'Test',
-                        message: { value: 'hello' },
+                expect(mockClient.submitRequest).toHaveBeenCalledWith(
+                    'signTypedData',
+                    {
+                        status: 'pending',
+                        origin: undefined,
+                        from: mockAddress,
+                        data: {
+                            domain: { name: 'Test', version: '1' },
+                            types: {
+                                Test: [{ name: 'value', type: 'string' }],
+                            },
+                            primaryType: 'Test',
+                            message: { value: 'hello' },
+                        },
                     },
-                });
+                );
             });
         });
 
@@ -665,7 +783,7 @@ describe('TlockKeyring', () => {
                         },
                     };
                     return keyring.submitRequest(mockRequest);
-                }
+                },
             );
 
             it('should reject unsupported methods', async () => {
@@ -679,7 +797,9 @@ describe('TlockKeyring', () => {
                     },
                 };
 
-                await expect(keyring.submitRequest(mockRequest)).rejects.toThrow("EVM method 'eth_unsupported' not supported");
+                await expect(
+                    keyring.submitRequest(mockRequest),
+                ).rejects.toThrow("EVM method 'eth_unsupported' not supported");
             });
         });
     });

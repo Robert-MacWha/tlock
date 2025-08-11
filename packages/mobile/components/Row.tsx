@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { MD3TypescaleKey, Text } from "react-native-paper";
+import { MD3TypescaleKey, Text } from 'react-native-paper';
 
 interface KeyValueRowProps {
     label: string;
@@ -15,13 +15,15 @@ export const KeyValueRow = ({
     value,
     labelVariant = 'bodyMedium',
     valueVariant = 'titleMedium',
-    minSpacing = 16
+    minSpacing = 16,
 }: KeyValueRowProps) => (
-    <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: minSpacing
-    }}>
+    <View
+        style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: minSpacing,
+        }}
+    >
         <Text variant={labelVariant} style={{ flexShrink: 0 }}>
             {label}
         </Text>

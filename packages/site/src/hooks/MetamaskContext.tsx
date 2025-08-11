@@ -18,8 +18,8 @@ export const MetaMaskContext = createContext<MetaMaskContextType>({
     provider: null,
     installedSnap: null,
     error: null,
-    setInstalledSnap: () => { },
-    setError: () => { },
+    setInstalledSnap: () => {},
+    setError: () => {},
 });
 
 /**
@@ -30,7 +30,9 @@ export const MetaMaskContext = createContext<MetaMaskContextType>({
  * @returns JSX.
  */
 export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
-    const [provider, setProvider] = useState<MetaMaskInpageProvider | null>(null);
+    const [provider, setProvider] = useState<MetaMaskInpageProvider | null>(
+        null,
+    );
     const [installedSnap, setInstalledSnap] = useState<Snap | null>(null);
     const [error, setError] = useState<Error | null>(null);
 
@@ -54,7 +56,13 @@ export const MetaMaskProvider = ({ children }: { children: ReactNode }) => {
 
     return (
         <MetaMaskContext.Provider
-            value={{ provider, error, setError, installedSnap, setInstalledSnap }}
+            value={{
+                provider,
+                error,
+                setError,
+                installedSnap,
+                setInstalledSnap,
+            }}
         >
             {children}
         </MetaMaskContext.Provider>

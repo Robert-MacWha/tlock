@@ -15,25 +15,36 @@ import { TxSimulation } from '../../components/TxSimulation';
 export default function SignTransaction() {
     const { signTransaction } = useKeyringContext();
     const { accounts } = useKeyringContext();
-    const { client, request, loading, error, handleApprove, handleReject } = useRequestHandler({
-        type: 'signTransaction',
-        onApprove: async (request) => {
-            const signed = await signTransaction(request.from, request.transaction);
-            return { signed };
-        },
-    });
+    const { client, request, loading, error, handleApprove, handleReject } =
+        useRequestHandler({
+            type: 'signTransaction',
+            onApprove: async (request) => {
+                const signed = await signTransaction(
+                    request.from,
+                    request.transaction,
+                );
+                return { signed };
+            },
+        });
 
     if (!request) return <ErrorScreen error="Request not found" />;
     if (!client) return <ErrorScreen error="Client not found" />;
 
-    const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
+    const account = accounts.find(
+        (acc) => acc.address.toLowerCase() === request.from.toLowerCase(),
+    );
     if (!account) return <ErrorScreen error="Account not found" />;
 
     const clientName = client.name ?? client.id;
     const transaction = parseTransaction(request.transaction);
     const valueWei = transaction.value ? formatEther(transaction.value) : '0';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    const chain = transaction.chainId ? extractChain({ chains: Object.values(chains), id: transaction.chainId as any }).name : "Unknown Chain";
+    const chain = transaction.chainId
+        ? extractChain({
+              chains: Object.values(chains),
+              id: transaction.chainId as any,
+          }).name
+        : 'Unknown Chain';
 
     return (
         <>
@@ -58,29 +69,54 @@ export default function SignTransaction() {
                 loading={loading}
                 error={error}
             >
-                <Card mode='contained' style={{ marginBottom: 16 }}>
-                    <Card.Title
-                        title="Transaction Details"
-                    />
+                <Card mode="contained" style={{ marginBottom: 16 }}>
+                    <Card.Title title="Transaction Details" />
                     <Card.Content>
                         <View style={{ gap: 4 }}>
-                            {request.origin && (<KeyValueRow label="Origin" value={request.origin} />)}
+                            {request.origin && (
+                                <KeyValueRow
+                                    label="Origin"
+                                    value={request.origin}
+                                />
+                            )}
                             <KeyValueRow label="Chain" value={chain} />
-                            <KeyValueRow label="From" value={account.name ?? formatAddressForDisplay(account.address)} />
-                            <KeyValueRow label="To" value={formatAddressForDisplay(account.address) ?? 'Create Contract'} />
-                            <KeyValueRow label="Value" value={`${valueWei} ETH`} />
+                            <KeyValueRow
+                                label="From"
+                                value={
+                                    account.name ??
+                                    formatAddressForDisplay(account.address)
+                                }
+                            />
+                            <KeyValueRow
+                                label="To"
+                                value={
+                                    formatAddressForDisplay(account.address) ??
+                                    'Create Contract'
+                                }
+                            />
+                            <KeyValueRow
+                                label="Value"
+                                value={`${valueWei} ETH`}
+                            />
                         </View>
 
                         {transaction.data && (
                             <>
                                 <Divider style={{ marginVertical: 12 }} />
 
-                                <Text variant="labelMedium" style={{ marginBottom: 8 }}>
+                                <Text
+                                    variant="labelMedium"
+                                    style={{ marginBottom: 8 }}
+                                >
                                     Transaction Data:
                                 </Text>
-                                <Text variant="bodyLarge" selectable style={{
-                                    fontFamily: 'monospace',
-                                }}>
+                                <Text
+                                    variant="bodyLarge"
+                                    selectable
+                                    style={{
+                                        fontFamily: 'monospace',
+                                    }}
+                                >
                                     {transaction.data ?? '0x'}
                                 </Text>
                             </>

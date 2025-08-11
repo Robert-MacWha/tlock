@@ -43,7 +43,7 @@ export interface TraceNode {
 }
 
 export interface LogNode {
-    opcode: "LOG0" | "LOG1" | "LOG2" | "LOG3" | "LOG4";
+    opcode: 'LOG0' | 'LOG1' | 'LOG2' | 'LOG3' | 'LOG4';
     topics: Hex[];
     memory: Hex;
     address: Address;
@@ -54,7 +54,7 @@ export interface LogNode {
 }
 
 export interface ReturnNode {
-    opcode: "RETURN" | "REVERT";
+    opcode: 'RETURN' | 'REVERT';
     error: string;
     selector: Hex;
     signature: string;
@@ -66,7 +66,7 @@ export interface ReturnNode {
 }
 
 export interface SelfDestructNode {
-    opcode: "SELFDESTRUCT";
+    opcode: 'SELFDESTRUCT';
     beneficiary: Address;
     value: number;
     caller_pc: number;
@@ -79,8 +79,8 @@ export interface AbiInfo {
     inputs: AbiInput[];
     address: Address;
     outputs?: AbiOutput[];
-    type: "function";
-    stateMutability: "payable" | "nonpayable" | "view" | "pure";
+    type: 'function';
+    stateMutability: 'payable' | 'nonpayable' | 'view' | 'pure';
 }
 
 export interface EventAbi {
@@ -91,7 +91,7 @@ export interface EventAbi {
     address: Address;
     indexes: boolean[][];
     anonymous: boolean;
-    type: "event";
+    type: 'event';
 }
 
 export interface TokenTransfer {
@@ -99,7 +99,7 @@ export interface TokenTransfer {
     from_a: Address;
     to_a: Address;
     amount: Hex;
-    type: "NATIVE" | "ERC20" | "ERC721" | "ERC1155";
+    type: 'NATIVE' | 'ERC20' | 'ERC721' | 'ERC1155';
 }
 
 export interface BalanceDelta {
@@ -158,35 +158,45 @@ export interface SimulationResponse {
     tx_data: TxData | null;
 }
 
-export const NETWORKS = ["ethereum", "polygon", "bsc", "arbitrum", "optimism", "avalanche", "fantom"] as const;
-export type Network = typeof NETWORKS[number];
+export const NETWORKS = [
+    'ethereum',
+    'polygon',
+    'bsc',
+    'arbitrum',
+    'optimism',
+    'avalanche',
+    'fantom',
+] as const;
+export type Network = (typeof NETWORKS)[number];
 
 export function isNetwork(value: string): value is Network {
     return Object.values(NETWORKS).includes(value.toLowerCase() as Network);
 }
 
 export class DedaubClient {
-    private readonly baseUrl = "https://api.dedaub.com/api";
+    private readonly baseUrl = 'https://api.dedaub.com/api';
 
     async simulate(
         network: Network,
-        request: SimulationRequest
+        request: SimulationRequest,
     ): Promise<SimulationResponse> {
         const url = `${this.baseUrl}/transaction/${network}/simulate`;
 
         const headers: Record<string, string> = {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         };
 
         const response = await fetch(url, {
-            method: "POST",
+            method: 'POST',
             headers,
             body: JSON.stringify(request),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+            throw new Error(
+                `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
+            );
         }
 
         return response.json() as Promise<SimulationResponse>;
@@ -200,9 +210,11 @@ export class SimulationUtils {
     }
 
     static wouldRevert(response: SimulationResponse): boolean {
-        const findRevert = (node: TraceNode | LogNode | ReturnNode | SelfDestructNode): boolean => {
-            if ('opcode' in node && node.opcode === "REVERT") return true;
-            if ('error' in node && node.error && node.error !== "") return true;
+        const findRevert = (
+            node: TraceNode | LogNode | ReturnNode | SelfDestructNode,
+        ): boolean => {
+            if ('opcode' in node && node.opcode === 'REVERT') return true;
+            if ('error' in node && node.error && node.error !== '') return true;
             if ('children' in node && node.children) {
                 return node.children.some((child) => findRevert(child));
             }
@@ -214,24 +226,31 @@ export class SimulationUtils {
 
     static getBalanceChanges(
         response: SimulationResponse,
-        address: Address
+        address: Address,
     ): BalanceDelta[] {
         return response.balance_deltas.filter(
-            delta => delta.address.toLowerCase() === address.toLowerCase()
+            (delta) => delta.address.toLowerCase() === address.toLowerCase(),
         );
     }
 
     static getNativeTransfers(response: SimulationResponse): TokenTransfer[] {
-        return response.token_transfers.filter(transfer => transfer.type === "NATIVE");
+        return response.token_transfers.filter(
+            (transfer) => transfer.type === 'NATIVE',
+        );
     }
 
     static getERC20Transfers(response: SimulationResponse): TokenTransfer[] {
-        return response.token_transfers.filter(transfer => transfer.type === "ERC20");
+        return response.token_transfers.filter(
+            (transfer) => transfer.type === 'ERC20',
+        );
     }
 
-    static addressInTrace(response: SimulationResponse, address: Address): boolean {
-        return response.addresses.some(addr =>
-            addr.toLowerCase() === address.toLowerCase()
+    static addressInTrace(
+        response: SimulationResponse,
+        address: Address,
+    ): boolean {
+        return response.addresses.some(
+            (addr) => addr.toLowerCase() === address.toLowerCase(),
         );
     }
 }

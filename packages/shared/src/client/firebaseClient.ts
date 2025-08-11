@@ -1,8 +1,19 @@
-import { Client, DeviceRegistration, Request, RequestType, RequestTypeMap } from ".";
-import { decryptMessage, deriveRoomId, encryptMessage, SharedSecret } from "../crypto";
-import { FirebaseHttpClient, HttpClient } from "./client";
+import {
+    Client,
+    DeviceRegistration,
+    Request,
+    RequestType,
+    RequestTypeMap,
+} from '.';
+import {
+    decryptMessage,
+    deriveRoomId,
+    encryptMessage,
+    SharedSecret,
+} from '../crypto';
+import { FirebaseHttpClient, HttpClient } from './client';
 
-const FIREBASE_URL = "https://tlock-974e6-default-rtdb.firebaseio.com/"
+const FIREBASE_URL = 'https://tlock-974e6-default-rtdb.firebaseio.com/';
 
 interface StoredRequest {
     type: RequestType;
@@ -12,7 +23,8 @@ interface StoredRequest {
 
 const FirebasePaths = {
     registration: (roomId: string) => `registrations/${roomId}`,
-    request: (roomId: string, requestId: string) => `requests/${roomId}/${requestId}`,
+    request: (roomId: string, requestId: string) =>
+        `requests/${roomId}/${requestId}`,
     requests: (roomId: string) => `requests/${roomId}`,
 };
 
@@ -25,7 +37,7 @@ export class FirebaseClient implements Client {
     constructor(
         sharedSecret: SharedSecret,
         fcmToken?: string,
-        httpClient: HttpClient = new FirebaseHttpClient()
+        httpClient: HttpClient = new FirebaseHttpClient(),
     ) {
         this.sharedSecret = sharedSecret;
         this.roomId = deriveRoomId(sharedSecret);
@@ -41,10 +53,14 @@ export class FirebaseClient implements Client {
 
         const encryptedData = encryptMessage(registration, this.sharedSecret);
 
-        await this.http.put(FIREBASE_URL, FirebasePaths.registration(this.roomId), {
-            encryptedData,
-            registeredAt: Date.now()
-        });
+        await this.http.put(
+            FIREBASE_URL,
+            FirebasePaths.registration(this.roomId),
+            {
+                encryptedData,
+                registeredAt: Date.now(),
+            },
+        );
 
         // Update our local FCM token for notifications
         this.fcmToken = fcmToken;
@@ -53,7 +69,7 @@ export class FirebaseClient implements Client {
     async getDevice(): Promise<DeviceRegistration | null> {
         const data = await this.http.get<{ encryptedData: string }>(
             FIREBASE_URL,
-            FirebasePaths.registration(this.roomId)
+            FirebasePaths.registration(this.roomId),
         );
 
         if (!data || !data.encryptedData) {
@@ -61,13 +77,19 @@ export class FirebaseClient implements Client {
         }
 
         try {
-            return decryptMessage<DeviceRegistration>(data.encryptedData, this.sharedSecret);
+            return decryptMessage<DeviceRegistration>(
+                data.encryptedData,
+                this.sharedSecret,
+            );
         } catch {
             return null;
         }
     }
 
-    async pollUntilDeviceRegistered(intervalMs: number, timeoutSeconds: number): Promise<DeviceRegistration> {
+    async pollUntilDeviceRegistered(
+        intervalMs: number,
+        timeoutSeconds: number,
+    ): Promise<DeviceRegistration> {
         const startTime = Date.now();
 
         while (true) {
@@ -77,16 +99,21 @@ export class FirebaseClient implements Client {
             }
 
             if ((Date.now() - startTime) / 1000 > timeoutSeconds) {
-                throw new Error(`Polling for device registration timed out after ${timeoutSeconds} seconds`);
+                throw new Error(
+                    `Polling for device registration timed out after ${timeoutSeconds} seconds`,
+                );
             }
 
-            await new Promise(resolve => setTimeout(resolve, intervalMs));
+            await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
     }
 
-    async submitRequest<T extends RequestType>(type: T, data: RequestTypeMap[T]): Promise<string> {
+    async submitRequest<T extends RequestType>(
+        type: T,
+        data: RequestTypeMap[T],
+    ): Promise<string> {
         if (!this.fcmToken) {
-            throw new Error("Missing FCM token.");
+            throw new Error('Missing FCM token.');
         }
 
         const requestId = generateRequestId();
@@ -95,16 +122,24 @@ export class FirebaseClient implements Client {
         const storedRequest: StoredRequest = {
             type,
             data: encryptedData,
-            lastUpdated: Date.now()
+            lastUpdated: Date.now(),
         };
 
-        await this.http.put(FIREBASE_URL, FirebasePaths.request(this.roomId, requestId), storedRequest);
+        await this.http.put(
+            FIREBASE_URL,
+            FirebasePaths.request(this.roomId, requestId),
+            storedRequest,
+        );
         await this.sendNotification(this.fcmToken, requestId);
 
         return requestId;
     }
 
-    async updateRequest<T extends RequestType>(id: string, type: T, partialData: Partial<RequestTypeMap[T]>): Promise<void> {
+    async updateRequest<T extends RequestType>(
+        id: string,
+        type: T,
+        partialData: Partial<RequestTypeMap[T]>,
+    ): Promise<void> {
         const existingRequest = await this.getRequest(id, type);
         const mergedData = { ...existingRequest, ...partialData };
         const encryptedData = encryptMessage(mergedData, this.sharedSecret);
@@ -112,44 +147,56 @@ export class FirebaseClient implements Client {
         const storedRequest: StoredRequest = {
             type,
             data: encryptedData,
-            lastUpdated: Date.now()
+            lastUpdated: Date.now(),
         };
 
-        await this.http.put(FIREBASE_URL, FirebasePaths.request(this.roomId, id), storedRequest);
+        await this.http.put(
+            FIREBASE_URL,
+            FirebasePaths.request(this.roomId, id),
+            storedRequest,
+        );
     }
 
-    async getRequest<T extends RequestType>(id: string, _requestType: T): Promise<RequestTypeMap[T]> {
+    async getRequest<T extends RequestType>(
+        id: string,
+        _requestType: T,
+    ): Promise<RequestTypeMap[T]> {
         const storedRequest = await this.http.get<StoredRequest>(
             FIREBASE_URL,
-            FirebasePaths.request(this.roomId, id)
+            FirebasePaths.request(this.roomId, id),
         );
 
         if (!storedRequest || !storedRequest.data) {
             throw new Error('Request not found');
         }
 
-        return decryptMessage<RequestTypeMap[T]>(storedRequest.data, this.sharedSecret);
+        return decryptMessage<RequestTypeMap[T]>(
+            storedRequest.data,
+            this.sharedSecret,
+        );
     }
 
     async getRequests(): Promise<Request[]> {
-        const data = await this.http.get<{ [requestId: string]: StoredRequest }>(
-            FIREBASE_URL,
-            FirebasePaths.requests(this.roomId)
-        );
+        const data = await this.http.get<{
+            [requestId: string]: StoredRequest;
+        }>(FIREBASE_URL, FirebasePaths.requests(this.roomId));
 
         if (!data) return [];
 
         const requests: Request[] = [];
         for (const [requestId, storedRequest] of Object.entries(data)) {
             const requestType = storedRequest.type;
-            const requestData = decryptMessage(storedRequest.data, this.sharedSecret);
+            const requestData = decryptMessage(
+                storedRequest.data,
+                this.sharedSecret,
+            );
 
             const request: Request = {
                 id: requestId,
                 type: requestType,
                 request: requestData,
                 lastUpdated: storedRequest.lastUpdated,
-            } as Request
+            } as Request;
 
             requests.push(request);
         }
@@ -158,7 +205,10 @@ export class FirebaseClient implements Client {
     }
 
     async deleteRequest(id: string): Promise<void> {
-        await this.http.delete(FIREBASE_URL, FirebasePaths.request(this.roomId, id));
+        await this.http.delete(
+            FIREBASE_URL,
+            FirebasePaths.request(this.roomId, id),
+        );
     }
 
     async pollUntil<T extends RequestType>(
@@ -166,12 +216,12 @@ export class FirebaseClient implements Client {
         requestType: T,
         intervalMs: number,
         timeoutSeconds: number,
-        condition: (response: RequestTypeMap[T]) => boolean
+        condition: (response: RequestTypeMap[T]) => boolean,
     ): Promise<RequestTypeMap[T]> {
         const startTime = Date.now();
 
         while (true) {
-            await new Promise(resolve => setTimeout(resolve, intervalMs));
+            await new Promise((resolve) => setTimeout(resolve, intervalMs));
 
             const data = await this.getRequest(requestId, requestType);
             if (condition(data)) {
@@ -184,8 +234,16 @@ export class FirebaseClient implements Client {
         }
     }
 
-    private async sendNotification(fcmToken: string, requestId: string): Promise<void> {
-        console.log("TODO: Send notification to FCM token:", fcmToken, "for request ID:", requestId);
+    private async sendNotification(
+        fcmToken: string,
+        requestId: string,
+    ): Promise<void> {
+        console.log(
+            'TODO: Send notification to FCM token:',
+            fcmToken,
+            'for request ID:',
+            requestId,
+        );
         // await this.http.post(CLOUD_FUNCTION_URL, {
         //     data: {
         //         roomId: this.roomId,
@@ -199,5 +257,5 @@ export class FirebaseClient implements Client {
 function generateRequestId(): string {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 15);
-    return timestamp + "_" + random;
+    return timestamp + '_' + random;
 }

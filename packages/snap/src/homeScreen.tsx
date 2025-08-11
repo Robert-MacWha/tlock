@@ -15,21 +15,26 @@ export async function handleHomeScreen(interfaceId: string) {
         console.error('Error retrieving state:', error);
     }
 
-    await showScreen(interfaceId, (
+    await showScreen(
+        interfaceId,
         <Box>
             <Heading>Foxguard</Heading>
-            <Text>Your wallet is not paired. Pair it with the app to start using Foxguard accounts.</Text>
+            <Text>
+                Your wallet is not paired. Pair it with the app to start using
+                Foxguard accounts.
+            </Text>
             <Button name={SCREENS.PAIR}>Pair Wallet</Button>
-        </Box>
-    ));
+        </Box>,
+    );
 }
 
 async function showPairedScreen(state: SnapState, interfaceId: string) {
-    await showScreen(interfaceId, (
+    await showScreen(
+        interfaceId,
         <Box>
             <Heading>Foxguard</Heading>
             <Button name={SCREENS.IMPORT_ACCOUNT}>Import Account</Button>
             <Button name={SCREENS.PAIR}>Re-pair wallet</Button>
-        </Box>
-    ));
+        </Box>,
+    );
 }

@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { useSetupStatus } from "../../hooks/useSetupStatus";
-import { useKeyringContext } from "../../contexts/KeyringContext";
-import { router } from "expo-router";
+import { useSetupStatus } from '../../hooks/useSetupStatus';
+import { useKeyringContext } from '../../contexts/KeyringContext';
+import { router } from 'expo-router';
 import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
-import { Badge, Button, List, Modal, Portal, Surface, SegmentedButtons } from 'react-native-paper';
+import {
+    Badge,
+    Button,
+    List,
+    Modal,
+    Portal,
+    Surface,
+    SegmentedButtons,
+} from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
 import { useClientsContext } from '../../contexts/ClientContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -46,9 +54,9 @@ export default function SettingsScreen() {
             'Security Warning',
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
-                { text: 'Cancel', },
-                { text: 'Show', mode: 'contained', onPress: showSeedPhrase, },
-            ]
+                { text: 'Cancel' },
+                { text: 'Show', mode: 'contained', onPress: showSeedPhrase },
+            ],
         );
     };
 
@@ -57,9 +65,9 @@ export default function SettingsScreen() {
             'Reset App',
             'This will clear your setup status and require you to go through initial setup again. All data within the app will be rest. Are you sure?',
             [
-                { text: 'Cancel', },
-                { text: 'Reset', mode: 'contained', onPress: resetApp, },
-            ]
+                { text: 'Cancel' },
+                { text: 'Reset', mode: 'contained', onPress: resetApp },
+            ],
         );
     };
 
@@ -80,7 +88,9 @@ export default function SettingsScreen() {
                     <List.Item
                         title="Theme"
                         description="Choose your preferred theme"
-                        left={props => <List.Icon {...props} icon="palette-outline" />}
+                        left={(props) => (
+                            <List.Icon {...props} icon="palette-outline" />
+                        )}
                     />
 
                     <SegmentedButtons
@@ -109,14 +119,16 @@ export default function SettingsScreen() {
 
                     <List.Item
                         title="Connected Devices"
-                        left={props => <List.Icon {...props} icon="devices" />}
+                        left={(props) => (
+                            <List.Icon {...props} icon="devices" />
+                        )}
                         right={() =>
                             !hasClients ? (
                                 <Badge
                                     size={8}
                                     style={{
                                         alignSelf: 'center',
-                                        backgroundColor: 'red'
+                                        backgroundColor: 'red',
                                     }}
                                 />
                             ) : null
@@ -125,14 +137,19 @@ export default function SettingsScreen() {
                     />
                     <List.Item
                         title="Request"
-                        left={props => <List.Icon {...props} icon="clipboard-check-outline" />}
+                        left={(props) => (
+                            <List.Icon
+                                {...props}
+                                icon="clipboard-check-outline"
+                            />
+                        )}
                         right={() =>
                             hasRequests ? (
                                 <Badge
                                     size={8}
                                     style={{
                                         alignSelf: 'center',
-                                        backgroundColor: 'red'
+                                        backgroundColor: 'red',
                                     }}
                                 />
                             ) : null
@@ -141,7 +158,12 @@ export default function SettingsScreen() {
                     />
                     <List.Item
                         title="Docs"
-                        left={props => <List.Icon {...props} icon="file-document-multiple-outline" />}
+                        left={(props) => (
+                            <List.Icon
+                                {...props}
+                                icon="file-document-multiple-outline"
+                            />
+                        )}
                         onPress={() => router.push('/_docs')}
                     />
 
@@ -150,7 +172,9 @@ export default function SettingsScreen() {
                     <List.Item
                         title="Show Seed Phrase"
                         description="View your recovery phrase"
-                        left={props => <List.Icon {...props} icon="key-outline" />}
+                        left={(props) => (
+                            <List.Icon {...props} icon="key-outline" />
+                        )}
                         onPress={() => void alertShowSeedPhrase()}
                     />
 
@@ -159,7 +183,9 @@ export default function SettingsScreen() {
                     <List.Item
                         title="Reset Setup"
                         description="Clear all app data and start over"
-                        left={props => <List.Icon {...props} icon="refresh" />}
+                        left={(props) => (
+                            <List.Icon {...props} icon="refresh" />
+                        )}
                         onPress={() => void alertReset()}
                     />
                 </List.Section>
@@ -171,9 +197,7 @@ export default function SettingsScreen() {
                     style={{ padding: 32 }}
                     onDismiss={() => setShowSeedPhrasePopup(false)}
                 >
-                    <SeedPhraseDisplay
-                        seedPhrase={seedPhrase}
-                    />
+                    <SeedPhraseDisplay seedPhrase={seedPhrase} />
                     <Button
                         mode="contained"
                         style={{ marginTop: 16 }}

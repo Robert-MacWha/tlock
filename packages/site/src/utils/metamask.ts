@@ -1,6 +1,6 @@
 import type {
-  EIP6963AnnounceProviderEvent,
-  MetaMaskInpageProvider,
+    EIP6963AnnounceProviderEvent,
+    MetaMaskInpageProvider,
 } from '@metamask/providers';
 
 /**
@@ -11,17 +11,17 @@ import type {
  * @returns True if the provider supports snaps, false otherwise.
  */
 export async function hasSnapsSupport(
-  provider: MetaMaskInpageProvider = window.ethereum,
+    provider: MetaMaskInpageProvider = window.ethereum,
 ) {
-  try {
-    await provider.request({
-      method: 'wallet_getSnaps',
-    });
+    try {
+        await provider.request({
+            method: 'wallet_getSnaps',
+        });
 
-    return true;
-  } catch {
-    return false;
-  }
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /**
@@ -32,53 +32,56 @@ export async function hasSnapsSupport(
  * @returns A MetaMask provider if found, otherwise null.
  */
 export async function getMetaMaskEIP6963Provider() {
-  return new Promise<MetaMaskInpageProvider | null>((resolve) => {
-    // Timeout looking for providers after 500ms
-    const timeout = setTimeout(() => {
-      resolveWithCleanup(null);
-    }, 500);
+    return new Promise<MetaMaskInpageProvider | null>((resolve) => {
+        // Timeout looking for providers after 500ms
+        const timeout = setTimeout(() => {
+            resolveWithCleanup(null);
+        }, 500);
 
-    /**
-     * Resolve the promise with a MetaMask provider and clean up.
-     *
-     * @param provider - A MetaMask provider if found, otherwise null.
-     */
-    function resolveWithCleanup(provider: MetaMaskInpageProvider | null) {
-      window.removeEventListener(
-        'eip6963:announceProvider',
-        onAnnounceProvider,
-      );
+        /**
+         * Resolve the promise with a MetaMask provider and clean up.
+         *
+         * @param provider - A MetaMask provider if found, otherwise null.
+         */
+        function resolveWithCleanup(provider: MetaMaskInpageProvider | null) {
+            window.removeEventListener(
+                'eip6963:announceProvider',
+                onAnnounceProvider,
+            );
 
-      clearTimeout(timeout);
-      resolve(provider);
-    }
+            clearTimeout(timeout);
+            resolve(provider);
+        }
 
-    /**
-     * Listener for the EIP6963 announceProvider event.
-     *
-     * Resolves the promise if a MetaMask provider is found.
-     *
-     * @param event - The EIP6963 announceProvider event.
-     * @param event.detail - The details of the EIP6963 announceProvider event.
-     */
-    function onAnnounceProvider({ detail }: EIP6963AnnounceProviderEvent) {
-      if (!detail) {
-        return;
-      }
+        /**
+         * Listener for the EIP6963 announceProvider event.
+         *
+         * Resolves the promise if a MetaMask provider is found.
+         *
+         * @param event - The EIP6963 announceProvider event.
+         * @param event.detail - The details of the EIP6963 announceProvider event.
+         */
+        function onAnnounceProvider({ detail }: EIP6963AnnounceProviderEvent) {
+            if (!detail) {
+                return;
+            }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-      const { info, provider } = detail as { info: any, provider: MetaMaskInpageProvider | null };
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            const { info, provider } = detail as {
+                info: any;
+                provider: MetaMaskInpageProvider | null;
+            };
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      if (info.rdns.includes('io.metamask')) {
-        resolveWithCleanup(provider);
-      }
-    }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            if (info.rdns.includes('io.metamask')) {
+                resolveWithCleanup(provider);
+            }
+        }
 
-    window.addEventListener('eip6963:announceProvider', onAnnounceProvider);
+        window.addEventListener('eip6963:announceProvider', onAnnounceProvider);
 
-    window.dispatchEvent(new Event('eip6963:requestProvider'));
-  });
+        window.dispatchEvent(new Event('eip6963:requestProvider'));
+    });
 }
 
 /**
@@ -88,35 +91,35 @@ export async function getMetaMaskEIP6963Provider() {
  * @returns The provider, or `null` if no provider supports snaps.
  */
 export async function getSnapsProvider() {
-  if (typeof window === 'undefined') {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    if (await hasSnapsSupport()) {
+        return window.ethereum;
+    }
+
+    if (window.ethereum?.detected) {
+        for (const provider of window.ethereum.detected) {
+            if (await hasSnapsSupport(provider)) {
+                return provider;
+            }
+        }
+    }
+
+    if (window.ethereum?.providers) {
+        for (const provider of window.ethereum.providers) {
+            if (await hasSnapsSupport(provider)) {
+                return provider;
+            }
+        }
+    }
+
+    const eip6963Provider = await getMetaMaskEIP6963Provider();
+
+    if (eip6963Provider && (await hasSnapsSupport(eip6963Provider))) {
+        return eip6963Provider;
+    }
+
     return null;
-  }
-
-  if (await hasSnapsSupport()) {
-    return window.ethereum;
-  }
-
-  if (window.ethereum?.detected) {
-    for (const provider of window.ethereum.detected) {
-      if (await hasSnapsSupport(provider)) {
-        return provider;
-      }
-    }
-  }
-
-  if (window.ethereum?.providers) {
-    for (const provider of window.ethereum.providers) {
-      if (await hasSnapsSupport(provider)) {
-        return provider;
-      }
-    }
-  }
-
-  const eip6963Provider = await getMetaMaskEIP6963Provider();
-
-  if (eip6963Provider && (await hasSnapsSupport(eip6963Provider))) {
-    return eip6963Provider;
-  }
-
-  return null;
 }

@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Card, Text, IconButton, Portal, Modal, Divider, Button, Menu, TextInput } from 'react-native-paper';
+import {
+    Card,
+    Text,
+    IconButton,
+    Portal,
+    Modal,
+    Divider,
+    Button,
+    Menu,
+    TextInput,
+} from 'react-native-paper';
 import { View } from 'react-native';
 import { useClientsContext } from '../contexts/ClientContext';
 import { ClientInstance } from '../hooks/useClients';
@@ -16,7 +26,7 @@ export function ClientCard({ id }: ClientCardProps) {
     const [nameInput, setNameInput] = useState<string>('');
     const { alert } = useAlert();
 
-    const client = clients.find(client => client.id === id);
+    const client = clients.find((client) => client.id === id);
 
     if (!client) {
         return (
@@ -43,7 +53,7 @@ export function ClientCard({ id }: ClientCardProps) {
                     onPress: () => void removeClient(id),
                 },
             ],
-        )
+        );
     }
 
     function handleRename() {
@@ -60,8 +70,17 @@ export function ClientCard({ id }: ClientCardProps) {
     return (
         <Card mode="elevated">
             <Card.Content>
-                <Text variant="titleMedium">{client.name ? client.name : id}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Text variant="titleMedium">
+                    {client.name ? client.name : id}
+                </Text>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: 16,
+                    }}
+                >
                     <Text
                         variant="bodyMedium"
                         style={{ color: 'gray', flexShrink: 1 }}
@@ -80,9 +99,17 @@ export function ClientCard({ id }: ClientCardProps) {
                             />
                         }
                     >
-                        <Menu.Item leadingIcon="pencil-outline" onPress={handleRename} title="Rename" />
+                        <Menu.Item
+                            leadingIcon="pencil-outline"
+                            onPress={handleRename}
+                            title="Rename"
+                        />
                         <Divider />
-                        <Menu.Item leadingIcon="delete-outline" onPress={() => handleRemove(client)} title="Delete" />
+                        <Menu.Item
+                            leadingIcon="delete-outline"
+                            onPress={() => handleRemove(client)}
+                            title="Delete"
+                        />
                     </Menu>
                 </View>
             </Card.Content>
@@ -91,7 +118,11 @@ export function ClientCard({ id }: ClientCardProps) {
                 <Modal
                     visible={renameVisible}
                     onDismiss={() => setRenameVisible(false)}
-                    contentContainerStyle={{ padding: 16, backgroundColor: 'white', margin: 32 }}
+                    contentContainerStyle={{
+                        padding: 16,
+                        backgroundColor: 'white',
+                        margin: 32,
+                    }}
                 >
                     <Text variant="titleMedium">Rename Client</Text>
                     <TextInput
@@ -99,7 +130,11 @@ export function ClientCard({ id }: ClientCardProps) {
                         value={nameInput}
                         style={{ marginBottom: 16 }}
                     />
-                    <Button mode="contained" onPress={() => void handleRenameConfirm()} style={{ marginBottom: 8 }}>
+                    <Button
+                        mode="contained"
+                        onPress={() => void handleRenameConfirm()}
+                        style={{ marginBottom: 8 }}
+                    >
                         Save
                     </Button>
                 </Modal>

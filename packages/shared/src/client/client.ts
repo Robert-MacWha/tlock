@@ -21,19 +21,21 @@ export class FirebaseHttpClient implements HttpClient {
         const response = await fetch(`${url}${path}.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`PUT ${path} failed: [${response.status}] ${errorText}`);
+            throw new Error(
+                `PUT ${path} failed: [${response.status}] ${errorText}`,
+            );
         }
     }
 
     async delete(url: string, path: string): Promise<void> {
         const response = await fetch(`${url}${path}.json`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
         });
 
         if (!response.ok && response.status !== 404) {
@@ -45,7 +47,7 @@ export class FirebaseHttpClient implements HttpClient {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
 
         if (!response.ok) {

@@ -4,7 +4,13 @@ import { entropyToMnemonic, mnemonicToSeedSync } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bytesToHex, parseTransaction } from 'viem';
-import type { Address, Hex, PrivateKeyAccount, TransactionSerialized, TypedDataDefinition } from 'viem';
+import type {
+    Address,
+    Hex,
+    PrivateKeyAccount,
+    TransactionSerialized,
+    TypedDataDefinition,
+} from 'viem';
 import * as Crypto from 'expo-crypto';
 
 export interface Account {
@@ -23,12 +29,14 @@ export function useKeyring() {
     const [accounts, setAccounts] = useState<Account[]>([]);
 
     useEffect(() => {
-        const accounts = _loadAccounts()
+        const accounts = _loadAccounts();
         setAccounts(accounts);
     }, []);
 
     const getSeedPhrase = (): string => {
-        const seedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, { requireAuthentication: true });
+        const seedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
+            requireAuthentication: true,
+        });
         if (!seedPhrase) {
             throw new Error('No seed phrase found');
         }
@@ -36,9 +44,13 @@ export function useKeyring() {
     };
 
     const generateSeedPhrase = (override: boolean = false): string => {
-        const existingSeedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, { requireAuthentication: true });
+        const existingSeedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
+            requireAuthentication: true,
+        });
         if (existingSeedPhrase && !override) {
-            throw new Error('Seed phrase already exists. Use override to replace it.');
+            throw new Error(
+                'Seed phrase already exists. Use override to replace it.',
+            );
         }
 
         const entropy = Crypto.getRandomBytes(16);
@@ -53,7 +65,7 @@ export function useKeyring() {
         setAccounts([]);
 
         return seedPhrase;
-    }
+    };
 
     const addAccount = (): Address => {
         const newAccountId = accounts.length + 1;
@@ -61,7 +73,7 @@ export function useKeyring() {
 
         const newAccount: Account = {
             id: newAccountId,
-            address
+            address,
         };
 
         const newAccounts = [...accounts, newAccount];
@@ -72,16 +84,18 @@ export function useKeyring() {
     };
 
     const renameAccount = (address: Address, name: string): void => {
-        const updatedAccounts = accounts.map(account =>
-            account.address === address ? { ...account, name } : account
+        const updatedAccounts = accounts.map((account) =>
+            account.address === address ? { ...account, name } : account,
         );
         _saveAccounts(updatedAccounts);
         setAccounts(updatedAccounts);
     };
 
     const hideAccount = (address: Address, hide: boolean): void => {
-        const updatedAccounts = accounts.map(account =>
-            account.address === address ? { ...account, isHidden: hide } : account
+        const updatedAccounts = accounts.map((account) =>
+            account.address === address
+                ? { ...account, isHidden: hide }
+                : account,
         );
         _saveAccounts(updatedAccounts);
         setAccounts(updatedAccounts);
@@ -95,19 +109,25 @@ export function useKeyring() {
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
         const account = _getAccountFromAddress(from);
         return await account.signMessage({ message: { raw } });
-    }
+    };
 
-    const signTypedData = async (from: Address, data: TypedDataDefinition): Promise<Hex> => {
+    const signTypedData = async (
+        from: Address,
+        data: TypedDataDefinition,
+    ): Promise<Hex> => {
         const account = _getAccountFromAddress(from);
         return await account.signTypedData(data);
-    }
+    };
 
-    const signTransaction = async (from: Address, transaction: Hex): Promise<TransactionSerialized> => {
+    const signTransaction = async (
+        from: Address,
+        transaction: Hex,
+    ): Promise<TransactionSerialized> => {
         const account = _getAccountFromAddress(from);
         const parsed = parseTransaction(transaction);
         const signedTransaction = await account.signTransaction(parsed);
         return signedTransaction;
-    }
+    };
 
     const _loadAccounts = (): Account[] => {
         const accountsStr = SecureStore.getItem(ACCOUNTS_KEY);
@@ -123,17 +143,20 @@ export function useKeyring() {
     const _saveAccounts = (accounts: Account[]) => {
         setAccounts(accounts);
         SecureStore.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    }
+    };
 
     const _getAccountFromAddress = (address: Address): PrivateKeyAccount => {
-        const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
+        const account = accounts.find(
+            (account) =>
+                account.address.toLowerCase() === address.toLowerCase(),
+        );
         if (!account) {
             throw new Error(`Account with address ${address} not found`);
         }
 
         const privateKey = _getPrivateKey(account.id);
         return privateKeyToAccount(privateKey);
-    }
+    };
 
     const _deriveAddress = (accountId: number): Address => {
         const privateKey = _getPrivateKey(accountId);
@@ -144,7 +167,7 @@ export function useKeyring() {
             // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to derive address');
         }
-    }
+    };
 
     const _getPrivateKey = (accountId: number): Hex => {
         const seedPhrase = getSeedPhrase();
@@ -162,7 +185,7 @@ export function useKeyring() {
             // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to get private key');
         }
-    }
+    };
 
     return {
         accounts,
@@ -175,5 +198,5 @@ export function useKeyring() {
         signPersonal,
         signTypedData,
         signTransaction,
-    }
+    };
 }

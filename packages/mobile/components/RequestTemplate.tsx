@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
-import {
-    Text,
-    Button,
-    Surface,
-    Snackbar,
-    useTheme
-} from 'react-native-paper';
+import { Text, Button, Surface, Snackbar, useTheme } from 'react-native-paper';
 
 type RequestTemplateProps = {
     title: string;
@@ -30,8 +24,8 @@ export function RequestTemplate({
     canApprove = true,
     loading = false,
     error = null,
-    approveText = "Approve",
-    rejectText = "Reject"
+    approveText = 'Approve',
+    rejectText = 'Reject',
 }: RequestTemplateProps) {
     const [showError, setShowError] = useState(false);
     const theme = useTheme();
@@ -49,21 +43,29 @@ export function RequestTemplate({
                     {title}
                 </Text>
 
-                <Text variant="bodyLarge" style={{ marginBottom: 24, color: theme.colors.onSurfaceVariant }}>
+                <Text
+                    variant="bodyLarge"
+                    style={{
+                        marginBottom: 24,
+                        color: theme.colors.onSurfaceVariant,
+                    }}
+                >
                     {description}
                 </Text>
 
-                <View style={{ flex: 1, marginBottom: 24 }}>
-                    {children}
-                </View>
+                <View style={{ flex: 1, marginBottom: 24 }}>{children}</View>
 
-                <View style={{
-                    flexDirection: 'row',
-                    gap: 12,
-                    justifyContent: 'space-between'
-                }}>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        gap: 12,
+                        justifyContent: 'space-between',
+                    }}
+                >
                     <Button
-                        onPress={() => { void onReject() }}
+                        onPress={() => {
+                            void onReject();
+                        }}
                         style={{ flex: 1 }}
                         textColor={theme.colors.error}
                         disabled={loading}
@@ -72,7 +74,9 @@ export function RequestTemplate({
                     </Button>
                     <Button
                         mode="contained"
-                        onPress={() => { void onApprove() }}
+                        onPress={() => {
+                            void onApprove();
+                        }}
                         disabled={!canApprove || loading}
                         style={{ flex: 1 }}
                     >

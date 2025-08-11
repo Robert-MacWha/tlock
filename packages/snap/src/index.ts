@@ -1,4 +1,11 @@
-import { type OnRpcRequestHandler, type OnHomePageHandler, type OnUserInputHandler, type OnKeyringRequestHandler, type Json, UserInputEventType } from '@metamask/snaps-sdk';
+import {
+    type OnRpcRequestHandler,
+    type OnHomePageHandler,
+    type OnUserInputHandler,
+    type OnKeyringRequestHandler,
+    type Json,
+    UserInputEventType,
+} from '@metamask/snaps-sdk';
 import { createClient } from '@tlock/shared';
 import { getState } from './state';
 import { TlockKeyring } from './keyring';
@@ -30,9 +37,12 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         await selectScreen(id, buttonName);
         return;
     }
-}
+};
 
-export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, request }): Promise<Json> => {
+export const onKeyringRequest: OnKeyringRequestHandler = async ({
+    origin,
+    request,
+}): Promise<Json> => {
     console.log('Keyring request from origin:', origin, 'Request:', request);
 
     const state = await getState();
@@ -42,9 +52,12 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({ origin, reques
     const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
     return (await handleKeyringRequest(keyring, request)) ?? null;
-}
+};
 
-export async function selectScreen(interfaceId: string, screen: string | undefined) {
+export async function selectScreen(
+    interfaceId: string,
+    screen: string | undefined,
+) {
     try {
         switch (screen) {
             case SCREENS.HOME:
@@ -64,7 +77,9 @@ export async function selectScreen(interfaceId: string, screen: string | undefin
                 return;
         }
     } catch (error) {
-        console.error(`Error showing screen screen=${screen} err=${error as string}`);
+        console.error(
+            `Error showing screen screen=${screen} err=${error as string}`,
+        );
         if (error instanceof Error) {
             await showErrorScreen(interfaceId, error.message);
         } else {

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 export const onRenderBody = ({ setHeadComponents }) => {
     setHeadComponents([
@@ -7,5 +7,5 @@ export const onRenderBody = ({ setHeadComponents }) => {
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
             rel="stylesheet"
         />,
-    ])
-}
+    ]);
+};

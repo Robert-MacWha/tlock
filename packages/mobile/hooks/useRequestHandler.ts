@@ -5,23 +5,30 @@ import { useClientsContext } from '../contexts/ClientContext';
 
 interface RequestHandlerConfig<T extends RequestType> {
     type: T;
-    onApprove: (request: RequestTypeMap[T]) => Promise<Partial<RequestTypeMap[T]>>;
+    onApprove: (
+        request: RequestTypeMap[T],
+    ) => Promise<Partial<RequestTypeMap[T]>>;
 }
 
 /**
  * RequestHandler provides methods to handle approval and rejection of requests,
  * updating the request status and navigating accordingly.
  */
-export function useRequestHandler<T extends RequestType>(config: RequestHandlerConfig<T>) {
+export function useRequestHandler<T extends RequestType>(
+    config: RequestHandlerConfig<T>,
+) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const { clientId, requestId } = useLocalSearchParams() as { clientId: string, requestId: string };
+    const { clientId, requestId } = useLocalSearchParams() as {
+        clientId: string;
+        requestId: string;
+    };
     const { clients } = useClientsContext();
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [request, setRequest] = useState<RequestTypeMap[T] | null>(null);
 
-    const client = clients.find(c => c.id === clientId);
+    const client = clients.find((c) => c.id === clientId);
 
     useEffect(() => {
         const fetchRequest = async () => {
@@ -32,11 +39,18 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
                     throw new Error('Client not found');
                 }
 
-                const req = await client.client.getRequest(requestId, config.type);
+                const req = await client.client.getRequest(
+                    requestId,
+                    config.type,
+                );
                 setRequest(req);
             } catch (err) {
                 console.error('Failed to fetch request:', err);
-                setError(err instanceof Error ? err.message : 'Failed to fetch request');
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Failed to fetch request',
+                );
             } finally {
                 setLoading(false);
             }
@@ -44,7 +58,6 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
 
         void fetchRequest();
     }, [clientId, requestId]);
-
 
     const handleApprove = async () => {
         if (!client || !request) {
@@ -62,11 +75,15 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
             });
             router.replace({
                 pathname: '/_requests/success',
-                params: { type: config.type }
+                params: { type: config.type },
             });
         } catch (err) {
             console.error('Failed to approve request:', err);
-            setError(err instanceof Error ? err.message : 'Failed to approve request');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to approve request',
+            );
         } finally {
             setLoading(false);
         }
@@ -86,7 +103,9 @@ export function useRequestHandler<T extends RequestType>(config: RequestHandlerC
             router.back();
         } catch (err) {
             console.error('Failed to reject request:', err);
-            setError(err instanceof Error ? err.message : 'Failed to reject request');
+            setError(
+                err instanceof Error ? err.message : 'Failed to reject request',
+            );
         } finally {
             setLoading(false);
         }

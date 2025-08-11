@@ -47,7 +47,7 @@ describe('useRequestManager', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockGetRequests.mockResolvedValue([mockRequest]);
         mockUpdateRequest.mockResolvedValue(undefined);
@@ -58,7 +58,7 @@ describe('useRequestManager', () => {
             useRequestManager({
                 clients: [mockClient],
                 pollingInterval: 0,
-            })
+            }),
         );
 
         await waitFor(() => {
@@ -67,7 +67,10 @@ describe('useRequestManager', () => {
 
         expect(mockRouter.push).toHaveBeenCalledWith({
             pathname: '/_requests/signPersonal',
-            params: { clientId: 'test-client-id', requestId: 'test-request-id' }
+            params: {
+                clientId: 'test-client-id',
+                requestId: 'test-request-id',
+            },
         });
     });
 
@@ -78,7 +81,7 @@ describe('useRequestManager', () => {
             useRequestManager({
                 clients: [mockClient],
                 pollingInterval: 0,
-            })
+            }),
         );
 
         await waitFor(() => {
@@ -91,7 +94,7 @@ describe('useRequestManager', () => {
             useRequestManager({
                 clients: [],
                 pollingInterval: 0,
-            })
+            }),
         );
 
         await waitFor(() => {

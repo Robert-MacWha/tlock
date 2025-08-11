@@ -1,16 +1,41 @@
-import { Address, Hex, TransactionSerialized, TypedDataDefinition } from "viem";
-import { FirebaseClient } from "./firebaseClient";
-import { SharedSecret } from "../crypto";
+import { Address, Hex, TransactionSerialized, TypedDataDefinition } from 'viem';
+import { FirebaseClient } from './firebaseClient';
+import { SharedSecret } from '../crypto';
 
 /**
  * Request represents a request currently pending in the backend.
  */
 export type Request =
-    { id: string; lastUpdated: number; type: 'importAccount'; request: ImportAccountRequest } |
-    { id: string; lastUpdated: number; type: 'signPersonal'; request: SignPersonalRequest } |
-    { id: string; lastUpdated: number; type: 'signTransaction'; request: SignTransactionRequest } |
-    { id: string; lastUpdated: number; type: 'signTypedData'; request: SignTypedDataRequest } |
-    { id: string; lastUpdated: number; type: 'signMessage'; request: SignMessageRequest };
+    | {
+          id: string;
+          lastUpdated: number;
+          type: 'importAccount';
+          request: ImportAccountRequest;
+      }
+    | {
+          id: string;
+          lastUpdated: number;
+          type: 'signPersonal';
+          request: SignPersonalRequest;
+      }
+    | {
+          id: string;
+          lastUpdated: number;
+          type: 'signTransaction';
+          request: SignTransactionRequest;
+      }
+    | {
+          id: string;
+          lastUpdated: number;
+          type: 'signTypedData';
+          request: SignTypedDataRequest;
+      }
+    | {
+          id: string;
+          lastUpdated: number;
+          type: 'signMessage';
+          request: SignMessageRequest;
+      };
 
 /**
  * DeviceRegistration used for pairing devices with the backend.
@@ -23,7 +48,12 @@ export interface DeviceRegistration {
 }
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
-export type RequestType = 'importAccount' | 'signPersonal' | 'signTransaction' | 'signTypedData' | 'signMessage';
+export type RequestType =
+    | 'importAccount'
+    | 'signPersonal'
+    | 'signTransaction'
+    | 'signTypedData'
+    | 'signMessage';
 
 export interface ImportAccountRequest {
     status: RequestStatus;
@@ -79,11 +109,24 @@ export interface Client {
 
     submitDevice(fcmToken: string, deviceName: string): Promise<void>;
     getDevice(): Promise<DeviceRegistration | null>;
-    pollUntilDeviceRegistered(intervalMs: number, timeoutSeconds: number): Promise<DeviceRegistration>;
+    pollUntilDeviceRegistered(
+        intervalMs: number,
+        timeoutSeconds: number,
+    ): Promise<DeviceRegistration>;
 
-    submitRequest<T extends RequestType>(type: T, data: RequestTypeMap[T]): Promise<string>;
-    updateRequest<T extends RequestType>(id: string, type: T, data: Partial<RequestTypeMap[T]>): Promise<void>;
-    getRequest<T extends RequestType>(id: string, requestType: T): Promise<RequestTypeMap[T]>;
+    submitRequest<T extends RequestType>(
+        type: T,
+        data: RequestTypeMap[T],
+    ): Promise<string>;
+    updateRequest<T extends RequestType>(
+        id: string,
+        type: T,
+        data: Partial<RequestTypeMap[T]>,
+    ): Promise<void>;
+    getRequest<T extends RequestType>(
+        id: string,
+        requestType: T,
+    ): Promise<RequestTypeMap[T]>;
     getRequests(): Promise<Request[]>;
     deleteRequest(id: string): Promise<void>;
 
@@ -96,6 +139,9 @@ export interface Client {
     ): Promise<RequestTypeMap[T]>;
 }
 
-export function createClient(sharedSecret: SharedSecret, fcmToken?: string): Client {
+export function createClient(
+    sharedSecret: SharedSecret,
+    fcmToken?: string,
+): Client {
     return new FirebaseClient(sharedSecret, fcmToken);
 }

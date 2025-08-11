@@ -6,7 +6,7 @@ import {
     RadioButton,
     useTheme,
     IconButton,
-    ActivityIndicator
+    ActivityIndicator,
 } from 'react-native-paper';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { useRequestHandler } from '../../hooks/useRequestHandler';
@@ -23,7 +23,12 @@ type AccountItemProps = {
     onSelect: (address: Address) => void;
 };
 
-function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) {
+function AccountItem({
+    name,
+    address,
+    isSelected,
+    onSelect,
+}: AccountItemProps) {
     const theme = useTheme();
 
     return (
@@ -31,31 +36,39 @@ function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) 
             mode="outlined"
             style={{
                 marginVertical: 4,
-                backgroundColor: isSelected ? theme.colors.primaryContainer : theme.colors.surface
+                backgroundColor: isSelected
+                    ? theme.colors.primaryContainer
+                    : theme.colors.surface,
             }}
             onPress={() => onSelect(address)}
         >
-            <Card.Content style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: 12
-            }}>
+            <Card.Content
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 12,
+                }}
+            >
                 <RadioButton
                     value={address}
                     status={isSelected ? 'checked' : 'unchecked'}
                     onPress={() => onSelect(address)}
                 />
-                <View style={{
-                    flex: 1,
-                    marginLeft: 8,
-                    justifyContent: name ? 'flex-start' : 'center'
-                }}>
+                <View
+                    style={{
+                        flex: 1,
+                        marginLeft: 8,
+                        justifyContent: name ? 'flex-start' : 'center',
+                    }}
+                >
                     {name && (
                         <Text
                             variant="bodyMedium"
                             numberOfLines={1}
                             style={{
-                                color: isSelected ? theme.colors.onPrimaryContainer : theme.colors.onSurface
+                                color: isSelected
+                                    ? theme.colors.onPrimaryContainer
+                                    : theme.colors.onSurface,
                             }}
                         >
                             {name}
@@ -66,7 +79,7 @@ function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) 
                         numberOfLines={1}
                         ellipsizeMode="middle"
                         style={{
-                            color: theme.colors.onSurfaceVariant
+                            color: theme.colors.onSurfaceVariant,
                         }}
                     >
                         {address}
@@ -78,12 +91,20 @@ function AccountItem({ name, address, isSelected, onSelect }: AccountItemProps) 
 }
 
 export default function ImportAccountScreen() {
-    const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const [selectedAddress, setSelectedAddress] = useState<Address | null>(
+        null,
+    );
     const { accounts, addAccount } = useKeyringContext();
     const { alert } = useAlert();
     const [loading, setLoading] = useState(false);
 
-    const { client, loading: reqLoading, error, handleApprove, handleReject } = useRequestHandler({
+    const {
+        client,
+        loading: reqLoading,
+        error,
+        handleApprove,
+        handleReject,
+    } = useRequestHandler({
         type: 'importAccount',
         onApprove: async () => {
             if (!selectedAddress) {
@@ -116,7 +137,7 @@ export default function ImportAccountScreen() {
     if (!client) return <ErrorScreen error="Client not found" />;
     const clientName = client.name ?? client.id;
 
-    const displayedAccounts = accounts.filter(account => !account.isHidden);
+    const displayedAccounts = accounts.filter((account) => !account.isHidden);
 
     return (
         <>
@@ -140,7 +161,10 @@ export default function ImportAccountScreen() {
 
             <RequestTemplate
                 title="Import Account"
-                description={clientName + " is requesting to import an existing account. Do you approve?"}
+                description={
+                    clientName +
+                    ' is requesting to import an existing account. Do you approve?'
+                }
                 onApprove={() => void handleApprove()}
                 onReject={() => void handleReject()}
                 canApprove={!!selectedAddress}

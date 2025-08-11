@@ -19,7 +19,10 @@ interface UseRequestManagerOptions {
  * on said events.  It can poll for new requests or receive them via push notifications.
  * TODO: Implement push notification receipt and conditional handling based on app visibility
  */
-export function useRequestManager({ pollingInterval, clients }: UseRequestManagerOptions) {
+export function useRequestManager({
+    pollingInterval,
+    clients,
+}: UseRequestManagerOptions) {
     const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
     const previousRequestIds = useRef(new Set<string>());
     const clientsRef = useRef(clients);
@@ -28,17 +31,17 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
     useEffect(() => {
         clientsRef.current = clients;
 
-        fetchRequests().catch(error => {
+        fetchRequests().catch((error) => {
             console.error('Failed to fetch requests:', error);
         });
     }, [clients]);
 
-    // update requests on polling interval 
+    // update requests on polling interval
     useEffect(() => {
         if (pollingInterval === undefined || pollingInterval === 0) return;
 
         const interval = setInterval(() => {
-            fetchRequests().catch(error => {
+            fetchRequests().catch((error) => {
                 console.error('Failed to fetch requests:', error);
             });
         }, pollingInterval);
@@ -49,7 +52,10 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
     const handleRequest = async (request: ClientRequest): Promise<void> => {
         router.push({
             pathname: `/_requests/${request.request.type}`,
-            params: { clientId: request.clientId, requestId: request.request.id }
+            params: {
+                clientId: request.clientId,
+                requestId: request.request.id,
+            },
         });
     };
 
@@ -57,8 +63,9 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
         const newClientRequests = await getClientRequests();
 
         // Handle new requests
-        const newRequests = newClientRequests
-            .filter(req => !previousRequestIds.current.has(req.request.id));
+        const newRequests = newClientRequests.filter(
+            (req) => !previousRequestIds.current.has(req.request.id),
+        );
 
         for (const req of newRequests) {
             try {
@@ -68,9 +75,11 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
             }
         }
 
-        newRequests.forEach(req => previousRequestIds.current.add(req.request.id));
+        newRequests.forEach((req) =>
+            previousRequestIds.current.add(req.request.id),
+        );
         setClientRequests(newClientRequests);
-    }
+    };
 
     const getClientRequests = async (): Promise<ClientRequest[]> => {
         let newClientRequests: ClientRequest[] = [];
@@ -81,20 +90,25 @@ export function useRequestManager({ pollingInterval, clients }: UseRequestManage
 
         for (const clientInstance of clientsRef.current) {
             try {
-                const client = clients.find(c => c.id === clientInstance.id);
+                const client = clients.find((c) => c.id === clientInstance.id);
                 if (!client) continue;
 
                 const resp = await client.client.getRequests();
-                const requests = resp.filter(req => req.request.status === 'pending');
+                const requests = resp.filter(
+                    (req) => req.request.status === 'pending',
+                );
 
                 newClientRequests = newClientRequests.concat(
-                    requests.map(req => ({
+                    requests.map((req) => ({
                         request: req,
                         clientId: clientInstance.id,
-                    }))
+                    })),
                 );
             } catch (error) {
-                console.error(`Failed to fetch requests for client ${clientInstance.id}:`, error);
+                console.error(
+                    `Failed to fetch requests for client ${clientInstance.id}:`,
+                    error,
+                );
                 continue;
             }
         }

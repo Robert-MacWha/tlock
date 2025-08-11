@@ -1,6 +1,4 @@
-import {
-    recoverPersonalSignature,
-} from '@metamask/eth-sig-util';
+import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import type {
     Keyring,
     KeyringAccount,
@@ -14,18 +12,27 @@ import {
     EthMethod,
 } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
-import type {
-    Client,
-    RequestType,
-    RequestTypeMap,
-} from '@tlock/shared';
+import type { Client, RequestType, RequestTypeMap } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
 import { serializeTransaction, type Address, type Hex } from 'viem';
 
 import type { KeyringState } from './state';
 import { updateState } from './state';
-import { KeyringRequestParams, mapViemTransactionType, transactionRequestToViem as toViemTransaction, TransactionRequest, TypedDataRequest, typedDataToViem, viemTxToJson } from './keyringTypes';
-import { POLL_INTERVAL, POLL_TIMEOUT, ERROR_CODES, ACCOUNT_NAME_SUGGESTION } from './constants';
+import {
+    KeyringRequestParams,
+    mapViemTransactionType,
+    transactionRequestToViem as toViemTransaction,
+    TransactionRequest,
+    TypedDataRequest,
+    typedDataToViem,
+    viemTxToJson,
+} from './keyringTypes';
+import {
+    POLL_INTERVAL,
+    POLL_TIMEOUT,
+    ERROR_CODES,
+    ACCOUNT_NAME_SUGGESTION,
+} from './constants';
 import { throwError, handleError } from './errors';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
@@ -49,7 +56,9 @@ export class TlockKeyring implements Keyring {
     private async pollForRequestCompletion<T extends RequestType>(
         requestId: string,
         requestType: T,
-        completionCheck: (response: RequestTypeMap[T]) => boolean = (r: RequestTypeMap[T]) => r.status !== 'pending'
+        completionCheck: (response: RequestTypeMap[T]) => boolean = (
+            r: RequestTypeMap[T],
+        ) => r.status !== 'pending',
     ): Promise<RequestTypeMap[T]> {
         try {
             const response = await this.client.pollUntil(
@@ -62,7 +71,11 @@ export class TlockKeyring implements Keyring {
             await this.client.deleteRequest(requestId);
             return response;
         } catch (error) {
-            handleError(error, ERROR_CODES.SIGNING_FAILED, `Polling for ${requestType} completion`);
+            handleError(
+                error,
+                ERROR_CODES.SIGNING_FAILED,
+                `Polling for ${requestType} completion`,
+            );
         }
     }
 
@@ -79,7 +92,10 @@ export class TlockKeyring implements Keyring {
 
         const wallet = this.state.wallets[id];
         if (!wallet) {
-            throwError(ERROR_CODES.ACCOUNT_NOT_FOUND, `Account with ID ${id} not found`);
+            throwError(
+                ERROR_CODES.ACCOUNT_NOT_FOUND,
+                `Account with ID ${id} not found`,
+            );
         }
         return wallet.account;
     }
@@ -95,11 +111,14 @@ export class TlockKeyring implements Keyring {
 
         const response = await this.pollForRequestCompletion(
             requestId,
-            'importAccount'
+            'importAccount',
         );
 
         if (!response.address) {
-            throwError(ERROR_CODES.IMPORT_FAILED, 'No address returned from mobile device');
+            throwError(
+                ERROR_CODES.IMPORT_FAILED,
+                'No address returned from mobile device',
+            );
         }
 
         const id = uuid();
@@ -126,7 +145,11 @@ export class TlockKeyring implements Keyring {
             });
         } catch (error) {
             // TODO: Handle error where account is already registered more gracefully
-            handleError(error, ERROR_CODES.ACCOUNT_CREATION_FAILED, 'Error registering account with MetaMask');
+            handleError(
+                error,
+                ERROR_CODES.ACCOUNT_CREATION_FAILED,
+                'Error registering account with MetaMask',
+            );
         }
 
         this.state.wallets[id] = { account };
@@ -146,7 +169,10 @@ export class TlockKeyring implements Keyring {
 
         const wallet = this.state.wallets[account.id];
         if (!wallet) {
-            throwError(ERROR_CODES.ACCOUNT_NOT_FOUND, `Account with ID ${account.id} not found`);
+            throwError(
+                ERROR_CODES.ACCOUNT_NOT_FOUND,
+                `Account with ID ${account.id} not found`,
+            );
         }
 
         const newAccount: KeyringAccount = {
@@ -182,7 +208,10 @@ export class TlockKeyring implements Keyring {
 
         const request = this.state.pendingRequests[id];
         if (!request) {
-            throwError(ERROR_CODES.REQUEST_NOT_FOUND, `Request with ID ${id} not found`);
+            throwError(
+                ERROR_CODES.REQUEST_NOT_FOUND,
+                `Request with ID ${id} not found`,
+            );
         }
         return request;
     }
@@ -190,7 +219,8 @@ export class TlockKeyring implements Keyring {
     async submitRequest(request: KeyringRequest): Promise<KeyringResponse> {
         console.log('Submitting request:', request);
 
-        const req: KeyringRequestParams = request.request as KeyringRequestParams;
+        const req: KeyringRequestParams =
+            request.request as KeyringRequestParams;
         const signature = await this.handleSigningRequest(req);
         return {
             pending: false,
@@ -204,12 +234,17 @@ export class TlockKeyring implements Keyring {
     ): Promise<void> {
         const pendingRequest = this.state.pendingRequests[id];
         if (!pendingRequest) {
-            throwError(ERROR_CODES.REQUEST_NOT_FOUND, `Request with ID ${id} not found`);
+            throwError(
+                ERROR_CODES.REQUEST_NOT_FOUND,
+                `Request with ID ${id} not found`,
+            );
         }
 
         let result: Json;
         try {
-            result = await this.handleSigningRequest(pendingRequest.request as KeyringRequestParams);
+            result = await this.handleSigningRequest(
+                pendingRequest.request as KeyringRequestParams,
+            );
         } catch (error) {
             console.error('Error handling signing request:', error);
             await this.rejectRequest(id);
@@ -227,7 +262,10 @@ export class TlockKeyring implements Keyring {
         console.log('Rejecting request with ID:', id);
 
         if (!this.state.pendingRequests[id]) {
-            throwError(ERROR_CODES.REQUEST_NOT_FOUND, `Request with ID ${id} not found`);
+            throwError(
+                ERROR_CODES.REQUEST_NOT_FOUND,
+                `Request with ID ${id} not found`,
+            );
         }
 
         await this.removePendingRequest(id);
@@ -239,7 +277,9 @@ export class TlockKeyring implements Keyring {
         await this.saveState();
     }
 
-    private async handleSigningRequest(request: KeyringRequestParams): Promise<Json> {
+    private async handleSigningRequest(
+        request: KeyringRequestParams,
+    ): Promise<Json> {
         switch (request.method) {
             case EthMethod.PersonalSign: {
                 const [message, from] = request.params;
@@ -251,10 +291,7 @@ export class TlockKeyring implements Keyring {
             }
             case EthMethod.SignTypedDataV4: {
                 const [from, data] = request.params;
-                return await this.signTypedData(
-                    from,
-                    data,
-                );
+                return await this.signTypedData(from, data);
             }
             case EthMethod.Sign: {
                 const [from, data] = request.params;
@@ -281,7 +318,7 @@ export class TlockKeyring implements Keyring {
 
         const response = await this.pollForRequestCompletion(
             requestId,
-            'signPersonal'
+            'signPersonal',
         );
 
         if (!response.signature) {
@@ -296,11 +333,13 @@ export class TlockKeyring implements Keyring {
         if (recoveredAddress !== from) {
             throwError(
                 ERROR_CODES.SIGNATURE_VERIFICATION_FAILED,
-                `Recovered address ${recoveredAddress} does not match from address ${from}`
+                `Recovered address ${recoveredAddress} does not match from address ${from}`,
             );
         }
 
-        console.log(`Recovered address matches from address: ${recoveredAddress}`);
+        console.log(
+            `Recovered address matches from address: ${recoveredAddress}`,
+        );
         console.log(
             `Signed personal message for request ${requestId} from=${from} message=${message} signature=${response.signature}`,
         );
@@ -321,11 +360,14 @@ export class TlockKeyring implements Keyring {
 
         const response = await this.pollForRequestCompletion(
             requestId,
-            'signTransaction'
+            'signTransaction',
         );
 
         if (!response.signed) {
-            throwError(ERROR_CODES.SIGNING_FAILED, 'No signed transaction returned');
+            throwError(
+                ERROR_CODES.SIGNING_FAILED,
+                'No signed transaction returned',
+            );
         }
 
         const signed = response.signed;
@@ -348,7 +390,7 @@ export class TlockKeyring implements Keyring {
 
         const response = await this.pollForRequestCompletion(
             requestId,
-            'signTypedData'
+            'signTypedData',
         );
 
         if (!response.signature) {
@@ -370,7 +412,7 @@ export class TlockKeyring implements Keyring {
 
         const response = await this.pollForRequestCompletion(
             requestId,
-            'signMessage'
+            'signMessage',
         );
 
         if (!response.signature) {

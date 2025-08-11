@@ -28,5 +28,5 @@ export const ERROR_CODES = {
     SIGNATURE_VERIFICATION_FAILED: 'SIGNATURE_VERIFICATION_FAILED',
 } as const;
 
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
-export type Screen = typeof SCREENS[keyof typeof SCREENS];
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+export type Screen = (typeof SCREENS)[keyof typeof SCREENS];

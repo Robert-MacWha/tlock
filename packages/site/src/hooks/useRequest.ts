@@ -10,33 +10,33 @@ export type Request = (params: RequestArguments) => Promise<unknown>;
  * @returns The `request` function.
  */
 export const useRequest = () => {
-  const { provider, setError } = useMetaMaskContext();
+    const { provider, setError } = useMetaMaskContext();
 
-  /**
-   * `provider.request` wrapper.
-   *
-   * @param params - The request params.
-   * @param params.method - The method to call.
-   * @param params.params - The method params.
-   * @returns The result of the request.
-   */
-  const request: Request = async ({ method, params }) => {
-    try {
-      const data =
-        (await provider?.request({
-          method,
-          params,
-        } as RequestArguments)) ?? null;
+    /**
+     * `provider.request` wrapper.
+     *
+     * @param params - The request params.
+     * @param params.method - The method to call.
+     * @param params.params - The method params.
+     * @returns The result of the request.
+     */
+    const request: Request = async ({ method, params }) => {
+        try {
+            const data =
+                (await provider?.request({
+                    method,
+                    params,
+                } as RequestArguments)) ?? null;
 
-      return data;
-    } catch (requestError: unknown) {
-      if (requestError instanceof Error) {
-        setError(requestError);
-      }
+            return data;
+        } catch (requestError: unknown) {
+            if (requestError instanceof Error) {
+                setError(requestError);
+            }
 
-      return null;
-    }
-  };
+            return null;
+        }
+    };
 
-  return request;
+    return request;
 };

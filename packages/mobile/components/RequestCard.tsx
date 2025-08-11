@@ -7,7 +7,7 @@ import { ClientRequest } from '../hooks/useRequestManager';
 import { useRequestHandler } from '../hooks/useRequestHandler';
 
 interface RequestCardProps {
-    request: ClientRequest
+    request: ClientRequest;
 }
 
 export function RequestCard({ request }: RequestCardProps) {
@@ -19,10 +19,10 @@ export function RequestCard({ request }: RequestCardProps) {
         onApprove: async (_req) => {
             //? Should never be called anyways
             throw new Error('Cannot approve request from RequestCard');
-        }
+        },
     });
 
-    const client = clients.find(client => client.id === request.clientId);
+    const client = clients.find((client) => client.id === request.clientId);
     if (!client) {
         return (
             <Card mode="elevated">
@@ -52,15 +52,26 @@ export function RequestCard({ request }: RequestCardProps) {
     return (
         <Card mode="elevated">
             <Card.Content>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
                     <Text variant="titleMedium">{clientName}</Text>
-                    <Text variant="bodyMedium" style={{ color: 'gray' }}>{lastUpdated}</Text>
+                    <Text variant="bodyMedium" style={{ color: 'gray' }}>
+                        {lastUpdated}
+                    </Text>
                 </View>
-                <Text variant="bodyMedium" style={{ color: 'gray', marginTop: 4 }}>
+                <Text
+                    variant="bodyMedium"
+                    style={{ color: 'gray', marginTop: 4 }}
+                >
                     {request.request.type}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 16, gap: 8 }}>
-                    <Button mode='outlined' onPress={reject}>
+                    <Button mode="outlined" onPress={reject}>
                         Reject
                     </Button>
                     <Button mode="contained" onPress={handle}>

@@ -14,7 +14,7 @@ const mockClient = {
     getDevice: jest.fn(),
     pollUntil: jest.fn(),
     roomId: 'mock-room-id',
-}
+};
 
 // Mock dependencies
 jest.mock('expo-secure-store');
@@ -27,12 +27,16 @@ const mockSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
 const mockExportoCrypto = ExportoCrypto as jest.Mocked<typeof ExportoCrypto>;
 
 describe('useClients', () => {
-    const mockSharedSecret: SharedSecret = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-    const mockSharedSecret2: SharedSecret = [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    const mockSharedSecret: SharedSecret = [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+    ];
+    const mockSharedSecret2: SharedSecret = [
+        16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
+    ];
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         // Setup default mocks
         mockSecureStore.getItemAsync.mockResolvedValue(null);
@@ -54,10 +58,12 @@ describe('useClients', () => {
                 {
                     id: 'client-1',
                     name: 'Test Client',
-                    sharedSecret: mockSharedSecret
-                }
+                    sharedSecret: mockSharedSecret,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 
@@ -69,12 +75,11 @@ describe('useClients', () => {
                         name: 'Test Client',
                         sharedSecret: mockSharedSecret,
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                        client: expect.any(Object)
-                    })
+                        client: expect.any(Object),
+                    }),
                 );
             });
         });
-
     });
 
     describe('Adding clients', () => {
@@ -83,7 +88,10 @@ describe('useClients', () => {
 
             let newClient;
             await act(async () => {
-                newClient = await result.current.addClient(mockSharedSecret, 'My Client');
+                newClient = await result.current.addClient(
+                    mockSharedSecret,
+                    'My Client',
+                );
             });
 
             expect(newClient).toEqual(
@@ -92,8 +100,8 @@ describe('useClients', () => {
                     name: 'My Client',
                     sharedSecret: mockSharedSecret,
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    client: expect.any(Object)
-                })
+                    client: expect.any(Object),
+                }),
             );
 
             await waitFor(() => {
@@ -115,8 +123,8 @@ describe('useClients', () => {
                     name: undefined,
                     sharedSecret: mockSharedSecret,
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    client: expect.any(Object)
-                })
+                    client: expect.any(Object),
+                }),
             );
         });
 
@@ -129,7 +137,7 @@ describe('useClients', () => {
 
             expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
                 'tlock_clients',
-                expect.stringContaining('Test Client')
+                expect.stringContaining('Test Client'),
             );
         });
     });
@@ -138,10 +146,20 @@ describe('useClients', () => {
         it('should remove existing client successfully', async () => {
             // Setup initial client
             const storedClients = [
-                { id: 'client-1', name: 'Client 1', sharedSecret: mockSharedSecret },
-                { id: 'client-2', name: 'Client 2', sharedSecret: mockSharedSecret2 }
+                {
+                    id: 'client-1',
+                    name: 'Client 1',
+                    sharedSecret: mockSharedSecret,
+                },
+                {
+                    id: 'client-2',
+                    name: 'Client 2',
+                    sharedSecret: mockSharedSecret2,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 
@@ -161,9 +179,15 @@ describe('useClients', () => {
 
         it('should persist removal to storage', async () => {
             const storedClients = [
-                { id: 'client-1', name: 'Client 1', sharedSecret: mockSharedSecret }
+                {
+                    id: 'client-1',
+                    name: 'Client 1',
+                    sharedSecret: mockSharedSecret,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 
@@ -175,7 +199,10 @@ describe('useClients', () => {
                 await result.current.removeClient('client-1');
             });
 
-            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('tlock_clients', '[]');
+            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
+                'tlock_clients',
+                '[]',
+            );
         });
 
         it('should handle removing non-existent client gracefully', async () => {
@@ -194,9 +221,15 @@ describe('useClients', () => {
     describe('Renaming clients', () => {
         it('should rename existing client successfully', async () => {
             const storedClients = [
-                { id: 'client-1', name: 'Old Name', sharedSecret: mockSharedSecret }
+                {
+                    id: 'client-1',
+                    name: 'Old Name',
+                    sharedSecret: mockSharedSecret,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 
@@ -215,9 +248,15 @@ describe('useClients', () => {
 
         it('should persist name change to storage', async () => {
             const storedClients = [
-                { id: 'client-1', name: 'Old Name', sharedSecret: mockSharedSecret }
+                {
+                    id: 'client-1',
+                    name: 'Old Name',
+                    sharedSecret: mockSharedSecret,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 
@@ -231,15 +270,22 @@ describe('useClients', () => {
 
             expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
                 'tlock_clients',
-                expect.stringContaining('New Name')
+                expect.stringContaining('New Name'),
             );
         });
 
         it('should handle renaming non-existent client gracefully', async () => {
             const storedClients = [
-                { id: 'client-1', name: 'Old Name', sharedSecret: mockSharedSecret, client: mockClient }
+                {
+                    id: 'client-1',
+                    name: 'Old Name',
+                    sharedSecret: mockSharedSecret,
+                    client: mockClient,
+                },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(storedClients));
+            mockSecureStore.getItemAsync.mockResolvedValue(
+                JSON.stringify(storedClients),
+            );
 
             const { result } = renderHook(() => useClients());
 

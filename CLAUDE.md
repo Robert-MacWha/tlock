@@ -11,12 +11,13 @@ Tlock is a 2FA wallet system that consists of a MetaMask Snap and a mobile app f
 This is a TypeScript monorepo with 5 packages:
 
 - **@tlock/shared**: Common utilities and types shared across all packages
-- **@tlock/snap**: MetaMask Snap for browser-based wallet interface  
+- **@tlock/snap**: MetaMask Snap for browser-based wallet interface
 - **@tlock/mobile**: React Native/Expo mobile app for transaction approval
 - **@tlock/site**: Gatsby-based test application for development
 - **@tlock/functions**: Firebase Cloud Functions for backend services
 
 Key architectural flows:
+
 1. **Pairing**: Browser generates QR code with shared secret → Mobile scans → Firebase registration
 2. **Account Creation**: Snap requests account → Mobile generates private key → Returns address
 3. **Transaction Signing**: Snap sends transaction → Mobile approves/signs → Returns signature
@@ -24,6 +25,7 @@ Key architectural flows:
 ## Development Commands
 
 ### Root Level Commands
+
 - `yarn build` - Build all packages in topological order
 - `yarn dev:snap` - Start snap, site, and shared packages in development mode
 - `yarn dev:mobile` - Start mobile app with Expo
@@ -33,6 +35,7 @@ Key architectural flows:
 - `yarn deploy:functions` - Deploy Firebase functions
 
 ### Package-Specific Commands
+
 - Snap: `yarn workspace @tlock/snap dev` (watch mode), `yarn workspace @tlock/snap build`
 - Mobile: `yarn workspace @tlock/mobile dev`, `yarn workspace @tlock/mobile test`
 - Shared: `yarn workspace @tlock/shared build` (TypeScript compilation), `yarn workspace @tlock/shared dev` (watch mode)
@@ -42,8 +45,9 @@ Key architectural flows:
 ### Testing
 
 #### Structure
-- Files: *.test.ts in __test__/ directories
-- Organization: describe() blocks for components/features, it() for specific behaviors       
+
+- Files: \*.test.ts in **test**/ directories
+- Organization: describe() blocks for components/features, it() for specific behaviors
 
 #### Core Patterns
 
@@ -65,6 +69,7 @@ await act(async () => await result.current.method());
 ```
 
 #### Testing Categories
+
 1. Happy Path: Normal operations
 2. Error Handling: Network/auth failures
 3. Edge Cases: Empty data, boundaries
@@ -72,6 +77,7 @@ await act(async () => await result.current.method());
 5. User Interactions: Approve/reject flows
 
 #### Key Assertions
+
 ```
 expect(result).toBe(value);                    // Exact match
 expect(result).toEqual(expect.objectContaining({})); // Partial object
@@ -80,12 +86,14 @@ await expect(asyncFn()).rejects.toThrow();     // Async errors
 ```
 
 #### Helper Patterns
+
 - Setup functions for consistent test data
 - Parameterized tests for similar scenarios
 - Mock realistic data (addresses, secrets, etc.)
 - Test both success and failure paths
 
 #### Principles
+
 - Test behavior, not implementation
 - Independent, repeatable tests
 - Clear arrange-act-assert structure

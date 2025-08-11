@@ -1,26 +1,26 @@
 {
-  "version": "0.1.0",
-  "description": "A solution for storing private keys and signing transactions remotely",
-  "proposedName": "Foxguard",
-  "source": {
-    "shasum": "FE8ZifA7w3x1InIbK0I629SaZu2A4kUfJ86TfnXy62M=",
-    "location": {
-      "npm": {
-        "filePath": "dist/bundle.js",
-        "packageName": "@tlock/snap",
-        "registry": "https://registry.npmjs.org/"
-      }
-    }
-  },
-  "initialPermissions": {
-    "snap_dialog": {},
-    "snap_notify": {},
-    "snap_manageState": {},
-    "snap_manageAccounts": {},
-    "endowment:network-access": {},
-    "endowment:page-home": {},
-    "endowment:keyring": {}
-  },
-  "platformVersion": "6.24.0",
-  "manifestVersion": "0.1"
+    "version": "0.1.0",
+    "description": "A solution for storing private keys and signing transactions remotely",
+    "proposedName": "Foxguard",
+    "source": {
+        "shasum": "FE8ZifA7w3x1InIbK0I629SaZu2A4kUfJ86TfnXy62M=",
+        "location": {
+            "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@tlock/snap",
+                "registry": "https://registry.npmjs.org/"
+            }
+        }
+    },
+    "initialPermissions": {
+        "snap_dialog": {},
+        "snap_notify": {},
+        "snap_manageState": {},
+        "snap_manageAccounts": {},
+        "endowment:network-access": {},
+        "endowment:page-home": {},
+        "endowment:keyring": {}
+    },
+    "platformVersion": "6.24.0",
+    "manifestVersion": "0.1"
 }

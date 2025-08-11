@@ -13,7 +13,6 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import { RequestManagerProvider } from '../contexts/RequestManagerContext';
 
 export default function RootLayout() {
-
     const { isSetupComplete } = useSetupStatus();
     const [, requestCameraPermission] = useCameraPermissions();
 
@@ -44,22 +43,39 @@ export default function RootLayout() {
                     <RequestManagerProvider pollingInterval={2000}>
                         <AlertProvider>
                             <Stack>
-                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                                <Stack.Screen name="_requests" options={{ headerShown: false }} />
-                                <Stack.Screen name="_setup" options={{ headerShown: false }} />
-                                <Stack.Screen name="_docs" options={{ headerShown: false }} />
-                                <Stack.Screen name="clients" options={{
-                                    title: 'Connected Devices',
-                                }} />
-                                <Stack.Screen name="requests" options={{
-                                    title: 'Requests',
-                                }} />
+                                <Stack.Screen
+                                    name="(tabs)"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_requests"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_setup"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_docs"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="clients"
+                                    options={{
+                                        title: 'Connected Devices',
+                                    }}
+                                />
+                                <Stack.Screen
+                                    name="requests"
+                                    options={{
+                                        title: 'Requests',
+                                    }}
+                                />
                             </Stack>
                         </AlertProvider>
                     </RequestManagerProvider>
                 </ClientsProvider>
             </KeyringProvider>
-        </ThemeProvider >
+        </ThemeProvider>
     );
 }
-

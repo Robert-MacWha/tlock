@@ -24,14 +24,18 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     const [alertData, setAlertData] = useState<AlertOptions>({
         title: '',
         message: '',
-        buttons: []
+        buttons: [],
     });
 
-    const alert = (title: string, message?: string, buttons?: AlertButton[]) => {
+    const alert = (
+        title: string,
+        message?: string,
+        buttons?: AlertButton[],
+    ) => {
         setAlertData({
             title,
             message,
-            buttons: buttons || [{ text: 'OK', mode: 'text' }]
+            buttons: buttons || [{ text: 'OK', mode: 'text' }],
         });
         setVisible(true);
     };
@@ -51,7 +55,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                     <Dialog.Title>{alertData.title}</Dialog.Title>
                     {alertData.message && (
                         <Dialog.Content>
-                            <Text variant="bodyMedium">{alertData.message}</Text>
+                            <Text variant="bodyMedium">
+                                {alertData.message}
+                            </Text>
                         </Dialog.Content>
                     )}
                     <Dialog.Actions>
@@ -64,7 +70,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                                 >
                                     {button.text}
                                 </Button>
-                            )
+                            );
                         })}
                     </Dialog.Actions>
                 </Dialog>

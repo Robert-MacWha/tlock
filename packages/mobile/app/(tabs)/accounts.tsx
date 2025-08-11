@@ -1,10 +1,17 @@
-import React, { useState } from "react";
-import { ScrollView, View } from "react-native";
-import { useKeyringContext } from "../../contexts/KeyringContext";
-import { Text, IconButton, Dialog, Portal, Button, Surface } from "react-native-paper";
-import { AccountCard } from "../../components/AccountCard";
-import { Stack } from "expo-router";
-import { useAlert } from "../../components/AlertProvider";
+import React, { useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { useKeyringContext } from '../../contexts/KeyringContext';
+import {
+    Text,
+    IconButton,
+    Dialog,
+    Portal,
+    Button,
+    Surface,
+} from 'react-native-paper';
+import { AccountCard } from '../../components/AccountCard';
+import { Stack } from 'expo-router';
+import { useAlert } from '../../components/AlertProvider';
 
 export default function AccountsScreen() {
     const { accounts, addAccount } = useKeyringContext();
@@ -14,7 +21,7 @@ export default function AccountsScreen() {
 
     const displayedAccounts = showHidden
         ? accounts
-        : accounts.filter(account => !account.isHidden);
+        : accounts.filter((account) => !account.isHidden);
 
     function handleAddAccount() {
         try {
@@ -36,7 +43,7 @@ export default function AccountsScreen() {
                                 onPress={() => setHelpVisible(true)}
                             />
                             <IconButton
-                                icon={showHidden ? "eye" : "eye-off"}
+                                icon={showHidden ? 'eye' : 'eye-off'}
                                 onPress={() => setShowHidden(!showHidden)}
                             />
                             <IconButton
@@ -53,7 +60,7 @@ export default function AccountsScreen() {
                     {displayedAccounts.length === 0 ? (
                         <Text>No accounts available.</Text>
                     ) : (
-                        displayedAccounts.map(account => (
+                        displayedAccounts.map((account) => (
                             <AccountCard
                                 key={account.address}
                                 address={account.address}
@@ -64,24 +71,31 @@ export default function AccountsScreen() {
             </Surface>
 
             <Portal>
-                <Dialog visible={helpVisible} onDismiss={() => setHelpVisible(false)}>
+                <Dialog
+                    visible={helpVisible}
+                    onDismiss={() => setHelpVisible(false)}
+                >
                     <Dialog.Title>Your Wallets</Dialog.Title>
                     <Dialog.Content>
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
-                            These are your blockchain accounts with private keys stored securely on this device.
+                            These are your blockchain accounts with private keys
+                            stored securely on this device.
                         </Text>
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
                             - Tap + to create a new wallet account
                         </Text>
                         <Text variant="bodyMedium">
-                            - Connected devices can request signatures from these accounts
+                            - Connected devices can request signatures from
+                            these accounts
                         </Text>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={() => setHelpVisible(false)}>Got it</Button>
+                        <Button onPress={() => setHelpVisible(false)}>
+                            Got it
+                        </Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
         </>
-    )
+    );
 }

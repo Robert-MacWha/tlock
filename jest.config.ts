@@ -7,11 +7,14 @@ module.exports = {
 
     // TypeScript configuration
     transform: {
-        '^.+\\.(ts|tsx)$': ['ts-jest', {
-            tsconfig: {
-                types: ['jest', '@types/jest']
-            }
-        }]
+        '^.+\\.(ts|tsx)$': [
+            'ts-jest',
+            {
+                tsconfig: {
+                    types: ['jest', '@types/jest'],
+                },
+            },
+        ],
     },
 
     // Basic coverage

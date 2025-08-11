@@ -27,9 +27,13 @@ export async function showPairingScreen(interfaceId: string) {
             interfaceId,
             <Box>
                 <Heading>Pair Your Wallet</Heading>
-                <Text>Open the Foxguard mobile app and scan this QR code to pair:</Text>
+                <Text>
+                    Open the Foxguard mobile app and scan this QR code to pair:
+                </Text>
                 <Image src={secretQR} alt="Pairing QR Code" />
-                <Button name={SCREENS.CONFIRM_PAIR}>I've Scanned the Code</Button>
+                <Button name={SCREENS.CONFIRM_PAIR}>
+                    I've Scanned the Code
+                </Button>
             </Box>,
         );
 
@@ -40,9 +44,12 @@ export async function showPairingScreen(interfaceId: string) {
             // Just let it fail silently since the user can select the confirm pairing button
             console.error('Error polling for device registration:', error);
         }
-
     } catch (error) {
-        handleError(error, ERROR_CODES.PAIRING_FAILED, 'Error generating pairing data');
+        handleError(
+            error,
+            ERROR_CODES.PAIRING_FAILED,
+            'Error generating pairing data',
+        );
     }
 }
 
@@ -54,7 +61,10 @@ export async function showConfirmPairingScreen(interfaceId: string) {
 
     const registeredDevice = await client.getDevice();
     if (!registeredDevice) {
-        await showErrorScreen(interfaceId, 'Device not registered. Please re-try pairing');
+        await showErrorScreen(
+            interfaceId,
+            'Device not registered. Please re-try pairing',
+        );
         return;
     }
 

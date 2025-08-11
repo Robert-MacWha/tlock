@@ -7,6 +7,7 @@ This document provides comprehensive manual testing procedures for the TLock mob
 ## Prerequisites
 
 ### Test Environment Setup
+
 - **Development Environment**: Expo oroduction build on-device (TODO setup production build environment)
 - **Test Browser**: MetaMask Snap enabled browser (`yarn dev:snap`)
 - **Test Site**: Foxguard test site (`yarn dev:snap`)
@@ -14,18 +15,21 @@ This document provides comprehensive manual testing procedures for the TLock mob
 - **Devices**: Test device with camera access for QR code scanning
 
 ### Before Each Test Session
+
 1. **Fresh App State**: Uninstall and reinstall the app for clean testing, or use a sandboxed folder
 2. **Browser Setup**: Clear MetaMask Snap state
 
 ## Device Coverage
 
-### Android Testing  
+### Android Testing
+
 - **Authentication**: Fingerprint/PIN integration if implemented
 - **Notifications**: Push notification behavior and priority
 - **Permissions**: Camera access, notification permissions
 - **App Lifecycle**: Background/foreground transitions, memory management
 
 ### iOS Testing
+
 TODO: Figure out IOS on-device testing process
 
 ## Test Scenarios
@@ -35,6 +39,7 @@ TODO: Figure out IOS on-device testing process
 **Objective**: Verify fresh installation and initial setup process
 
 **Steps**:
+
 1. Install fresh app (or clear all app data)
 2. Launch app
 3. Verify setup screen appears
@@ -44,10 +49,12 @@ TODO: Figure out IOS on-device testing process
 7. Verify app opens to home screen (not setup)
 
 **Expected Results**:
+
 - Seed phrase is generated and displayed properly
 - Home screen loads correctly after setup
 
 **Pass/Fail Criteria**:
+
 - PASS: Setup completes successfully, app remembers completion
 - FAIL: Setup loops, crashes, or doesn't persist completion state
 
@@ -58,6 +65,7 @@ TODO: Figure out IOS on-device testing process
 **Objective**: Test account creation flow and state persistence
 
 **Steps**:
+
 1. Navigate to Accounts tab
 2. Verify red indicator dot is present
 3. Tap "+" to add an account
@@ -70,11 +78,13 @@ TODO: Figure out IOS on-device testing process
 10. Verify account is still present with correct details
 
 **Expected Results**:
+
 - Red dot clearly indicates action needed
 - Account persists across app restarts
 - Account details (name, address) are correctly displayed
 
 **Pass/Fail Criteria**:
+
 - PASS: Account creates successfully and persists with correct data
 - FAIL: Account creation fails, doesn't persist, or shows incorrect data
 
@@ -85,6 +95,7 @@ TODO: Figure out IOS on-device testing process
 **Objective**: Test wallet client pairing process and persistence
 
 **Steps**:
+
 1. Open metamask snap page and select "Pair Client"
 2. In mobile app, navigate to client management
 3. Verify red indicator dot is present
@@ -100,6 +111,7 @@ TODO: Figure out IOS on-device testing process
 13. Verify client is still present
 
 **Expected Results**:
+
 - Red dot indicates action needed
 - QR scanning works smoothly
 - Pairing completes successfully
@@ -107,6 +119,7 @@ TODO: Figure out IOS on-device testing process
 - Snap automatically registers pairing
 
 **Pass/Fail Criteria**:
+
 - PASS: Client pairs successfully and persists across restarts
 - FAIL: Pairing fails, client doesn't appear, or doesn't persist
 
@@ -119,6 +132,7 @@ TODO: Figure out IOS on-device testing process
 **Setup**: Complete Account Creation and Client Addition first
 
 **Steps**:
+
 1. Ensure mobile app is open and in foreground
 2. In browser, initiate a "Sign Personal Message" request from the test site
 3. Wait for request to appear in mobile app
@@ -129,6 +143,7 @@ TODO: Figure out IOS on-device testing process
 8. Check that request disappears from mobile app
 
 **Expected Results**:
+
 - Request appears promptly in mobile app
 - Request details are accurate
 - Biometric authentication is required prior to signing
@@ -136,6 +151,7 @@ TODO: Figure out IOS on-device testing process
 - UI updates appropriately
 
 **Pass/Fail Criteria**:
+
 - PASS: Request flows from browser to mobile and back
 - FAIL: Request doesn't appear, approval fails, or browser doesn't receive response
 
@@ -148,6 +164,7 @@ TODO: Figure out IOS on-device testing process
 **Setup**: Complete Account Creation and Client Addition first
 
 **Steps**:
+
 1. Close mobile app completely
 2. In browser, initiate a transaction request
 3. Wait for push notification on mobile device
@@ -160,6 +177,7 @@ TODO: Figure out IOS on-device testing process
 10. Check that request disappears from mobile app
 
 **Expected Results**:
+
 - Push notification appears promptly
 - Notification opens app to correct screen
 - Transaction details are comprehensive and clear
@@ -167,6 +185,7 @@ TODO: Figure out IOS on-device testing process
 - Approval process completes successfully
 
 **Pass/Fail Criteria**:
+
 - PASS: Push notification works, transaction details accurate, approval successful
 - FAIL: No notification, app doesn't open correctly, or transaction fails
 
@@ -177,6 +196,7 @@ TODO: Figure out IOS on-device testing process
 **Objective**: Test seed phrase viewing and backup functionality
 
 **Steps**:
+
 1. Navigate to Settings
 2. Tap "Show Seed Phrase" option
 3. Complete biometric authentication
@@ -184,11 +204,13 @@ TODO: Figure out IOS on-device testing process
 5. Verify all 12 words are visible and numbered
 
 **Expected Results**:
+
 - Authentication is required before displaying seed phrase
 - Seed phrase displays clearly with proper formatting
 - Security warnings are present and clear
 
 **Pass/Fail Criteria**:
+
 - PASS: Seed phrase access is secure and displays correctly
 - FAIL: No authentication required, display issues, or incorrect seed phrase
 
@@ -201,6 +223,7 @@ TODO: Figure out IOS on-device testing process
 **Setup**: Complete Account Creation and Client Addition first
 
 **Steps**:
+
 1. In browser, initiate a signing request
 2. Wait for request to appear in mobile app
 3. Tap "Reject"
@@ -209,11 +232,13 @@ TODO: Figure out IOS on-device testing process
 6. Repeat with a transaction request
 
 **Expected Results**:
+
 - Rejection is processed quickly
 - Mobile app provides clear feedback
 - Browser handles rejection appropriately
 
 **Pass/Fail Criteria**:
+
 - PASS: Rejections are handled cleanly on both sides
 - FAIL: Rejection fails, causes errors, or browser doesn't respond
 
@@ -226,6 +251,7 @@ TODO: Figure out IOS on-device testing process
 **Setup**: Complete initial account creation first
 
 **Steps**:
+
 1. Navigate to Accounts tab
 2. Add a second account
 3. Verify both accounts are listed
@@ -238,12 +264,14 @@ TODO: Figure out IOS on-device testing process
 10. Verify both accounts and their states persist
 
 **Expected Results**:
+
 - Multiple accounts can be created
 - Account renaming works correctly
 - Account hiding/showing functions properly
 - All changes persist across app restarts
 
 **Pass/Fail Criteria**:
+
 - PASS: Multiple accounts work correctly with proper state management
 - FAIL: Account operations fail or don't persist
 
@@ -257,7 +285,7 @@ Before releasing or deploying:
 - [ ] Critical issues (!) resolved
 - [ ] High severity issues (x) resolved or documented
 
-**Tester**: ________________  
-**Date**: ________________  
-**App Version**: ________________  
+**Tester**: ******\_\_\_\_******  
+**Date**: ******\_\_\_\_******  
+**App Version**: ******\_\_\_\_******  
 **Overall Result**: PASS / FAIL

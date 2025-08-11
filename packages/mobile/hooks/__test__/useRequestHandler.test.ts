@@ -17,8 +17,12 @@ jest.mock('../../contexts/ClientContext', () => ({
 import { useLocalSearchParams, router } from 'expo-router';
 import { useClientsContext } from '../../contexts/ClientContext';
 
-const mockUseLocalSearchParams = useLocalSearchParams as jest.MockedFunction<typeof useLocalSearchParams>;
-const mockUseClientsContext = useClientsContext as jest.MockedFunction<typeof useClientsContext>;
+const mockUseLocalSearchParams = useLocalSearchParams as jest.MockedFunction<
+    typeof useLocalSearchParams
+>;
+const mockUseClientsContext = useClientsContext as jest.MockedFunction<
+    typeof useClientsContext
+>;
 const mockRouter = router as jest.Mocked<typeof router>;
 
 describe('useRequestHandler', () => {
@@ -51,7 +55,7 @@ describe('useRequestHandler', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockUseLocalSearchParams.mockReturnValue({
             clientId: 'test-client-id',
@@ -74,12 +78,15 @@ describe('useRequestHandler', () => {
             useRequestHandler({
                 type: 'signPersonal',
                 onApprove: jest.fn(),
-            })
+            }),
         );
 
         await waitFor(() => expect(result.current.loading).toBe(false));
 
-        expect(mockGetRequest).toHaveBeenCalledWith('test-request-id', 'signPersonal');
+        expect(mockGetRequest).toHaveBeenCalledWith(
+            'test-request-id',
+            'signPersonal',
+        );
         expect(result.current.request).toEqual(mockRequest);
         expect(result.current.client).toEqual(mockClient);
         expect(result.current.error).toBeNull();
@@ -87,27 +94,33 @@ describe('useRequestHandler', () => {
 
     describe('handleApprove', () => {
         it('should update request and redirect on approval', async () => {
-            const mockOnApprove = jest.fn().mockResolvedValue({ signature: '0xsignature' as Hex });
+            const mockOnApprove = jest
+                .fn()
+                .mockResolvedValue({ signature: '0xsignature' as Hex });
 
             const { result } = renderHook(() =>
                 useRequestHandler({
                     type: 'signPersonal',
                     onApprove: mockOnApprove,
-                })
+                }),
             );
 
             await waitFor(() => expect(result.current.loading).toBe(false));
             await act(() => result.current.handleApprove());
 
             expect(mockOnApprove).toHaveBeenCalledWith(mockRequest);
-            expect(mockUpdateRequest).toHaveBeenCalledWith('test-request-id', 'signPersonal', {
-                ...mockRequest,
-                signature: '0xsignature',
-                status: 'approved',
-            });
+            expect(mockUpdateRequest).toHaveBeenCalledWith(
+                'test-request-id',
+                'signPersonal',
+                {
+                    ...mockRequest,
+                    signature: '0xsignature',
+                    status: 'approved',
+                },
+            );
             expect(mockRouter.replace).toHaveBeenCalledWith({
                 pathname: '/_requests/success',
-                params: { type: 'signPersonal' }
+                params: { type: 'signPersonal' },
             });
         });
     });
@@ -118,16 +131,20 @@ describe('useRequestHandler', () => {
                 useRequestHandler({
                     type: 'signPersonal',
                     onApprove: jest.fn(),
-                })
+                }),
             );
 
             await waitFor(() => expect(result.current.loading).toBe(false));
             await act(() => result.current.handleReject());
 
-            expect(mockUpdateRequest).toHaveBeenCalledWith('test-request-id', 'signPersonal', {
-                ...mockRequest,
-                status: 'rejected',
-            });
+            expect(mockUpdateRequest).toHaveBeenCalledWith(
+                'test-request-id',
+                'signPersonal',
+                {
+                    ...mockRequest,
+                    status: 'rejected',
+                },
+            );
             expect(mockRouter.back).toHaveBeenCalledWith();
         });
     });
@@ -144,7 +161,7 @@ describe('useRequestHandler', () => {
             useRequestHandler({
                 type: 'signPersonal',
                 onApprove: jest.fn(),
-            })
+            }),
         );
 
         await waitFor(() => expect(result.current.loading).toBe(false));
@@ -152,13 +169,15 @@ describe('useRequestHandler', () => {
     });
 
     it('should handle onApprove failure', async () => {
-        const mockOnApprove = jest.fn().mockRejectedValue(new Error('Approval failed'));
+        const mockOnApprove = jest
+            .fn()
+            .mockRejectedValue(new Error('Approval failed'));
 
         const { result } = renderHook(() =>
             useRequestHandler({
                 type: 'signPersonal',
                 onApprove: mockOnApprove,
-            })
+            }),
         );
 
         await waitFor(() => expect(result.current.loading).toBe(false));

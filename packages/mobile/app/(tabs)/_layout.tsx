@@ -23,7 +23,11 @@ const SettingsIcon = ({ color }: TabIconProps) => {
 
     return (
         <View>
-            <MaterialCommunityIcons name="cog-outline" color={color} size={24} />
+            <MaterialCommunityIcons
+                name="cog-outline"
+                color={color}
+                size={24}
+            />
             {(hasRequests || !hasClients) && (
                 <Badge
                     size={8}
@@ -31,7 +35,7 @@ const SettingsIcon = ({ color }: TabIconProps) => {
                         position: 'absolute',
                         top: -2,
                         right: -2,
-                        backgroundColor: 'red'
+                        backgroundColor: 'red',
                     }}
                 />
             )}
@@ -49,15 +53,15 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="accounts"
                 options={{
-                    title: "Wallets",
-                    tabBarIcon: WalletIcon
+                    title: 'Wallets',
+                    tabBarIcon: WalletIcon,
                 }}
             />
             <Tabs.Screen
                 name="settings"
                 options={{
-                    title: "Settings",
-                    tabBarIcon: SettingsIcon
+                    title: 'Settings',
+                    tabBarIcon: SettingsIcon,
                 }}
             />
         </Tabs>

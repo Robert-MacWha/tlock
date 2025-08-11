@@ -7,7 +7,13 @@ import { useRequestSnap } from '../hooks/useRequestSnap';
 import { EXPO_URL, SNAP_ORIGIN } from '../config';
 
 // QR Code Component with actual generation
-const QRCodeDisplay = ({ value, size = 200 }: { value: string; size?: number }) => {
+const QRCodeDisplay = ({
+    value,
+    size = 200,
+}: {
+    value: string;
+    size?: number;
+}) => {
     const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
     React.useEffect(() => {
@@ -45,12 +51,14 @@ const SnapDemo = () => {
 
     const handleSignPersonal = async () => {
         try {
-            const accounts = await request({ method: 'eth_requestAccounts' }) as string[];
+            const accounts = (await request({
+                method: 'eth_requestAccounts',
+            })) as string[];
             if (!accounts?.length) throw new Error('No accounts available');
 
             const result = await request({
                 method: 'personal_sign',
-                params: [message, accounts[0]]
+                params: [message, accounts[0]],
             });
             setSignatureResult(result as string);
         } catch (err) {
@@ -62,7 +70,11 @@ const SnapDemo = () => {
         <div className="container">
             <header className="py-3 mb-4 border-bottom">
                 <h1 className="h2">Foxguard Snap Demo</h1>
-                <p className="text-muted">Follow these 17-ish* steps to install the Foxguard metamask snap and the companion app so you can see what Robert's been going on about!</p>
+                <p className="text-muted">
+                    Follow these 17-ish* steps to install the Foxguard metamask
+                    snap and the companion app so you can see what Robert's been
+                    going on about!
+                </p>
             </header>
 
             {error && (
@@ -81,21 +93,35 @@ const SnapDemo = () => {
                         <div className="card-body">
                             {!snapsDetected ? (
                                 <div className="alert alert-warning mb-0">
-                                    <p className="mb-2">MetaMask not detected</p>
-                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                    <p className="mb-2">
+                                        MetaMask not detected
+                                    </p>
+                                    <a
+                                        href="https://metamask.io/flask/"
+                                        className="btn btn-primary btn-sm"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         Install MetaMask Flask
                                     </a>
                                 </div>
                             ) : !isFlask ? (
                                 <div className="alert alert-warning mb-0">
                                     <p className="mb-2">Flask required</p>
-                                    <a href="https://metamask.io/flask/" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                                    <a
+                                        href="https://metamask.io/flask/"
+                                        className="btn btn-primary btn-sm"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         Install Flask
                                     </a>
                                 </div>
                             ) : (
                                 <div className="alert alert-success mb-0">
-                                    <p className="mb-0">✓ MetaMask Flask detected</p>
+                                    <p className="mb-0">
+                                        ✓ MetaMask Flask detected
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -110,7 +136,9 @@ const SnapDemo = () => {
                         </div>
                         <div className="card-body">
                             <div>
-                                <p className="mb-2">Install the Foxguard snap</p>
+                                <p className="mb-2">
+                                    Install the Foxguard snap
+                                </p>
                                 <button
                                     className="btn btn-primary btn-sm"
                                     onClick={() => void handleInstallSnap()}
@@ -129,8 +157,19 @@ const SnapDemo = () => {
                             <h5>3. Install Expo Go</h5>
                         </div>
                         <div className="card-body">
-                            <p className="mb-2">Install the Expo Go app on your mobile device. Expo go is a sandbox for react-native apps, that's actually kind of incredible for distributing testing apps across various platforms.</p>
-                            <a href="https://expo.dev/client" className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                            <p className="mb-2">
+                                Install the Expo Go app on your mobile device.
+                                Expo go is a sandbox for react-native apps,
+                                that's actually kind of incredible for
+                                distributing testing apps across various
+                                platforms.
+                            </p>
+                            <a
+                                href="https://expo.dev/client"
+                                className="btn btn-primary btn-sm"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 Download Expo Go
                             </a>
                         </div>
@@ -145,7 +184,10 @@ const SnapDemo = () => {
                         </div>
                         <div className="card-body text-center">
                             <QRCodeDisplay value={EXPO_URL} size={150} />
-                            <p className="mt-2 mb-0 text-muted small">Open Expo Go and scan the QR code to launch the sandboxed app</p>
+                            <p className="mt-2 mb-0 text-muted small">
+                                Open Expo Go and scan the QR code to launch the
+                                sandboxed app
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -157,7 +199,11 @@ const SnapDemo = () => {
                             <h5>5. Foxguard Setup</h5>
                         </div>
                         <div className="card-body">
-                            <p className="mb-2">Follow the setup instructions within the Foxguard companion app, then pair it with the snap in metamask.</p>
+                            <p className="mb-2">
+                                Follow the setup instructions within the
+                                Foxguard companion app, then pair it with the
+                                snap in metamask.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -167,7 +213,11 @@ const SnapDemo = () => {
                     <div className="card h-100">
                         <div className="card-header">
                             <h5>6. Personal Sign</h5>
-                            <p className="mb-2">Test your connection with a personal_sign request, or try sending a transaction (TESTNET) from the account!</p>
+                            <p className="mb-2">
+                                Test your connection with a personal_sign
+                                request, or try sending a transaction (TESTNET)
+                                from the account!
+                            </p>
                         </div>
                         <div className="card-body">
                             <div className="mb-2">
