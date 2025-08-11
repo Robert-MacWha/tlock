@@ -5,15 +5,14 @@ import { Stack } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { KeyringProvider } from '../contexts/KeyringContext';
 import { ClientsProvider } from '../contexts/ClientContext';
-import { RequestReceiverProvider } from '../contexts/RequestRecieverContext';
 import { useSetupStatus } from '../hooks/useSetupStatus';
 import LoadingScreen from './_loading';
 import SetupFlow from './_setup';
 import { AlertProvider } from '../components/AlertProvider';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { RequestManagerProvider } from '../contexts/RequestManagerContext';
 
 export default function RootLayout() {
-
     const { isSetupComplete } = useSetupStatus();
     const [, requestCameraPermission] = useCameraPermissions();
 
@@ -41,25 +40,42 @@ export default function RootLayout() {
         <ThemeProvider>
             <KeyringProvider>
                 <ClientsProvider>
-                    <RequestReceiverProvider pollingInterval={2000}>
+                    <RequestManagerProvider pollingInterval={2000}>
                         <AlertProvider>
                             <Stack>
-                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                                <Stack.Screen name="_requests" options={{ headerShown: false }} />
-                                <Stack.Screen name="_setup" options={{ headerShown: false }} />
-                                <Stack.Screen name="_docs" options={{ headerShown: false }} />
-                                <Stack.Screen name="clients" options={{
-                                    title: 'Connected Devices',
-                                }} />
-                                <Stack.Screen name="requests" options={{
-                                    title: 'Requests',
-                                }} />
+                                <Stack.Screen
+                                    name="(tabs)"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_requests"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_setup"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="_docs"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="clients"
+                                    options={{
+                                        title: 'Connected Devices',
+                                    }}
+                                />
+                                <Stack.Screen
+                                    name="requests"
+                                    options={{
+                                        title: 'Requests',
+                                    }}
+                                />
                             </Stack>
                         </AlertProvider>
-                    </RequestReceiverProvider>
+                    </RequestManagerProvider>
                 </ClientsProvider>
             </KeyringProvider>
-        </ThemeProvider >
+        </ThemeProvider>
     );
 }
-

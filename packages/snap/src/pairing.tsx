@@ -7,13 +7,15 @@ import { getState, updateState } from './state';
 import qrcode from 'qrcode';
 import { showErrorScreen, showScreen } from './screen';
 import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
+import { SCREENS, ERROR_CODES } from './constants';
+import { handleError } from './errors';
+import { validateSharedSecret } from './utils';
 
-export async function handlePair(interfaceId: string) {
-    console.log('Handling pairing logic');
-
+export async function showPairingScreen(interfaceId: string) {
     try {
         // Generate & save 128-bit secret
         const sharedSecret = generateSharedSecret();
+        const client = createClient(sharedSecret);
         const qrData = await createQrCode(sharedSecret);
         const secretQR = await qrcode.toString(qrData);
 
@@ -21,78 +23,62 @@ export async function handlePair(interfaceId: string) {
             sharedSecret,
         });
 
-        console.log('Show pairing screen');
         await showScreen(
             interfaceId,
             <Box>
                 <Heading>Pair Your Wallet</Heading>
-                <Text>Open the Foxguard mobile app and scan this QR code to pair:</Text>
+                <Text>
+                    Open the Foxguard mobile app and scan this QR code to pair:
+                </Text>
                 <Image src={secretQR} alt="Pairing QR Code" />
-                <Button name="confirm-pair">I've Scanned the Code</Button>
+                <Button name={SCREENS.CONFIRM_PAIR}>
+                    I've Scanned the Code
+                </Button>
             </Box>,
         );
-    } catch (error) {
-        let msg = error;
-        if (error instanceof Error) {
-            msg = error.message;
+
+        try {
+            await client.pollUntilDeviceRegistered(200, 120);
+            await showConfirmPairingScreen(interfaceId);
+        } catch (error) {
+            // Just let it fail silently since the user can select the confirm pairing button
+            console.error('Error polling for device registration:', error);
         }
-        console.error('Error generating pairing data:', msg);
-        await showErrorScreen(
-            interfaceId,
-            'Failed to generate pairing data. Please try again.',
+    } catch (error) {
+        handleError(
+            error,
+            ERROR_CODES.PAIRING_FAILED,
+            'Error generating pairing data',
         );
     }
 }
 
-export async function handleConfirmPair(interfaceId: string) {
-    console.log('Confirming pairing');
-
+export async function showConfirmPairingScreen(interfaceId: string) {
     const state = await getState();
-    if (!state) {
-        console.error('No shared secret found in state');
-        await showErrorScreen(interfaceId, 'No pairing data found');
-        return;
-    }
+    validateSharedSecret(state);
 
-    console.log('Current state:', state);
-
-    const { sharedSecret } = state;
-    if (!sharedSecret) {
-        console.error('Shared secret is not set in state');
-        await showErrorScreen(
-            interfaceId,
-            'Error pairing: shared secret is missing',
-        );
-        return;
-    }
-
-    console.log('Using shared secret:', sharedSecret);
-    const client = createClient(sharedSecret);
+    const client = createClient(state.sharedSecret);
 
     const registeredDevice = await client.getDevice();
     if (!registeredDevice) {
-        console.error('Device not registered yet');
         await showErrorScreen(
             interfaceId,
-            'Device not registered. Please scan the QR code with your mobile app.',
+            'Device not registered. Please re-try pairing',
         );
         return;
     }
 
-    console.log('Device registered:', registeredDevice);
-
     await updateState({
-        sharedSecret: sharedSecret,
+        sharedSecret: state.sharedSecret,
         fcmToken: registeredDevice.fcmToken,
     });
 
-    console.log('Pairing completed successfully');
     await showScreen(
         interfaceId,
         <Box>
             <Heading>Pairing Successful!</Heading>
             <Text>Your device has been successfully paired.</Text>
-            <Button name="import-account">Import First Account</Button>
+            <Button name={SCREENS.IMPORT_ACCOUNT}>Import First Account</Button>
         </Box>,
     );
 }

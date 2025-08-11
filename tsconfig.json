@@ -1,29 +1,27 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "ES2020",
-      "DOM"
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "exactOptionalPropertyTypes": true,
+        "forceConsistentCasingInFileNames": true,
+        "lib": ["ES2020", "DOM"],
+        "module": "Node16",
+        "moduleResolution": "node16",
+        "noEmit": true,
+        "noErrorTruncation": true,
+        "noUncheckedIndexedAccess": true,
+        "skipLibCheck": true,
+        "incremental": true,
+        "strict": true,
+        "target": "es2020",
+        "isolatedModules": true
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules",
+        "dist",
+        "build",
+        "*.config.*",
+        ".prettierrc.*"
     ],
-    "module": "Node16",
-    "moduleResolution": "node16",
-    "noEmit": true,
-    "noErrorTruncation": true,
-    "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true,
-    "incremental": true,
-    "strict": true,
-    "target": "es2020"
-  },
-  "exclude": [
-    "node_modules",
-    "**/node_modules",
-    "dist",
-    "build",
-    "*.config.*",
-    ".prettierrc.*"
-  ],
-  "extends": "expo/tsconfig.base"
+    "extends": "expo/tsconfig.base"
 }

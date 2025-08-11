@@ -5,10 +5,7 @@ import type { Snap } from '../types';
 /**
  * Utility hook to wrap the `wallet_requestSnaps` method.
  */
-export const useRequestSnap = (
-    snapId: string,
-    version?: string,
-) => {
+export const useRequestSnap = (snapId: string, version?: string) => {
     const request = useRequest();
     const { setInstalledSnap } = useMetaMaskContext();
 

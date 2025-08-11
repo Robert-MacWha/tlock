@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { setStringAsync } from "expo-clipboard";
-import { Portal, Snackbar, Text } from "react-native-paper";
+import React, { useState } from 'react';
+import { setStringAsync } from 'expo-clipboard';
+import { Portal, Snackbar } from 'react-native-paper';
 
 interface UseCopyableReturn {
     copy: (text: string, onCopy?: () => void) => Promise<void>;

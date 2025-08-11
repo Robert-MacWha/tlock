@@ -1,10 +1,16 @@
+import { useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { entropyToMnemonic, mnemonicToSeed } from 'bip39';
+import { entropyToMnemonic, mnemonicToSeedSync } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
 import { bytesToHex, parseTransaction } from 'viem';
-import type { Address, Hex, PrivateKeyAccount, TransactionSerialized, TypedDataDefinition } from 'viem';
-import { useAuthenticator } from './useAuthenticator';
+import type {
+    Address,
+    Hex,
+    PrivateKeyAccount,
+    TransactionSerialized,
+    TypedDataDefinition,
+} from 'viem';
 import * as Crypto from 'expo-crypto';
 
 export interface Account {
@@ -15,174 +21,145 @@ export interface Account {
 }
 
 const SEED_PHRASE_KEY = 'tlock_seed_phrase';
-const ACCOUNT_COUNTER_KEY = 'tlock_account_counter';
 const ACCOUNTS_KEY = 'tlock_accounts';
 
 export function useKeyring() {
-    const { authenticate } = useAuthenticator();
+    //? Stateful accounts variable for external use. Internally make sure to
+    //? always use the _loadAccounts function to ensure data consistency.
+    const [accounts, setAccounts] = useState<Account[]>([]);
 
-    const getSeedPhrase = async (): Promise<string> => {
-        await authenticate();
+    useEffect(() => {
+        const accounts = _loadAccounts();
+        setAccounts(accounts);
+    }, []);
 
-        const seedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+    const getSeedPhrase = (): string => {
+        const seedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
+            requireAuthentication: true,
+        });
         if (!seedPhrase) {
             throw new Error('No seed phrase found');
         }
         return seedPhrase;
     };
 
-    const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
-        await authenticate();
-
-        const existingSeedPhrase = await SecureStore.getItemAsync(SEED_PHRASE_KEY);
+    const generateSeedPhrase = (override: boolean = false): string => {
+        const existingSeedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
+            requireAuthentication: true,
+        });
         if (existingSeedPhrase && !override) {
-            console.log('Seed phrase already exists, not generating new one');
-            throw new Error('Seed phrase already exists. Use override to replace it.');
+            throw new Error(
+                'Seed phrase already exists. Use override to replace it.',
+            );
         }
 
-        let seedPhrase: string;
-        try {
-            const entropy = Crypto.getRandomBytes(16);
-            seedPhrase = entropyToMnemonic(Buffer.from(entropy));
-            if (!seedPhrase) {
-                throw new Error('No seed phrase generated');
-            }
-        } catch (error) {
-            console.error('Error generating seed phrase:', error);
-            throw new Error('Failed to generate seed phrase');
+        const entropy = Crypto.getRandomBytes(16);
+        const seedPhrase = entropyToMnemonic(Buffer.from(entropy));
+        if (!seedPhrase) {
+            throw new Error('No seed phrase generated');
         }
+        SecureStore.setItem(SEED_PHRASE_KEY, seedPhrase);
 
-        await SecureStore.setItemAsync(SEED_PHRASE_KEY, seedPhrase);
-
-        // Reset accounts and counter
-        await setAccounts([]);
-        await setAccountCounter(0);
-        await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify([]));
-        await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, '0');
+        // Reset accounts
+        _saveAccounts([]);
+        setAccounts([]);
 
         return seedPhrase;
-    }
-
-    const getAccounts = async (): Promise<Account[]> => {
-        const accountsStr = await SecureStore.getItemAsync(ACCOUNTS_KEY);
-
-        if (accountsStr) {
-            return JSON.parse(accountsStr) as Account[];
-        }
-        return [];
     };
 
-    const addAccount = async (): Promise<Address> => {
-        console.log('Adding new account...');
-
-        const accounts = await getAccounts();
-        const newAccountId = await _getAccountCounter() + 1;
-        const address = await _deriveAddress(newAccountId);
+    const addAccount = (): Address => {
+        const newAccountId = accounts.length + 1;
+        const address = _deriveAddress(newAccountId);
 
         const newAccount: Account = {
             id: newAccountId,
-            address
+            address,
         };
 
         const newAccounts = [...accounts, newAccount];
-        await setAccounts(newAccounts);
-        await setAccountCounter(newAccountId);
+        _saveAccounts(newAccounts);
+        setAccounts(newAccounts);
 
         return address;
     };
 
-    const renameAccount = async (address: Address, name: string): Promise<void> => {
-        const accounts = await getAccounts();
-        const updatedAccounts = accounts.map(account =>
-            account.address === address ? { ...account, name } : account
+    const renameAccount = (address: Address, name: string): void => {
+        const updatedAccounts = accounts.map((account) =>
+            account.address === address ? { ...account, name } : account,
         );
-        await setAccounts(updatedAccounts);
+        _saveAccounts(updatedAccounts);
+        setAccounts(updatedAccounts);
     };
 
-    const hideAccount = async (address: Address, hide: boolean): Promise<void> => {
-        const accounts = await getAccounts();
-        const updatedAccounts = accounts.map(account =>
-            account.address === address ? { ...account, isHidden: hide } : account
+    const hideAccount = (address: Address, hide: boolean): void => {
+        const updatedAccounts = accounts.map((account) =>
+            account.address === address
+                ? { ...account, isHidden: hide }
+                : account,
         );
-        await setAccounts(updatedAccounts);
+        _saveAccounts(updatedAccounts);
+        setAccounts(updatedAccounts);
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
-        console.log('Signing hash:', hash);
-
-        const account = await _getAccountFromAddress(from);
-        try {
-            return await account.sign({ hash });
-        } catch (error) {
-            console.log(error);
-            throw new Error(`Failed to sign hash: ${hash}`);
-        }
+        const account = _getAccountFromAddress(from);
+        return await account.sign({ hash });
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
-        console.log('Signing raw:', raw);
-
-        const account = await _getAccountFromAddress(from);
-        try {
-            return await account.signMessage({ message: { raw } });
-        } catch (error) {
-            console.log(error);
-            throw new Error(`Failed to sign raw: ${raw}`);
-        }
-    }
-
-    const signTypedData = async (from: Address, data: TypedDataDefinition): Promise<Hex> => {
-        console.log('Signing typed data:', data);
-
-        const account = await _getAccountFromAddress(from);
-        try {
-            return await account.signTypedData(data);
-        } catch (error) {
-            console.log(error);
-            throw new Error(`Failed to sign typed data: ${JSON.stringify(data)}`);
-        }
-    }
-
-    const signTransaction = async (from: Address, transaction: Hex): Promise<TransactionSerialized> => {
-        console.log('Signing transaction:', transaction);
-
-        const account = await _getAccountFromAddress(from);
-        try {
-            const parsed = parseTransaction(transaction);
-            const signedTransaction = await account.signTransaction(parsed);
-            return signedTransaction;
-        } catch (error) {
-            console.log(error);
-            throw new Error(`Failed to sign transaction from address: ${from}`);
-        }
-    }
-
-    const _getAccountCounter = async (): Promise<number> => {
-        const counterStr = await SecureStore.getItemAsync(ACCOUNT_COUNTER_KEY);
-        if (counterStr) {
-            return parseInt(counterStr, 10);
-        }
-        return 0;
+        const account = _getAccountFromAddress(from);
+        return await account.signMessage({ message: { raw } });
     };
 
-    const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
-        try {
-            const accounts = await getAccounts();
-            const account = accounts.find(account => account.address.toLowerCase() === address.toLowerCase());
-            if (!account) {
-                throw new Error(`Account with address ${address} not found`);
-            }
+    const signTypedData = async (
+        from: Address,
+        data: TypedDataDefinition,
+    ): Promise<Hex> => {
+        const account = _getAccountFromAddress(from);
+        return await account.signTypedData(data);
+    };
 
-            const privateKey = await _getPrivateKey(account.id);
-            return privateKeyToAccount(privateKey);
-        } catch (error) {
-            console.error('Error getting account from address:', error);
-            throw new Error(`Failed to get account from address: ${address}`);
+    const signTransaction = async (
+        from: Address,
+        transaction: Hex,
+    ): Promise<TransactionSerialized> => {
+        const account = _getAccountFromAddress(from);
+        const parsed = parseTransaction(transaction);
+        const signedTransaction = await account.signTransaction(parsed);
+        return signedTransaction;
+    };
+
+    const _loadAccounts = (): Account[] => {
+        const accountsStr = SecureStore.getItem(ACCOUNTS_KEY);
+
+        let accounts: Account[] = [];
+        if (accountsStr) {
+            accounts = JSON.parse(accountsStr) as Account[];
         }
-    }
+        setAccounts(accounts);
+        return accounts;
+    };
 
-    const _deriveAddress = async (accountId: number): Promise<Address> => {
-        const privateKey = await _getPrivateKey(accountId);
+    const _saveAccounts = (accounts: Account[]) => {
+        setAccounts(accounts);
+        SecureStore.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    };
+
+    const _getAccountFromAddress = (address: Address): PrivateKeyAccount => {
+        const account = accounts.find(
+            (account) =>
+                account.address.toLowerCase() === address.toLowerCase(),
+        );
+        if (!account) {
+            throw new Error(`Account with address ${address} not found`);
+        }
+
+        const privateKey = _getPrivateKey(account.id);
+        return privateKeyToAccount(privateKey);
+    };
+
+    const _deriveAddress = (accountId: number): Address => {
+        const privateKey = _getPrivateKey(accountId);
         try {
             const account = privateKeyToAccount(privateKey);
             return account.address;
@@ -190,12 +167,12 @@ export function useKeyring() {
             // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to derive address');
         }
-    }
+    };
 
-    const _getPrivateKey = async (accountId: number): Promise<Hex> => {
-        const seedPhrase = await getSeedPhrase();
+    const _getPrivateKey = (accountId: number): Hex => {
+        const seedPhrase = getSeedPhrase();
         try {
-            const seed = await mnemonicToSeed(seedPhrase);
+            const seed = mnemonicToSeedSync(seedPhrase);
             const hdKey = HDKey.fromMasterSeed(seed);
             const derived = hdKey.derive(`m/44'/60'/0'/0/${accountId}`);
 
@@ -208,12 +185,12 @@ export function useKeyring() {
             // ? Should never be thrown, just here to prevent data leaks
             throw new Error('Failed to get private key');
         }
-    }
+    };
 
     return {
+        accounts,
         getSeedPhrase,
         generateSeedPhrase,
-        getAccounts,
         renameAccount,
         hideAccount,
         addAccount,
@@ -221,13 +198,5 @@ export function useKeyring() {
         signPersonal,
         signTypedData,
         signTransaction,
-    }
-}
-
-const setAccounts = async (accounts: Account[]) => {
-    await SecureStore.setItemAsync(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
-
-const setAccountCounter = async (counter: number) => {
-    await SecureStore.setItemAsync(ACCOUNT_COUNTER_KEY, counter.toString());
+    };
 }

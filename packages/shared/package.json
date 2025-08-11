@@ -4,20 +4,21 @@
     "description": "Shared utilities for Tlock 2FA wallet",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "scripts": {
-        "build": "tsc",
-        "dev": "tsc --watch",
-        "clean": "rm -rf dist"
-    },
-    "devDependencies": {
-        "typescript": "^5.7.3"
-    },
     "files": [
         "dist"
     ],
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist",
+        "dev": "tsc --watch",
+        "lint": "eslint . --cache --ext js,ts",
+        "test": "jest"
+    },
     "dependencies": {
-        "@ethereumjs/tx": "^10.0.0",
         "jest": "^30.0.4",
         "viem": "^2.33.1"
+    },
+    "devDependencies": {
+        "typescript": "^5.7.3"
     }
 }

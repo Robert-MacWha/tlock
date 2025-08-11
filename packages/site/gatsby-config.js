@@ -4,5 +4,5 @@ module.exports = {
         PRESERVE_WEBPACK_CACHE: true,
         PARALLEL_SOURCING: true,
     },
-    plugins: []
-}
+    plugins: [],
+};

@@ -1,12 +1,24 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    ReactNode,
+} from 'react';
 import { useColorScheme } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import {
     DefaultTheme as NavLightTheme,
     DarkTheme as NavDarkTheme,
     ThemeProvider as NavThemeProvider,
 } from '@react-navigation/native';
-import { adaptNavigationTheme, MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
+import {
+    adaptNavigationTheme,
+    MD3DarkTheme,
+    MD3LightTheme,
+    PaperProvider,
+} from 'react-native-paper';
 import { customDarkTheme, customLightTheme } from '../lib/theme';
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -19,7 +31,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = '@theme_mode';
+const THEME_STORAGE_KEY = 'theme_mode';
 
 interface ThemeProviderProps {
     children: ReactNode;
@@ -29,9 +41,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const systemColorScheme = useColorScheme();
     const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
 
-    const isDark = themeMode === 'system'
-        ? systemColorScheme === 'dark'
-        : themeMode === 'dark';
+    const isDark =
+        themeMode === 'system'
+            ? systemColorScheme === 'dark'
+            : themeMode === 'dark';
 
     const lightTheme = {
         ...MD3LightTheme,
@@ -50,15 +63,15 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         reactNavigationDark: NavDarkTheme,
         materialLight: lightTheme,
-        materialDark: darkTheme
+        materialDark: darkTheme,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const currentNavTheme = isDark
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        ? { ...DarkTheme, fonts: NavDarkTheme.fonts }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        : { ...LightTheme, fonts: NavLightTheme.fonts };
+        ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          { ...DarkTheme, fonts: NavDarkTheme.fonts }
+        : // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          { ...LightTheme, fonts: NavLightTheme.fonts };
 
     const currentPaperTheme = isDark ? darkTheme : lightTheme;
 
@@ -89,6 +102,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     return (
         <ThemeContext.Provider value={{ themeMode, setThemeMode, isDark }}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
+            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
             <NavThemeProvider value={currentNavTheme}>
                 <PaperProvider theme={currentPaperTheme}>
                     {children}

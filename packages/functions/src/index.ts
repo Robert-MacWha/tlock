@@ -8,7 +8,7 @@ if (!admin.apps.length) {
 const db = admin.database();
 
 export const cleanupOldRequests = onSchedule('0 2 * * *', async (_event) => {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000;
 
     try {
         const requestsRef = db.ref('requests');
@@ -19,7 +19,7 @@ export const cleanupOldRequests = onSchedule('0 2 * * *', async (_event) => {
             .once('value');
 
         const updates: { [key: string]: null } = {};
-        snapshot.forEach(child => {
+        snapshot.forEach((child) => {
             updates[child.key] = null;
         });
 

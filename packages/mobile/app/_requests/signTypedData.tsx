@@ -9,18 +9,24 @@ import { ErrorScreen } from '../../components/ErrorScreen';
 export default function SignTypedDataScreen() {
     const { signTypedData } = useKeyringContext();
     const { accounts } = useKeyringContext();
-    const { client, request, loading, error, handleApprove, handleReject } = useRequestHandler({
-        type: 'signTypedData',
-        onApprove: async (request) => {
-            const signature = await signTypedData(request.from, request.data);
-            return { signature };
-        },
-    });
+    const { client, request, loading, error, handleApprove, handleReject } =
+        useRequestHandler({
+            type: 'signTypedData',
+            onApprove: async (request) => {
+                const signature = await signTypedData(
+                    request.from,
+                    request.data,
+                );
+                return { signature };
+            },
+        });
 
     if (!request) return <ErrorScreen error="Request not found" />;
     if (!client) return <ErrorScreen error="Client not found" />;
 
-    const account = accounts.find(acc => acc.address.toLowerCase() === request.from.toLowerCase());
+    const account = accounts.find(
+        (acc) => acc.address.toLowerCase() === request.from.toLowerCase(),
+    );
     if (!account) return <ErrorScreen error="Account not found" />;
 
     const clientName = client.name ?? client.id;
@@ -37,22 +43,31 @@ export default function SignTypedDataScreen() {
             <Card>
                 <Card.Content>
                     <KeyValueRow label="From" value={clientName} />
-                    <KeyValueRow label="Account" value={account.name ?? account.address} />
-                    <KeyValueRow label="Origin" value={request.origin ?? 'Unknown'} />
+                    <KeyValueRow
+                        label="Account"
+                        value={account.name ?? account.address}
+                    />
+                    <KeyValueRow
+                        label="Origin"
+                        value={request.origin ?? 'Unknown'}
+                    />
 
-                    <Text variant="labelMedium" style={{
-                        marginTop: 16,
-                        marginBottom: 8,
-                    }}>
+                    <Text
+                        variant="labelMedium"
+                        style={{
+                            marginTop: 16,
+                            marginBottom: 8,
+                        }}
+                    >
                         Data to sign:
                     </Text>
-                    <Card mode='contained'>
+                    <Card mode="contained">
                         <Card.Content>
                             <Text
                                 variant="bodySmall"
                                 selectable
                                 style={{
-                                    fontFamily: 'monospace'
+                                    fontFamily: 'monospace',
                                 }}
                             >
                                 {JSON.stringify(request.data, null, 2)}

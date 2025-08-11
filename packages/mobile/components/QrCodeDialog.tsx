@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Modal, Portal, Text, Button, Surface, Dialog } from 'react-native-paper';
+import { Modal, Portal, Text, Button, Dialog } from 'react-native-paper';
 import { CameraView } from 'expo-camera';
 
 interface QrCodeDialogProps {
@@ -16,7 +16,7 @@ export function QrCodeDialog({
     instructions,
     onDismiss,
     onBarcodeScanned,
-    isProcessing = false
+    isProcessing = false,
 }: QrCodeDialogProps) {
     const [hasScanned, setHasScanned] = useState(false);
 
@@ -56,10 +56,16 @@ export function QrCodeDialog({
                     </View>
 
                     <Dialog visible={true} style={styles.instructionContainer}>
-                        <Text variant="titleMedium" style={{ textAlign: 'center' }}>
+                        <Text
+                            variant="titleMedium"
+                            style={{ textAlign: 'center' }}
+                        >
                             {instructions}
                         </Text>
-                        <Text variant="bodyMedium" style={{ textAlign: 'center', opacity: 0.7 }}>
+                        <Text
+                            variant="bodyMedium"
+                            style={{ textAlign: 'center', opacity: 0.7 }}
+                        >
                             Position the QR code within the frame
                         </Text>
                         <Button

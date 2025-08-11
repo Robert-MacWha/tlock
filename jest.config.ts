@@ -5,6 +5,18 @@ module.exports = {
     testMatch: ['**/packages/**/*.test.{ts,tsx}'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
+    // TypeScript configuration
+    transform: {
+        '^.+\\.(ts|tsx)$': [
+            'ts-jest',
+            {
+                tsconfig: {
+                    types: ['jest', '@types/jest'],
+                },
+            },
+        ],
+    },
+
     // Basic coverage
     collectCoverageFrom: [
         'packages/*/src/**/*.{ts,tsx}',
