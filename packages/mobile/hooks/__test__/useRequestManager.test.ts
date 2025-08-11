@@ -23,8 +23,6 @@ describe('useRequestManager', () => {
         sharedSecret: [1, 2, 3, 4, 5] as SharedSecret,
         client: {
             roomId: 'test-room-id',
-            submitDevice: jest.fn(),
-            getDevice: jest.fn(),
             submitRequest: jest.fn(),
             updateRequest: mockUpdateRequest,
             getRequest: jest.fn(),
@@ -47,7 +45,7 @@ describe('useRequestManager', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => { });
 
         mockGetRequests.mockResolvedValue([mockRequest]);
         mockUpdateRequest.mockResolvedValue(undefined);

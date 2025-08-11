@@ -50,6 +50,10 @@ export function useRequestManager({
     }, [pollingInterval, clients]);
 
     const handleRequest = async (request: ClientRequest): Promise<void> => {
+        if (request.request.type === 'pair') {
+            return;
+        }
+
         router.push({
             pathname: `/_requests/${request.request.type}`,
             params: {
