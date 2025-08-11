@@ -285,7 +285,7 @@ Before releasing or deploying:
 - [ ] Critical issues (!) resolved
 - [ ] High severity issues (x) resolved or documented
 
-**Tester**: ******\_\_\_\_******  
-**Date**: ******\_\_\_\_******  
-**App Version**: ******\_\_\_\_******  
+**Tester**:
+**Date**:
+**App Version**:
 **Overall Result**: PASS / FAIL

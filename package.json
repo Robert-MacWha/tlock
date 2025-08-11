@@ -14,6 +14,7 @@
         "deploy:functions": "yarn workspace @tlock/functions deploy",
         "dev:mobile": "yarn workspace @tlock/mobile dev",
         "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
+        "format": "prettier --write .",
         "lint": "yarn workspaces foreach run lint",
         "test": "yarn workspaces foreach run test"
     },
