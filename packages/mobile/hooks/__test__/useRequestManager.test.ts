@@ -101,4 +101,32 @@ describe('useRequestManager', () => {
 
         expect(mockGetRequests).not.toHaveBeenCalled();
     });
+
+    it('should not redirect for pairing requests', async () => {
+        const pairingRequest: Request = {
+            id: 'pairing-request-id',
+            lastUpdated: Date.now(),
+            type: 'pair',
+            request: {
+                status: 'pending',
+                fcmToken: '',
+                deviceName: '',
+            },
+        };
+
+        mockGetRequests.mockResolvedValue([pairingRequest]);
+
+        const { result } = renderHook(() =>
+            useRequestManager({
+                clients: [mockClient],
+                pollingInterval: 0,
+            }),
+        );
+
+        await waitFor(() => {
+            expect(result.current.clientRequests).toHaveLength(1);
+        });
+
+        expect(mockRouter.push).not.toHaveBeenCalled();
+    });
 });
