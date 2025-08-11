@@ -42,10 +42,6 @@ export class FirebaseClient implements Client {
         type: T,
         data: RequestTypeMap[T],
     ): Promise<string> {
-        if (!this.fcmToken) {
-            throw new Error('Missing FCM token.');
-        }
-
         const requestId = generateRequestId();
         const encryptedData = encryptMessage(data, this.sharedSecret);
 
@@ -165,9 +161,13 @@ export class FirebaseClient implements Client {
     }
 
     private async sendNotification(
-        fcmToken: string,
+        fcmToken: string | undefined,
         requestId: string,
     ): Promise<void> {
+        if (!fcmToken) {
+            return;
+        }
+
         console.log(
             'TODO: Send notification to FCM token:',
             fcmToken,
