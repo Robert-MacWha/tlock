@@ -1,9 +1,12 @@
-import { deriveRoomId, generateSharedSecret } from '../../crypto';
+import { generateSharedSecret } from '../../crypto';
 import { FirebaseClient } from '../firebaseClient';
-import { HttpClient } from '../client';
+import { FirebaseHttpClient } from '../client';
+
+// Mock fetch globally
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
 describe('FirebaseClient', () => {
-    let mockHttp: jest.Mocked<HttpClient>;
     let client: FirebaseClient;
     const testSecret = generateSharedSecret();
     const mockStorage = new Map<string, unknown>();
@@ -12,37 +15,50 @@ describe('FirebaseClient', () => {
         jest.clearAllMocks();
         mockStorage.clear();
 
-        mockHttp = {
-            get: jest
-                .fn()
-                .mockImplementation(async (url: string, path: string) => {
-                    return mockStorage.get(path) || null;
-                }),
-            put: jest
-                .fn()
-                .mockImplementation(
-                    async (url: string, path: string, data: unknown) => {
-                        mockStorage.set(path, data);
-                    },
-                ),
-            delete: jest
-                .fn()
-                .mockImplementation(async (url: string, path: string) => {
+        // Mock fetch to simulate Firebase REST API behavior
+        mockFetch.mockImplementation(
+            async (url: string, options?: RequestInit) => {
+                const urlObj = new URL(url);
+                const path = urlObj.pathname.replace('.json', '');
+
+                if (options?.method === 'PUT') {
+                    const data: unknown = JSON.parse(options.body as string);
+                    mockStorage.set(path, data);
+                    return new Response(JSON.stringify(data), { status: 200 });
+                } else if (options?.method === 'DELETE') {
                     const existed = mockStorage.has(path);
                     mockStorage.delete(path);
                     if (!existed) {
-                        throw new Error('Request not found');
+                        return new Response('Not Found', { status: 404 });
                     }
-                }),
-            post: jest.fn().mockResolvedValue({ success: true }),
-        };
+                    return new Response('null', { status: 200 });
+                } else if (options?.method === undefined) {
+                    // GET
+                    const data = mockStorage.get(path);
+                    if (data === undefined) {
+                        return new Response('null', { status: 404 });
+                    }
+                    return new Response(JSON.stringify(data), { status: 200 });
+                } else {
+                    return new Response('Method Not Allowed', { status: 405 });
+                }
+            },
+        );
 
-        client = new FirebaseClient(testSecret, 'test-fcm-token', mockHttp);
+        client = new FirebaseClient(
+            testSecret,
+            'test-fcm-token',
+            new FirebaseHttpClient(),
+        );
     });
 
     describe('request lifecycle', () => {
         it('should fail if FCM token is not set', async () => {
-            const clientWithoutToken = new FirebaseClient(testSecret);
+            const clientWithoutToken = new FirebaseClient(
+                testSecret,
+                undefined,
+                new FirebaseHttpClient(),
+            );
             await expect(
                 clientWithoutToken.submitRequest('importAccount', {
                     status: 'pending',
