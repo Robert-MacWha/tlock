@@ -24,13 +24,20 @@ export default function App() {
 
     const onBarcodeScanned = async (data: string) => {
         try {
-            const sharedSecret = await parseQrCode(data);
-            const client = await addClient(sharedSecret, 'React Native App');
+            const qrData = await parseQrCode(data);
+            const client = await addClient(
+                qrData.sharedSecret,
+                'React Native App',
+            );
 
             // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
             const fcmToken = 'new-fcm-token';
-            await client.client.submitDevice(fcmToken, 'React Native App');
-            await addClient(sharedSecret, 'New Client');
+            await client.client.updateRequest(qrData.pairRequestId, 'pair', {
+                status: 'approved',
+                fcmToken,
+                deviceName: 'React Native App',
+            });
+            await addClient(qrData.sharedSecret, 'New Client');
             alert('Success', 'Device paired successfully!');
         } catch (error) {
             console.error('Pairing failed:', error);
