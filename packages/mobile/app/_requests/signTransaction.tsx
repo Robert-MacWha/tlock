@@ -38,12 +38,12 @@ export default function SignTransaction() {
     const clientName = client.name ?? client.id;
     const transaction = parseTransaction(request.transaction);
     const valueWei = transaction.value ? formatEther(transaction.value) : '0';
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     const chain = transaction.chainId
         ? extractChain({
-              chains: Object.values(chains),
-              id: transaction.chainId as any,
-          }).name
+            chains: Object.values(chains),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            id: transaction.chainId as any,
+        }).name
         : 'Unknown Chain';
 
     return (
