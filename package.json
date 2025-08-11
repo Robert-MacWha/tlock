@@ -1,58 +1,46 @@
 {
-  "name": "tlock",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Tlock 2FA wallet system",
-  "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "yarn workspaces foreach --parallel --topological run build",
-    "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
-    "dev:mobile": "yarn workspace @tlock/mobile dev",
-    "build:shared": "yarn workspace @tlock/shared build",
-    "build:snap": "yarn workspace @tlock/snap build",
-    "deploy:functions": "yarn workspace @tlock/functions deploy",
-    "lint": "yarn workspaces foreach run lint",
-    "test": "yarn workspaces foreach run test"
-  },
-  "devDependencies": {
-    "@metamask/eslint-config": "^14.0.0",
-    "@metamask/eslint-config-browser": "^14.0.0",
-    "@metamask/eslint-config-jest": "^14.0.0",
-    "@metamask/eslint-config-nodejs": "^14.0.0",
-    "@metamask/eslint-config-typescript": "^14.0.0",
-    "@types/jest": "^30.0.0",
-    "eslint": "^9.11.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-import-x": "^4.3.0",
-    "eslint-plugin-jest": "^28.8.3",
-    "eslint-plugin-jsdoc": "^50.2.4",
-    "eslint-plugin-n": "^17.10.3",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-promise": "^7.1.0",
-    "jest": "^30.0.4",
-    "prettier": "^3.3.3",
-    "prettier-plugin-packagejson": "^2.2.18",
-    "ts-jest": "^29.4.0",
-    "ts-node": "^10.9.2",
-    "typescript": "~5.7.3",
-    "typescript-eslint": "^8.6.0"
-  },
-  "resolutions": {
-    "typescript": "5.7.3",
-    "cookie": "^0.7.1",
-    "path-to-regexp@0.1.10": "^0.1.12",
-    "sharp": "^0.33.5",
-    "socket.io": "^4.8.1",
-    "ws": "^8.17.1",
-    "viem": "2.33.1",
-    "abitype": "^1.0.0"
-  },
-  "packageManager": "yarn@3.2.1",
-  "engines": {
-    "node": ">=18.6.0"
-  }
+    "name": "tlock",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Tlock 2FA wallet system",
+    "license": "MIT",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "yarn workspaces foreach --parallel --topological run build",
+        "build:shared": "yarn workspace @tlock/shared build",
+        "build:snap": "yarn workspace @tlock/snap build",
+        "deploy:functions": "yarn workspace @tlock/functions deploy",
+        "dev:mobile": "yarn workspace @tlock/mobile dev",
+        "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
+        "lint": "yarn workspaces foreach run lint",
+        "test": "yarn workspaces foreach run test"
+    },
+    "resolutions": {
+        "abitype": "^1.0.0",
+        "cookie": "^0.7.1",
+        "path-to-regexp@0.1.10": "^0.1.12",
+        "sharp": "^0.33.5",
+        "socket.io": "^4.8.1",
+        "typescript": "5.7.3",
+        "viem": "2.33.1",
+        "ws": "^8.17.1"
+    },
+    "devDependencies": {
+        "@types/jest": "^30.0.0",
+        "eslint": "^9.11.0",
+        "eslint-plugin-jest": "^28.8.3",
+        "jest": "^30.0.4",
+        "prettier": "^3.3.3",
+        "prettier-plugin-packagejson": "^2.5.19",
+        "ts-jest": "^29.4.0",
+        "ts-node": "^10.9.2",
+        "typescript": "~5.7.3",
+        "typescript-eslint": "^8.6.0"
+    },
+    "packageManager": "yarn@3.2.1",
+    "engines": {
+        "node": ">=18.6.0"
+    }
 }
