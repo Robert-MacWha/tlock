@@ -9,6 +9,12 @@ export type Request =
     | {
           id: string;
           lastUpdated: number;
+          type: 'pair';
+          request: PairRequest;
+      }
+    | {
+          id: string;
+          lastUpdated: number;
           type: 'importAccount';
           request: ImportAccountRequest;
       }
@@ -37,23 +43,20 @@ export type Request =
           request: SignMessageRequest;
       };
 
-/**
- * DeviceRegistration used for pairing devices with the backend.
- * @property fcmToken - FCM token for push notifications to mobile devices.
- * @property deviceName - Name of the mobile device.
- */
-export interface DeviceRegistration {
-    fcmToken: string;
-    deviceName: string;
-}
-
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
 export type RequestType =
+    | 'pair'
     | 'importAccount'
     | 'signPersonal'
     | 'signTransaction'
     | 'signTypedData'
     | 'signMessage';
+
+export interface PairRequest {
+    status: RequestStatus;
+    fcmToken: string;
+    deviceName: string;
+}
 
 export interface ImportAccountRequest {
     status: RequestStatus;
@@ -93,6 +96,7 @@ export interface SignMessageRequest {
 }
 
 export interface RequestTypeMap {
+    pair: PairRequest;
     importAccount: ImportAccountRequest;
     signPersonal: SignPersonalRequest;
     signTransaction: SignTransactionRequest;
@@ -106,13 +110,6 @@ export interface RequestTypeMap {
  */
 export interface Client {
     roomId: string;
-
-    submitDevice(fcmToken: string, deviceName: string): Promise<void>;
-    getDevice(): Promise<DeviceRegistration | null>;
-    pollUntilDeviceRegistered(
-        intervalMs: number,
-        timeoutSeconds: number,
-    ): Promise<DeviceRegistration>;
 
     submitRequest<T extends RequestType>(
         type: T,

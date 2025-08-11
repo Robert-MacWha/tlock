@@ -3,6 +3,7 @@ import { SharedSecret, isValidSharedSecret } from './crypto';
 export interface QrCodeData {
     version: number;
     sharedSecret: SharedSecret;
+    pairRequestId: string;
 }
 
 export const QR_VERSION = 1;
@@ -11,17 +12,19 @@ export const QR_ACTION = 'pair';
 
 export async function createQrCode(
     sharedSecret: SharedSecret,
+    pairRequestId: string,
 ): Promise<string> {
     const qrData: QrCodeData = {
-        sharedSecret,
         version: QR_VERSION,
+        sharedSecret,
+        pairRequestId,
     };
 
     const encodedData = btoa(JSON.stringify(qrData));
     return `${QR_PROTOCOL}://${QR_ACTION}/${encodedData}`;
 }
 
-export async function parseQrCode(qrCode: string): Promise<SharedSecret> {
+export async function parseQrCode(qrCode: string): Promise<QrCodeData> {
     const expectedPrefix = `${QR_PROTOCOL}://${QR_ACTION}/`;
 
     if (!qrCode.startsWith(expectedPrefix)) {
@@ -46,5 +49,5 @@ export async function parseQrCode(qrCode: string): Promise<SharedSecret> {
         );
     }
 
-    return qrData.sharedSecret;
+    return qrData;
 }
