@@ -4,9 +4,14 @@ import { createQrCode, parseQrCode } from '../pairing';
 describe('pairing', () => {
     it('should generated a valid pairing code', async () => {
         const sharedSecret = generateSharedSecret();
-        const qrCode = await createQrCode(sharedSecret);
-        const parsedSecret = await parseQrCode(qrCode);
-        expect(parsedSecret).toEqual(sharedSecret);
+        const pairRequestId = 'test-request-id';
+        const qrCode = await createQrCode(sharedSecret, pairRequestId);
+        const qrData = await parseQrCode(qrCode);
+        expect(qrData).toEqual({
+            version: 1,
+            sharedSecret,
+            pairRequestId,
+        });
     });
 
     it('should throw an error for invalid QR code prefix', async () => {

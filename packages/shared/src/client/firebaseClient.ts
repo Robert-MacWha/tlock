@@ -1,10 +1,4 @@
-import {
-    Client,
-    DeviceRegistration,
-    Request,
-    RequestType,
-    RequestTypeMap,
-} from '.';
+import { Client, Request, RequestType, RequestTypeMap } from '.';
 import {
     decryptMessage,
     deriveRoomId,
@@ -22,7 +16,6 @@ interface StoredRequest {
 }
 
 const FirebasePaths = {
-    registration: (roomId: string) => `registrations/${roomId}`,
     request: (roomId: string, requestId: string) =>
         `requests/${roomId}/${requestId}`,
     requests: (roomId: string) => `requests/${roomId}`,
@@ -43,69 +36,6 @@ export class FirebaseClient implements Client {
         this.roomId = deriveRoomId(sharedSecret);
         this.fcmToken = fcmToken;
         this.http = httpClient;
-    }
-
-    async submitDevice(fcmToken: string, deviceName: string): Promise<void> {
-        const registration: DeviceRegistration = {
-            fcmToken,
-            deviceName,
-        };
-
-        const encryptedData = encryptMessage(registration, this.sharedSecret);
-
-        await this.http.put(
-            FIREBASE_URL,
-            FirebasePaths.registration(this.roomId),
-            {
-                encryptedData,
-                registeredAt: Date.now(),
-            },
-        );
-
-        // Update our local FCM token for notifications
-        this.fcmToken = fcmToken;
-    }
-
-    async getDevice(): Promise<DeviceRegistration | null> {
-        const data = await this.http.get<{ encryptedData: string }>(
-            FIREBASE_URL,
-            FirebasePaths.registration(this.roomId),
-        );
-
-        if (!data || !data.encryptedData) {
-            return null;
-        }
-
-        try {
-            return decryptMessage<DeviceRegistration>(
-                data.encryptedData,
-                this.sharedSecret,
-            );
-        } catch {
-            return null;
-        }
-    }
-
-    async pollUntilDeviceRegistered(
-        intervalMs: number,
-        timeoutSeconds: number,
-    ): Promise<DeviceRegistration> {
-        const startTime = Date.now();
-
-        while (true) {
-            const device = await this.getDevice();
-            if (device) {
-                return device;
-            }
-
-            if ((Date.now() - startTime) / 1000 > timeoutSeconds) {
-                throw new Error(
-                    `Polling for device registration timed out after ${timeoutSeconds} seconds`,
-                );
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, intervalMs));
-        }
     }
 
     async submitRequest<T extends RequestType>(

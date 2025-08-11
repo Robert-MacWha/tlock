@@ -6,7 +6,6 @@ export const POLL_TIMEOUT = 120; // seconds
 export const SCREENS = {
     HOME: 'home',
     PAIR: 'pair',
-    CONFIRM_PAIR: 'confirm-pair',
     IMPORT_ACCOUNT: 'import-account',
 } as const;
 

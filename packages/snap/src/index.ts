@@ -14,7 +14,7 @@ import { validatePairedState } from './utils';
 import { initializeInterface, showErrorScreen } from './screen';
 import { SCREENS } from './constants';
 import { handleHomeScreen as showHomeScreen } from './homeScreen';
-import { showConfirmPairingScreen, showPairingScreen } from './pairing';
+import { showPairingScreen } from './pairing';
 import { handleImportAccount as showImportAccountScreen } from './importAccount';
 
 // Home page UI
@@ -65,9 +65,6 @@ export async function selectScreen(
                 return;
             case SCREENS.PAIR:
                 await showPairingScreen(interfaceId);
-                return;
-            case SCREENS.CONFIRM_PAIR:
-                await showConfirmPairingScreen(interfaceId);
                 return;
             case SCREENS.IMPORT_ACCOUNT:
                 await showImportAccountScreen(interfaceId);

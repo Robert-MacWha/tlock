@@ -4,6 +4,7 @@ import { SharedSecret } from '@tlock/shared';
 export interface SnapState {
     sharedSecret?: SharedSecret;
     fcmToken?: string;
+    deviceName?: string;
     keyringState?: KeyringState;
 }
 

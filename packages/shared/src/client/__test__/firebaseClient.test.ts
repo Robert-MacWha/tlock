@@ -1,102 +1,64 @@
-import { DeviceRegistration } from '..';
-import { deriveRoomId, generateSharedSecret } from '../../crypto';
+import { generateSharedSecret } from '../../crypto';
 import { FirebaseClient } from '../firebaseClient';
-import { HttpClient } from '../client';
+import { FirebaseHttpClient } from '../client';
+
+// Mock fetch globally
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
 
 describe('FirebaseClient', () => {
-    let mockHttp: jest.Mocked<HttpClient>;
     let client: FirebaseClient;
     const testSecret = generateSharedSecret();
-    const testRoomId = deriveRoomId(testSecret);
     const mockStorage = new Map<string, unknown>();
 
     beforeEach(() => {
         jest.clearAllMocks();
         mockStorage.clear();
 
-        mockHttp = {
-            get: jest
-                .fn()
-                .mockImplementation(async (url: string, path: string) => {
-                    return mockStorage.get(path) || null;
-                }),
-            put: jest
-                .fn()
-                .mockImplementation(
-                    async (url: string, path: string, data: unknown) => {
-                        mockStorage.set(path, data);
-                    },
-                ),
-            delete: jest
-                .fn()
-                .mockImplementation(async (url: string, path: string) => {
+        // Mock fetch to simulate Firebase REST API behavior
+        mockFetch.mockImplementation(
+            async (url: string, options?: RequestInit) => {
+                const urlObj = new URL(url);
+                const path = urlObj.pathname.replace('.json', '');
+
+                if (options?.method === 'PUT') {
+                    const data: unknown = JSON.parse(options.body as string);
+                    mockStorage.set(path, data);
+                    return new Response(JSON.stringify(data), { status: 200 });
+                } else if (options?.method === 'DELETE') {
                     const existed = mockStorage.has(path);
                     mockStorage.delete(path);
                     if (!existed) {
-                        throw new Error('Request not found');
+                        return new Response('Not Found', { status: 404 });
                     }
-                }),
-            post: jest.fn().mockResolvedValue({ success: true }),
-        };
+                    return new Response('null', { status: 200 });
+                } else if (options?.method === undefined) {
+                    // GET
+                    const data = mockStorage.get(path);
+                    if (data === undefined) {
+                        return new Response('null', { status: 404 });
+                    }
+                    return new Response(JSON.stringify(data), { status: 200 });
+                } else {
+                    return new Response('Method Not Allowed', { status: 405 });
+                }
+            },
+        );
 
-        client = new FirebaseClient(testSecret, 'test-fcm-token', mockHttp);
-    });
-
-    describe('submitDevice', () => {
-        it('should encrypt and store device registration', async () => {
-            await client.submitDevice('fcm-123', 'iPhone 15');
-
-            const storedData = mockStorage.get(
-                `registrations/${testRoomId}`,
-            ) as { encryptedData: string; registeredAt: number };
-            expect(storedData).toMatchObject({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                encryptedData: expect.any(String),
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                registeredAt: expect.any(Number),
-            });
-        });
-
-        it('should update internal FCM token', async () => {
-            await client.submitDevice('new-fcm-token', 'iPhone 15');
-            expect(client.fcmToken).toBe('new-fcm-token');
-        });
-    });
-
-    describe('getDevice', () => {
-        it('should return null when no device is registered', async () => {
-            const device = await client.getDevice();
-            expect(device).toBeNull();
-        });
-
-        it('should decrypt and return device registration', async () => {
-            const testDeviceRegistration: DeviceRegistration = {
-                fcmToken: 'fcm-1234',
-                deviceName: 'iphone 15',
-            };
-            await client.submitDevice(
-                testDeviceRegistration.fcmToken,
-                testDeviceRegistration.deviceName,
-            );
-
-            const retrieved = await client.getDevice();
-            expect(retrieved).toEqual(testDeviceRegistration);
-        });
-
-        it('should return null when decryption fails', async () => {
-            mockStorage.set('registrations/ROOM_1234', {
-                encryptedData: 'invalid-encrypted-data',
-                registeredAt: Date.now(),
-            });
-
-            const device = await client.getDevice();
-            expect(device).toBeNull();
-        });
+        client = new FirebaseClient(
+            testSecret,
+            'test-fcm-token',
+            new FirebaseHttpClient(),
+        );
     });
 
     describe('request lifecycle', () => {
         it('should fail if FCM token is not set', async () => {
-            const clientWithoutToken = new FirebaseClient(testSecret);
+            const clientWithoutToken = new FirebaseClient(
+                testSecret,
+                undefined,
+                new FirebaseHttpClient(),
+            );
             await expect(
                 clientWithoutToken.submitRequest('importAccount', {
                     status: 'pending',
@@ -176,56 +138,6 @@ describe('FirebaseClient', () => {
             );
 
             expect(result.status).toBe('approved');
-        });
-    });
-
-    describe('pollUntilDeviceRegistered', () => {
-        it('should return device when already registered', async () => {
-            // Register device first
-            await client.submitDevice('fcm-token', 'iPhone 15');
-
-            const device = await client.pollUntilDeviceRegistered(100, 1);
-            expect(device).toEqual({
-                fcmToken: 'fcm-token',
-                deviceName: 'iPhone 15',
-            });
-        });
-
-        it('should poll until device is registered', async () => {
-            // Register device after a delay
-            setTimeout(() => {
-                void client.submitDevice('fcm-delayed', 'iPad Pro');
-            }, 50);
-
-            const device = await client.pollUntilDeviceRegistered(10, 1);
-            expect(device).toEqual({
-                fcmToken: 'fcm-delayed',
-                deviceName: 'iPad Pro',
-            });
-        });
-
-        it('should timeout when device is never registered', async () => {
-            await expect(
-                client.pollUntilDeviceRegistered(10, 0.1),
-            ).rejects.toThrow(
-                'Polling for device registration timed out after 0.1 seconds',
-            );
-        });
-
-        it('should handle registration with decryption errors', async () => {
-            // Set up invalid device registration data
-            setTimeout(() => {
-                mockStorage.set(`registrations/${testRoomId}`, {
-                    encryptedData: 'invalid-encrypted-data',
-                    registeredAt: Date.now(),
-                });
-            }, 50);
-
-            await expect(
-                client.pollUntilDeviceRegistered(10, 0.2),
-            ).rejects.toThrow(
-                'Polling for device registration timed out after 0.2 seconds',
-            );
         });
     });
 });
