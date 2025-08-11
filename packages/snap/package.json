@@ -9,12 +9,10 @@
     "scripts": {
         "build": "mm-snap build",
         "dev": "mm-snap watch",
-        "lint": "yarn lint:eslint && yarn lint:misc --check",
-        "lint:eslint": "eslint . --cache --ext js,ts",
-        "lint:misc": "prettier '**/*.json' '**/*.md' '!dist/**' '!build/**' --check",
+        "lint": "eslint . --cache --ext js,ts",
+        "test": "jest",
         "prepublishOnly": "mm-snap manifest",
-        "serve": "mm-snap serve",
-        "test": "jest"
+        "serve": "mm-snap serve"
     },
     "dependencies": {
         "@ethereumjs/tx": "^10.0.0",
