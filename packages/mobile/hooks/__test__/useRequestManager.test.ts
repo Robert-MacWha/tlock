@@ -45,7 +45,7 @@ describe('useRequestManager', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockGetRequests.mockResolvedValue([mockRequest]);
         mockUpdateRequest.mockResolvedValue(undefined);
