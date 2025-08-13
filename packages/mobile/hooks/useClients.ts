@@ -29,7 +29,7 @@ export function useClients() {
 
     useEffect(() => {
         if (firebaseUrl) {
-            void loadClients();
+            loadClients();
         }
     }, [firebaseUrl]);
 
@@ -50,6 +50,8 @@ export function useClients() {
         const savedUrl = SecureStore.getItem(FIREBASE_URL_KEY);
         if (savedUrl) {
             setFirebaseUrlState(savedUrl);
+        } else {
+            setFirebaseUrlState(DEFAULT_FIREBASE_URL);
         }
     };
 
