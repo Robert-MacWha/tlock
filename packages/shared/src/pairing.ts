@@ -30,9 +30,9 @@ export function parseQrCode(qrCode: string): QrCodeData {
     if (!qrCode.startsWith(expectedPrefix)) {
         throw new Error(
             'Expected QR code to start with ' +
-                expectedPrefix +
-                ' but got: ' +
-                qrCode,
+            expectedPrefix +
+            ' but got: ' +
+            qrCode,
         );
     }
 

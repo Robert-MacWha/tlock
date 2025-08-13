@@ -7,41 +7,41 @@ import { SharedSecret } from '../crypto';
  */
 export type Request =
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'pair';
-          request: PairRequest;
-      }
+        id: string;
+        lastUpdated: number;
+        type: 'pair';
+        request: PairRequest;
+    }
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'importAccount';
-          request: ImportAccountRequest;
-      }
+        id: string;
+        lastUpdated: number;
+        type: 'importAccount';
+        request: ImportAccountRequest;
+    }
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'signPersonal';
-          request: SignPersonalRequest;
-      }
+        id: string;
+        lastUpdated: number;
+        type: 'signPersonal';
+        request: SignPersonalRequest;
+    }
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'signTransaction';
-          request: SignTransactionRequest;
-      }
+        id: string;
+        lastUpdated: number;
+        type: 'signTransaction';
+        request: SignTransactionRequest;
+    }
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'signTypedData';
-          request: SignTypedDataRequest;
-      }
+        id: string;
+        lastUpdated: number;
+        type: 'signTypedData';
+        request: SignTypedDataRequest;
+    }
     | {
-          id: string;
-          lastUpdated: number;
-          type: 'signMessage';
-          request: SignMessageRequest;
-      };
+        id: string;
+        lastUpdated: number;
+        type: 'signMessage';
+        request: SignMessageRequest;
+    };
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'error';
 export type RequestType =

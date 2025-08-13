@@ -14,14 +14,14 @@ describe('pairing', () => {
         });
     });
 
-    it('should throw an error for invalid QR code prefix', async () => {
+    it('should throw an error for invalid QR code prefix', () => {
         const invalidQrCode = 'invalid://pair/someData';
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Expected QR code to start with tlock://pair/ but got: invalid://pair/someData',
         );
     });
 
-    it('should throw an error for unsupported QR code version', async () => {
+    it('should throw an error for unsupported QR code version', () => {
         const invalidQrCode =
             'tlock://pair/' +
             btoa(
@@ -30,12 +30,12 @@ describe('pairing', () => {
                     sharedSecret: generateSharedSecret(),
                 }),
             );
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Unsupported QR code version',
         );
     });
 
-    it('should throw an error for invalid shared secret in QR code', async () => {
+    it('should throw an error for invalid shared secret in QR code', () => {
         const invalidQrCode =
             'tlock://pair/' +
             btoa(
@@ -44,7 +44,7 @@ describe('pairing', () => {
                     sharedSecret: 'invalidSharedSecret',
                 }),
             );
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Invalid shared secret in QR code: invalidSharedSecret',
         );
     });
