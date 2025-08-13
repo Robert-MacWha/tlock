@@ -10,10 +10,10 @@ export const QR_VERSION = 1;
 export const QR_PROTOCOL = 'tlock';
 export const QR_ACTION = 'pair';
 
-export async function createQrCode(
+export function createQrCode(
     sharedSecret: SharedSecret,
     pairRequestId: string,
-): Promise<string> {
+): string {
     const qrData: QrCodeData = {
         version: QR_VERSION,
         sharedSecret,
@@ -24,7 +24,7 @@ export async function createQrCode(
     return `${QR_PROTOCOL}://${QR_ACTION}/${encodedData}`;
 }
 
-export async function parseQrCode(qrCode: string): Promise<QrCodeData> {
+export function parseQrCode(qrCode: string): QrCodeData {
     const expectedPrefix = `${QR_PROTOCOL}://${QR_ACTION}/`;
 
     if (!qrCode.startsWith(expectedPrefix)) {

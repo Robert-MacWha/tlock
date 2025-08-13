@@ -5,8 +5,8 @@ describe('pairing', () => {
     it('should generated a valid pairing code', async () => {
         const sharedSecret = generateSharedSecret();
         const pairRequestId = 'test-request-id';
-        const qrCode = await createQrCode(sharedSecret, pairRequestId);
-        const qrData = await parseQrCode(qrCode);
+        const qrCode = createQrCode(sharedSecret, pairRequestId);
+        const qrData = parseQrCode(qrCode);
         expect(qrData).toEqual({
             version: 1,
             sharedSecret,

@@ -24,7 +24,7 @@ export default function App() {
 
     const onBarcodeScanned = async (data: string) => {
         try {
-            const qrData = await parseQrCode(data);
+            const qrData = parseQrCode(data);
             const client = await addClient(
                 qrData.sharedSecret,
                 'React Native App',
