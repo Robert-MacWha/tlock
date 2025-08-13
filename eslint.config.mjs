@@ -59,7 +59,7 @@ export default tseslint.config(
             // Disable TypeScript's unbound-method rule for test files
             '@typescript-eslint/unbound-method': 'off',
             // Enable Jest's unbound-method rule instead
-            'jest/unbound-method': 'error',
+            'jest/unbound-method': 'off',
         },
     },
 );

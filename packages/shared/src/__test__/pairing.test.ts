@@ -5,8 +5,8 @@ describe('pairing', () => {
     it('should generated a valid pairing code', async () => {
         const sharedSecret = generateSharedSecret();
         const pairRequestId = 'test-request-id';
-        const qrCode = await createQrCode(sharedSecret, pairRequestId);
-        const qrData = await parseQrCode(qrCode);
+        const qrCode = createQrCode(sharedSecret, pairRequestId);
+        const qrData = parseQrCode(qrCode);
         expect(qrData).toEqual({
             version: 1,
             sharedSecret,
@@ -14,14 +14,14 @@ describe('pairing', () => {
         });
     });
 
-    it('should throw an error for invalid QR code prefix', async () => {
+    it('should throw an error for invalid QR code prefix', () => {
         const invalidQrCode = 'invalid://pair/someData';
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Expected QR code to start with tlock://pair/ but got: invalid://pair/someData',
         );
     });
 
-    it('should throw an error for unsupported QR code version', async () => {
+    it('should throw an error for unsupported QR code version', () => {
         const invalidQrCode =
             'tlock://pair/' +
             btoa(
@@ -30,12 +30,12 @@ describe('pairing', () => {
                     sharedSecret: generateSharedSecret(),
                 }),
             );
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Unsupported QR code version',
         );
     });
 
-    it('should throw an error for invalid shared secret in QR code', async () => {
+    it('should throw an error for invalid shared secret in QR code', () => {
         const invalidQrCode =
             'tlock://pair/' +
             btoa(
@@ -44,7 +44,7 @@ describe('pairing', () => {
                     sharedSecret: 'invalidSharedSecret',
                 }),
             );
-        await expect(parseQrCode(invalidQrCode)).rejects.toThrow(
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Invalid shared secret in QR code: invalidSharedSecret',
         );
     });

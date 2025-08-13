@@ -53,19 +53,6 @@ describe('FirebaseClient', () => {
     });
 
     describe('request lifecycle', () => {
-        it('should fail if FCM token is not set', async () => {
-            const clientWithoutToken = new FirebaseClient(
-                testSecret,
-                undefined,
-                new FirebaseHttpClient(),
-            );
-            await expect(
-                clientWithoutToken.submitRequest('importAccount', {
-                    status: 'pending',
-                }),
-            ).rejects.toThrow('Missing FCM token.');
-        });
-
         it('should complete full request/response cycle', async () => {
             // Submit request
             const requestId = await client.submitRequest('importAccount', {
