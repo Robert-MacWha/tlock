@@ -6,8 +6,7 @@ import {
     SharedSecret,
 } from '../crypto';
 import { FirebaseHttpClient, HttpClient } from './client';
-
-const FIREBASE_URL = 'https://tlock-974e6-default-rtdb.firebaseio.com/';
+import { DEFAULT_FIREBASE_URL } from '../constants';
 
 interface StoredRequest {
     type: RequestType;
@@ -26,16 +25,19 @@ export class FirebaseClient implements Client {
     public fcmToken?: string | undefined;
     private sharedSecret: SharedSecret;
     private http: HttpClient;
+    private firebaseUrl: string;
 
     constructor(
         sharedSecret: SharedSecret,
         fcmToken?: string,
         httpClient: HttpClient = new FirebaseHttpClient(),
+        firebaseUrl: string = DEFAULT_FIREBASE_URL,
     ) {
         this.sharedSecret = sharedSecret;
         this.roomId = deriveRoomId(sharedSecret);
         this.fcmToken = fcmToken;
         this.http = httpClient;
+        this.firebaseUrl = firebaseUrl;
     }
 
     async submitRequest<T extends RequestType>(
@@ -52,7 +54,7 @@ export class FirebaseClient implements Client {
         };
 
         await this.http.put(
-            FIREBASE_URL,
+            this.firebaseUrl,
             FirebasePaths.request(this.roomId, requestId),
             storedRequest,
         );
@@ -77,7 +79,7 @@ export class FirebaseClient implements Client {
         };
 
         await this.http.put(
-            FIREBASE_URL,
+            this.firebaseUrl,
             FirebasePaths.request(this.roomId, id),
             storedRequest,
         );
@@ -88,7 +90,7 @@ export class FirebaseClient implements Client {
         _requestType: T,
     ): Promise<RequestTypeMap[T]> {
         const storedRequest = await this.http.get<StoredRequest>(
-            FIREBASE_URL,
+            this.firebaseUrl,
             FirebasePaths.request(this.roomId, id),
         );
 
@@ -105,7 +107,7 @@ export class FirebaseClient implements Client {
     async getRequests(): Promise<Request[]> {
         const data = await this.http.get<{
             [requestId: string]: StoredRequest;
-        }>(FIREBASE_URL, FirebasePaths.requests(this.roomId));
+        }>(this.firebaseUrl, FirebasePaths.requests(this.roomId));
 
         if (!data) return [];
 
@@ -132,7 +134,7 @@ export class FirebaseClient implements Client {
 
     async deleteRequest(id: string): Promise<void> {
         await this.http.delete(
-            FIREBASE_URL,
+            this.firebaseUrl,
             FirebasePaths.request(this.roomId, id),
         );
     }

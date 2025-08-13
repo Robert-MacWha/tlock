@@ -36,11 +36,11 @@ describe('useClients', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => { });
 
-        // Setup default mocks
-        mockSecureStore.getItemAsync.mockResolvedValue(null);
-        mockSecureStore.setItemAsync.mockResolvedValue(void 0);
+        // Setup default mocks for sync methods
+        mockSecureStore.getItem.mockReturnValue(null);
+        mockSecureStore.setItem.mockReturnValue(void 0);
         mockExportoCrypto.randomUUID.mockReturnValue('test-uuid-123');
     });
 
@@ -61,7 +61,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -88,7 +88,7 @@ describe('useClients', () => {
 
             let newClient;
             await act(async () => {
-                newClient = await result.current.addClient(
+                newClient = result.current.addClient(
                     mockSharedSecret,
                     'My Client',
                 );
@@ -114,7 +114,7 @@ describe('useClients', () => {
 
             let newClient;
             await act(async () => {
-                newClient = await result.current.addClient(mockSharedSecret);
+                newClient = result.current.addClient(mockSharedSecret);
             });
 
             expect(newClient).toEqual(
@@ -132,10 +132,10 @@ describe('useClients', () => {
             const { result } = renderHook(() => useClients());
 
             await act(async () => {
-                await result.current.addClient(mockSharedSecret, 'Test Client');
+                result.current.addClient(mockSharedSecret, 'Test Client');
             });
 
-            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('Test Client'),
             );
@@ -157,7 +157,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret2,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -168,7 +168,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                await result.current.removeClient('client-1');
+                result.current.removeClient('client-1');
             });
 
             await waitFor(() => {
@@ -185,7 +185,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -196,10 +196,10 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                await result.current.removeClient('client-1');
+                result.current.removeClient('client-1');
             });
 
-            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 '[]',
             );
@@ -209,7 +209,7 @@ describe('useClients', () => {
             const { result } = renderHook(() => useClients());
 
             await act(async () => {
-                await result.current.removeClient('non-existent');
+                result.current.removeClient('non-existent');
             });
 
             await waitFor(() => {
@@ -227,7 +227,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -238,7 +238,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                await result.current.setClientName('client-1', 'New Name');
+                result.current.setClientName('client-1', 'New Name');
             });
 
             await waitFor(() => {
@@ -254,7 +254,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -265,10 +265,10 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                await result.current.setClientName('client-1', 'New Name');
+                result.current.setClientName('client-1', 'New Name');
             });
 
-            expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
+            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('New Name'),
             );
@@ -283,7 +283,7 @@ describe('useClients', () => {
                     client: mockClient,
                 },
             ];
-            mockSecureStore.getItemAsync.mockResolvedValue(
+            mockSecureStore.getItem.mockReturnValue(
                 JSON.stringify(storedClients),
             );
 
@@ -294,7 +294,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                await result.current.setClientName('non-existent', 'New Name');
+                result.current.setClientName('non-existent', 'New Name');
             });
 
             await waitFor(() => {

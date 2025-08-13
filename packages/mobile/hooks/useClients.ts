@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import { createClient, Client, SharedSecret } from '@tlock/shared';
+import { createClient, Client, SharedSecret, DEFAULT_FIREBASE_URL } from '@tlock/shared';
 import { useEffect, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 
@@ -17,48 +17,62 @@ export interface ClientInstance {
 }
 
 const CLIENTS_KEY = 'tlock_clients';
+const FIREBASE_URL_KEY = 'tlock_firebase_url';
 
 export function useClients() {
     const [clients, setClients] = useState<ClientInstance[]>([]);
+    const [firebaseUrl, setFirebaseUrlState] = useState<string>(DEFAULT_FIREBASE_URL);
 
     useEffect(() => {
-        const initializeApp = async () => {
-            await loadClients();
-        };
-        void initializeApp();
+        loadFirebaseUrl();
     }, []);
 
-    const saveClients = async (clientsToSave: ClientInstance[] = clients) => {
+    useEffect(() => {
+        if (firebaseUrl) {
+            loadClients();
+        }
+    }, [firebaseUrl]);
+
+    const saveClients = (clientsToSave: ClientInstance[] = clients) => {
         const savedClients: SavedClient[] = clientsToSave.map((client) => ({
             id: client.id,
             name: client.name,
             sharedSecret: client.sharedSecret,
         }));
 
-        await SecureStore.setItemAsync(
+        SecureStore.setItem(
             CLIENTS_KEY,
             JSON.stringify(savedClients),
         );
     };
 
-    const loadClients = async () => {
-        const savedClients = await SecureStore.getItemAsync(CLIENTS_KEY);
+    const loadFirebaseUrl = () => {
+        const savedUrl = SecureStore.getItem(FIREBASE_URL_KEY);
+        if (savedUrl) {
+            setFirebaseUrlState(savedUrl);
+        } else {
+            setFirebaseUrlState(DEFAULT_FIREBASE_URL);
+        }
+    };
+
+    const loadClients = () => {
+        const savedClients = SecureStore.getItem(CLIENTS_KEY);
         if (savedClients) {
             const data = JSON.parse(savedClients) as ClientInstance[];
             const loadedClients: ClientInstance[] = data.map((client) => ({
                 ...client,
-                client: createClient(client.sharedSecret),
+                client: createClient(client.sharedSecret, undefined, firebaseUrl),
             }));
 
             setClients(loadedClients);
         }
     };
 
-    const addClient = async (
+    const addClient = (
         sharedSecret: SharedSecret,
         name?: string,
-    ): Promise<ClientInstance> => {
-        const client = createClient(sharedSecret);
+    ): ClientInstance => {
+        const client = createClient(sharedSecret, undefined, firebaseUrl);
         const newClient: ClientInstance = {
             id: randomUUID(),
             name,
@@ -68,20 +82,20 @@ export function useClients() {
 
         const updatedClients = [...clients, newClient];
         setClients(updatedClients);
-        await saveClients(updatedClients);
+        saveClients(updatedClients);
 
         return newClient;
     };
 
-    const removeClient = async (clientId: string) => {
+    const removeClient = (clientId: string) => {
         const updatedClients = clients.filter(
             (client) => client.id !== clientId,
         );
         setClients(updatedClients);
-        await saveClients(updatedClients);
+        saveClients(updatedClients);
     };
 
-    const setClientName = async (clientId: string, name: string) => {
+    const setClientName = (clientId: string, name: string) => {
         const updatedClients = clients.map((client) => {
             if (client.id === clientId) {
                 return { ...client, name };
@@ -90,13 +104,21 @@ export function useClients() {
         });
 
         setClients(updatedClients);
-        await saveClients(updatedClients);
+        saveClients(updatedClients);
+    };
+
+    const setFirebaseUrl = (url: string) => {
+        //? useEffect automatically reloads clients with new URL
+        setFirebaseUrlState(url);
+        SecureStore.setItem(FIREBASE_URL_KEY, url, { requireAuthentication: true });
     };
 
     return {
         clients,
+        firebaseUrl,
         addClient,
         removeClient,
         setClientName,
+        setFirebaseUrl,
     };
 }

@@ -56,7 +56,7 @@ describe('PairingService', () => {
 
     describe('Constructor', () => {
         it('should initialize with provided client', () => {
-            const service = new PairingService(mockClient);
+            const service = new PairingService();
             expect(service).toBeDefined();
         });
     });
@@ -79,7 +79,7 @@ describe('PairingService', () => {
             });
 
             expect(mockGenerateSharedSecret).toHaveBeenCalled();
-            expect(mockCreateClient).toHaveBeenCalledWith(mockSharedSecret);
+            expect(mockCreateClient).toHaveBeenCalledWith(mockSharedSecret, undefined, undefined);
             expect(mockClient.submitRequest).toHaveBeenCalledWith('pair', {
                 status: 'pending',
                 fcmToken: '',

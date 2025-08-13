@@ -7,9 +7,12 @@ export function useSetupStatus() {
     );
 
     useEffect(() => {
-        SecureStore.getItemAsync('tlock_setup_complete')
-            .then((value) => setIsSetupComplete(value === 'true'))
-            .catch(() => setIsSetupComplete(false));
+        try {
+            const value = SecureStore.getItem('tlock_setup_complete')
+            setIsSetupComplete(value === 'true')
+        } catch (_error) {
+            setIsSetupComplete(false);
+        }
     }, []);
 
     const updateIsSetupComplete = (isSetupComplete: boolean) => {
