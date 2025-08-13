@@ -69,17 +69,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const currentNavTheme = isDark
         ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          { ...DarkTheme, fonts: NavDarkTheme.fonts }
+        { ...DarkTheme, fonts: NavDarkTheme.fonts }
         : // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          { ...LightTheme, fonts: NavLightTheme.fonts };
+        { ...LightTheme, fonts: NavLightTheme.fonts };
 
     const currentPaperTheme = isDark ? darkTheme : lightTheme;
 
     // Load saved theme preference
     useEffect(() => {
-        const loadTheme = async () => {
+        const loadTheme = () => {
             try {
-                const saved = await SecureStore.getItemAsync(THEME_STORAGE_KEY);
+                const saved = SecureStore.getItem(THEME_STORAGE_KEY);
                 if (saved && ['light', 'dark', 'system'].includes(saved)) {
                     setThemeModeState(saved as ThemeMode);
                 }
@@ -92,7 +92,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     const setThemeMode = async (mode: ThemeMode) => {
         try {
-            await SecureStore.setItemAsync(THEME_STORAGE_KEY, mode);
+            SecureStore.setItem(THEME_STORAGE_KEY, mode);
             setThemeModeState(mode);
         } catch (error) {
             console.warn('Failed to save theme preference:', error);
