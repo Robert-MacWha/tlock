@@ -9,8 +9,7 @@ import { getState } from './state';
 export async function showPairingScreen(interfaceId: string) {
     try {
         const pairingService = new PairingService();
-        const { qrSrc, requestId, sharedSecret } =
-            await pairingService.startPairing();
+        const { qrSrc, requestId, sharedSecret } = await pairingService.startPairing();
 
         await showScreen(
             interfaceId,

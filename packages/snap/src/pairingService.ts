@@ -19,17 +19,11 @@ export interface PairingQrData {
 }
 
 export class PairingService {
-    private client?: Client | undefined;
-
-    constructor(client?: Client) {
-        this.client = client;
-    }
-
     async startPairing(): Promise<PairingQrData> {
         try {
             const sharedSecret = generateSharedSecret();
             const state = await getState();
-            const client = this.client ?? createClient(sharedSecret, undefined, state?.firebaseUrl);
+            const client = createClient(sharedSecret, undefined, state?.firebaseUrl);
 
             const requestId = await client.submitRequest('pair', {
                 status: 'pending',

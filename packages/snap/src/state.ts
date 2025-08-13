@@ -1,5 +1,5 @@
 import { KeyringAccount, KeyringRequest } from '@metamask/keyring-api';
-import { SharedSecret } from '@tlock/shared';
+import { SharedSecret, DEFAULT_FIREBASE_URL } from '@tlock/shared';
 
 export interface SnapState {
     sharedSecret?: SharedSecret;
@@ -36,6 +36,10 @@ export async function getState(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const parsedState = stored ? JSON.parse(stored.state as string) : null;
     const state = { ...d, ...parsedState } as SnapState;
+
+    if (!state.firebaseUrl) {
+        state.firebaseUrl = DEFAULT_FIREBASE_URL;
+    }
 
     return state;
 }
