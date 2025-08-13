@@ -24,6 +24,7 @@ export async function handleHomeScreen(interfaceId: string) {
                 Foxguard accounts.
             </Text>
             <Button name={SCREENS.PAIR}>Pair Wallet</Button>
+            <Button name={SCREENS.SETTINGS}>Settings</Button>
         </Box>,
     );
 }
@@ -35,6 +36,7 @@ async function showPairedScreen(state: SnapState, interfaceId: string) {
             <Heading>Foxguard</Heading>
             <Button name={SCREENS.IMPORT_ACCOUNT}>Import Account</Button>
             <Button name={SCREENS.PAIR}>Re-pair wallet</Button>
+            <Button name={SCREENS.SETTINGS}>Settings</Button>
         </Box>,
     );
 }

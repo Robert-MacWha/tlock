@@ -3,7 +3,7 @@
   "description": "A solution for storing private keys and signing transactions remotely",
   "proposedName": "Foxguard",
   "source": {
-    "shasum": "Yh8UGFAeq3vC+u9/Xcm1/JSiyPAEn/zq2Py2y+8VyRY=",
+    "shasum": "0rFlDirIBfo0Vw7q0fwbaBqiVIRMSTGPb+fARKMGjyg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

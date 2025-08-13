@@ -7,7 +7,7 @@ import {
     type SharedSecret,
 } from '@tlock/shared';
 import qrcode from 'qrcode';
-import { updateState } from './state';
+import { updateState, getState } from './state';
 import { POLL_INTERVAL, ERROR_CODES } from './constants';
 import { throwError } from './errors';
 
@@ -28,7 +28,8 @@ export class PairingService {
     async startPairing(): Promise<PairingQrData> {
         try {
             const sharedSecret = generateSharedSecret();
-            const client = this.client ?? createClient(sharedSecret);
+            const state = await getState();
+            const client = this.client ?? createClient(sharedSecret, undefined, state?.firebaseUrl);
 
             const requestId = await client.submitRequest('pair', {
                 status: 'pending',

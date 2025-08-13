@@ -139,6 +139,9 @@ export interface Client {
 export function createClient(
     sharedSecret: SharedSecret,
     fcmToken?: string,
+    firebaseUrl?: string,
 ): Client {
-    return new FirebaseClient(sharedSecret, fcmToken);
+    return new FirebaseClient(sharedSecret, fcmToken, undefined, firebaseUrl);
 }
+
+export { DEFAULT_FIREBASE_URL } from '../constants';

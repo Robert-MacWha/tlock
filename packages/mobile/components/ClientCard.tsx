@@ -63,7 +63,7 @@ export function ClientCard({ id }: ClientCardProps) {
     }
 
     async function handleRenameConfirm() {
-        await setClientName(id, nameInput);
+        setClientName(id, nameInput);
         setRenameVisible(false);
     }
 

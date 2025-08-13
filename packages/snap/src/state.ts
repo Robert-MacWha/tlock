@@ -6,6 +6,7 @@ export interface SnapState {
     fcmToken?: string;
     deviceName?: string;
     keyringState?: KeyringState;
+    firebaseUrl?: string;
 }
 
 export type KeyringState = {

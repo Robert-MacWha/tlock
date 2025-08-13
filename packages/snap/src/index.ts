@@ -16,6 +16,7 @@ import { SCREENS } from './constants';
 import { handleHomeScreen as showHomeScreen } from './homeScreen';
 import { showPairingScreen } from './pairing';
 import { handleImportAccount as showImportAccountScreen } from './importAccount';
+import { handleSettingsScreen, handleFirebaseUrlSave } from './settings';
 
 // Home page UI
 export const onHomePage: OnHomePageHandler = async () => {
@@ -37,6 +38,14 @@ export const onUserInput: OnUserInputHandler = async ({ id, event }) => {
         await selectScreen(id, buttonName);
         return;
     }
+
+    if (event.type === UserInputEventType.FormSubmitEvent) {
+        if (event.name === 'firebaseSettings') {
+            const firebaseUrl = event.value['firebaseUrl'] as string;
+            await handleFirebaseUrlSave(id, firebaseUrl);
+            return;
+        }
+    }
 };
 
 export const onKeyringRequest: OnKeyringRequestHandler = async ({
@@ -48,7 +57,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     const state = await getState();
     validatePairedState(state);
 
-    const client = createClient(state.sharedSecret, state.fcmToken);
+    const client = createClient(state.sharedSecret, state.fcmToken, state.firebaseUrl);
     const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
     return (await handleKeyringRequest(keyring, request)) ?? null;
@@ -68,6 +77,9 @@ export async function selectScreen(
                 return;
             case SCREENS.IMPORT_ACCOUNT:
                 await showImportAccountScreen(interfaceId);
+                return;
+            case SCREENS.SETTINGS:
+                await handleSettingsScreen(interfaceId);
                 return;
             default:
                 console.log('Unknown button clicked:', screen);

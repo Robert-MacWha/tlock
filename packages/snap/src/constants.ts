@@ -7,6 +7,7 @@ export const SCREENS = {
     HOME: 'home',
     PAIR: 'pair',
     IMPORT_ACCOUNT: 'import-account',
+    SETTINGS: 'settings',
 } as const;
 
 // Account name suggestion

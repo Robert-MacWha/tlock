@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { router } from 'expo-router';
@@ -11,24 +11,34 @@ import {
     Portal,
     Surface,
     SegmentedButtons,
+    Text,
+    TextInput,
 } from 'react-native-paper';
 import { useAlert } from '../../components/AlertProvider';
 import { useClientsContext } from '../../contexts/ClientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useRequestManagerContext } from '../../contexts/RequestManagerContext';
+import { DEFAULT_FIREBASE_URL } from '@tlock/shared';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();
     const { getSeedPhrase } = useKeyringContext();
     const [showSeedPhrasePopup, setShowSeedPhrasePopup] = useState(false);
     const [seedPhrase, setSeedPhrase] = useState<string>('');
+    const [firebaseUrlInput, setFirebaseUrlInput] = useState<string>('');
+    const [firebaseUrlError, setFirebaseUrlError] = useState<string>('');
     const { alert } = useAlert();
     const { clientRequests } = useRequestManagerContext();
-    const { clients } = useClientsContext();
+    const { clients, firebaseUrl, setFirebaseUrl } = useClientsContext();
     const { themeMode, setThemeMode } = useTheme();
 
     const hasRequests = clientRequests.length > 0;
     const hasClients = clients.length > 0;
+
+    // Initialize Firebase URL input when firebaseUrl changes
+    useEffect(() => {
+        setFirebaseUrlInput(firebaseUrl);
+    }, [firebaseUrl]);
 
     const resetApp = () => {
         try {
@@ -76,6 +86,35 @@ export default function SettingsScreen() {
             await setThemeMode(value as 'light' | 'dark' | 'system');
         } catch (_error) {
             alert('Error', 'Failed to save theme preference.');
+        }
+    };
+
+    const validateFirebaseUrl = (url: string): string => {
+        if (!url.trim()) {
+            return 'Firebase URL cannot be empty';
+        }
+
+        try {
+            new URL(url);
+            return '';
+        } catch {
+            return 'Please enter a valid URL';
+        }
+    };
+
+    const handleFirebaseUrlChange = (text: string) => {
+        setFirebaseUrlInput(text);
+        const error = validateFirebaseUrl(text);
+        setFirebaseUrlError(error);
+
+        if (!error && text !== firebaseUrl) {
+            try {
+                setFirebaseUrl(text);
+                alert('Success', 'Firebase server URL updated successfully.');
+            } catch (_error) {
+                alert('Error', 'Failed to update Firebase URL.');
+                setFirebaseUrlInput(firebaseUrl); // Reset to original value
+            }
         }
     };
 
@@ -179,6 +218,21 @@ export default function SettingsScreen() {
                     />
 
                     <List.Subheader>Advanced</List.Subheader>
+
+                    <TextInput
+                        label="Firebase Server URL"
+                        value={firebaseUrlInput}
+                        onChangeText={handleFirebaseUrlChange}
+                        mode="outlined"
+                        placeholder={DEFAULT_FIREBASE_URL}
+                        error={!!firebaseUrlError}
+                        left={<TextInput.Icon icon="server" />}
+                    />
+                    {firebaseUrlError ? (
+                        <Text style={{ color: 'red', marginHorizontal: 16, marginBottom: 16, fontSize: 12 }}>
+                            {firebaseUrlError}
+                        </Text>
+                    ) : null}
 
                     <List.Item
                         title="Reset Setup"

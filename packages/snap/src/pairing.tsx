@@ -4,6 +4,7 @@ import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
 import { SCREENS, ERROR_CODES } from './constants';
 import { handleError } from './errors';
 import { PairingService } from './pairingService';
+import { getState } from './state';
 
 export async function showPairingScreen(interfaceId: string) {
     try {
@@ -24,7 +25,8 @@ export async function showPairingScreen(interfaceId: string) {
         );
 
         try {
-            const client = createClient(sharedSecret);
+            const state = await getState();
+            const client = createClient(sharedSecret, undefined, state?.firebaseUrl);
             const response = await pairingService.waitForPairing(
                 requestId,
                 client,
