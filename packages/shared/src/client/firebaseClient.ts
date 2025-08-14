@@ -7,6 +7,7 @@ import {
 } from '../crypto';
 import { FirebaseHttpClient, HttpClient } from './client';
 import { DEFAULT_FIREBASE_URL } from '../constants';
+import { StoredRequestSchema, RequestTypeSchemaMap } from '../validation';
 
 interface StoredRequest {
     type: RequestType;
@@ -87,46 +88,80 @@ export class FirebaseClient implements Client {
 
     async getRequest<T extends RequestType>(
         id: string,
-        _requestType: T,
+        requestType: T,
     ): Promise<RequestTypeMap[T]> {
-        const storedRequest = await this.http.get<StoredRequest>(
+        const rawStoredRequest = await this.http.get<unknown>(
             this.firebaseUrl,
             FirebasePaths.request(this.roomId, id),
         );
 
-        if (!storedRequest || !storedRequest.data) {
+        if (!rawStoredRequest) {
             throw new Error('Request not found');
         }
 
-        return decryptMessage<RequestTypeMap[T]>(
-            storedRequest.data,
-            this.sharedSecret,
-        );
+        // Validate StoredRequest structure
+        const storedRequestResult = StoredRequestSchema.safeParse(rawStoredRequest);
+        if (!storedRequestResult.success) {
+            const errorDetails = storedRequestResult.error.issues
+                .map(issue => `${issue.path.join('.')}: ${issue.message}`)
+                .join(', ');
+            throw new Error(`Invalid stored request data from Firebase: ${errorDetails}`);
+        }
+
+        const storedRequest = storedRequestResult.data;
+
+        // Verify request type matches
+        if (storedRequest.type !== requestType) {
+            throw new Error(`Request type mismatch: expected ${requestType}, got ${storedRequest.type}`);
+        }
+
+        // Decrypt and validate the data
+        const schema = RequestTypeSchemaMap[requestType];
+        return decryptMessage(storedRequest.data, this.sharedSecret, schema) as RequestTypeMap[T];
     }
 
     async getRequests(): Promise<Request[]> {
-        const data = await this.http.get<{
-            [requestId: string]: StoredRequest;
-        }>(this.firebaseUrl, FirebasePaths.requests(this.roomId));
+        const rawData = await this.http.get<unknown>(
+            this.firebaseUrl,
+            FirebasePaths.requests(this.roomId)
+        );
 
-        if (!data) return [];
+        if (!rawData) return [];
+
+        // Validate that we got an object
+        if (typeof rawData !== 'object' || rawData === null) {
+            throw new Error('Invalid requests data from Firebase: expected object');
+        }
 
         const requests: Request[] = [];
-        for (const [requestId, storedRequest] of Object.entries(data)) {
-            const requestType = storedRequest.type;
-            const requestData = decryptMessage(
-                storedRequest.data,
-                this.sharedSecret,
-            );
+        for (const [requestId, rawStoredRequest] of Object.entries(rawData)) {
+            try {
+                // Validate each StoredRequest structure
+                const storedRequestResult = StoredRequestSchema.safeParse(rawStoredRequest);
+                if (!storedRequestResult.success) {
+                    console.warn(`Skipping invalid stored request ${requestId}:`, storedRequestResult.error.issues);
+                    continue;
+                }
 
-            const request: Request = {
-                id: requestId,
-                type: requestType,
-                request: requestData,
-                lastUpdated: storedRequest.lastUpdated,
-            } as Request;
+                const storedRequest = storedRequestResult.data;
+                const requestType = storedRequest.type;
 
-            requests.push(request);
+                // Decrypt and validate the data
+                const schema = RequestTypeSchemaMap[requestType];
+                const decryptedData = decryptMessage(storedRequest.data, this.sharedSecret, schema);
+
+                const request: Request = {
+                    id: requestId,
+                    type: requestType,
+                    request: decryptedData,
+                    lastUpdated: storedRequest.lastUpdated,
+                } as Request;
+
+                requests.push(request);
+            } catch (error) {
+                console.warn(`Error processing request ${requestId}:`, error);
+                // Continue processing other requests instead of failing completely
+            }
         }
 
         return requests;

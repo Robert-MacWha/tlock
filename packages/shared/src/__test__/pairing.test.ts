@@ -17,7 +17,7 @@ describe('pairing', () => {
     it('should throw an error for invalid QR code prefix', () => {
         const invalidQrCode = 'invalid://pair/someData';
         expect(() => parseQrCode(invalidQrCode)).toThrow(
-            'Expected QR code to start with tlock://pair/ but got: invalid://pair/someData',
+            'Invalid QR code format: Expected \'tlock://pair/\' prefix but got: invalid://pair/someData...',
         );
     });
 
@@ -28,10 +28,11 @@ describe('pairing', () => {
                 JSON.stringify({
                     version: 2,
                     sharedSecret: generateSharedSecret(),
+                    pairRequestId: 'test-id',
                 }),
             );
         expect(() => parseQrCode(invalidQrCode)).toThrow(
-            'Unsupported QR code version',
+            'Unsupported QR code version: 2 (expected 1)',
         );
     });
 
@@ -42,10 +43,41 @@ describe('pairing', () => {
                 JSON.stringify({
                     version: 1,
                     sharedSecret: 'invalidSharedSecret',
+                    pairRequestId: 'test-id',
                 }),
             );
         expect(() => parseQrCode(invalidQrCode)).toThrow(
-            'Invalid shared secret in QR code: invalidSharedSecret',
+            'Invalid QR code data: sharedSecret: Invalid input: expected array, received string, sharedSecret: SharedSecret must be exactly 32 numbers',
+        );
+    });
+
+    it('should throw an error for malformed base64 in QR code', () => {
+        const invalidQrCode = 'tlock://pair/invalidBase64!!!';
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
+            'Invalid QR code: Unable to decode or parse QR code data',
+        );
+    });
+
+    it('should throw an error for invalid JSON in QR code', () => {
+        const invalidQrCode = 'tlock://pair/' + btoa('{ invalid json }');
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
+            'Invalid QR code: Unable to decode or parse QR code data',
+        );
+    });
+
+    it('should throw an error for missing required fields in QR code', () => {
+        const invalidQrCode = 'tlock://pair/' + btoa(JSON.stringify({ version: 1 }));
+        expect(() => parseQrCode(invalidQrCode)).toThrow('Invalid QR code data');
+    });
+
+    it('should throw an error for invalid shared secret', () => {
+        const invalidQrCode = 'tlock://pair/' + btoa(JSON.stringify({
+            version: 1,
+            sharedSecret: [1, 2, 3], // Too short
+            pairRequestId: 'test-id',
+        }));
+        expect(() => parseQrCode(invalidQrCode)).toThrow(
+            'Invalid QR code data: sharedSecret: SharedSecret must be exactly 32 numbers'
         );
     });
 });
