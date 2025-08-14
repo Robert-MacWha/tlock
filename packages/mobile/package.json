@@ -7,7 +7,7 @@
     "dev": "expo start",
     "lint": "eslint . --cache --ext js,ts,tsx",
     "test": "jest",
-    "android": "expo run:android",
+    "android": "expo run:android --device",
     "ios": "expo run:ios"
   },
   "jest": {
