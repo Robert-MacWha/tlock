@@ -39,7 +39,7 @@ export function parseQrCode(qrCode: string): QrCodeData {
     let rawData: unknown;
     try {
         rawData = JSON.parse(atob(encodedData));
-    } catch (error) {
+    } catch (_error) {
         throw new Error(
             'Invalid QR code: Unable to decode or parse QR code data',
         );

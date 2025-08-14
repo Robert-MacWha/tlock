@@ -38,7 +38,7 @@ export function encryptMessage<T>(
 export function decryptMessage<T>(
     encryptedMessage: string,
     _sharedSecret: SharedSecret,
-    validationSchema?: z.ZodSchema<T>,
+    validationSchema?: z.ZodType<T>,
 ): T {
     const decrypted = JSON.parse(encryptedMessage) as T;
 
