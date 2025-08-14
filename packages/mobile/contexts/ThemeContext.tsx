@@ -69,9 +69,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const currentNavTheme = isDark
         ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        { ...DarkTheme, fonts: NavDarkTheme.fonts }
+          { ...DarkTheme, fonts: NavDarkTheme.fonts }
         : // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        { ...LightTheme, fonts: NavLightTheme.fonts };
+          { ...LightTheme, fonts: NavLightTheme.fonts };
 
     const currentPaperTheme = isDark ? darkTheme : lightTheme;
 

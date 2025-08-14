@@ -8,8 +8,8 @@ export function useSetupStatus() {
 
     useEffect(() => {
         try {
-            const value = SecureStore.getItem('tlock_setup_complete')
-            setIsSetupComplete(value === 'true')
+            const value = SecureStore.getItem('tlock_setup_complete');
+            setIsSetupComplete(value === 'true');
         } catch (_error) {
             setIsSetupComplete(false);
         }

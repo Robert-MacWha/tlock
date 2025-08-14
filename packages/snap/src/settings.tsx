@@ -1,4 +1,11 @@
-import { Box, Heading, Text, Button, Input, Form } from '@metamask/snaps-sdk/jsx';
+import {
+    Box,
+    Heading,
+    Text,
+    Button,
+    Input,
+    Form,
+} from '@metamask/snaps-sdk/jsx';
 import { getState, updateState } from './state';
 import { showScreen } from './screen';
 import { SCREENS } from './constants';
@@ -13,7 +20,7 @@ export async function handleSettingsScreen(interfaceId: string) {
         <Box>
             <Heading>Settings</Heading>
             <Text>Configure your Foxguard settings</Text>
-            
+
             <Form name="firebaseSettings">
                 <Text>Firebase Server URL:</Text>
                 <Input
@@ -26,13 +33,16 @@ export async function handleSettingsScreen(interfaceId: string) {
                     Save Firebase URL
                 </Button>
             </Form>
-            
+
             <Button name={SCREENS.HOME}>Back to Home</Button>
         </Box>,
     );
 }
 
-export async function handleFirebaseUrlSave(interfaceId: string, firebaseUrl: string) {
+export async function handleFirebaseUrlSave(
+    interfaceId: string,
+    firebaseUrl: string,
+) {
     try {
         // Basic URL validation
         if (!firebaseUrl.trim()) {
@@ -73,7 +83,7 @@ export async function handleFirebaseUrlSave(interfaceId: string, firebaseUrl: st
                 <Button name={SCREENS.HOME}>Back to Home</Button>
             </Box>,
         );
-    } catch (error) {
+    } catch (_error) {
         await showScreen(
             interfaceId,
             <Box>

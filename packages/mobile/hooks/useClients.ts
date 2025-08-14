@@ -1,5 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
-import { createClient, Client, SharedSecret, DEFAULT_FIREBASE_URL } from '@tlock/shared';
+import {
+    createClient,
+    Client,
+    SharedSecret,
+    DEFAULT_FIREBASE_URL,
+} from '@tlock/shared';
 import { useEffect, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 
@@ -21,7 +26,8 @@ const FIREBASE_URL_KEY = 'tlock_firebase_url';
 
 export function useClients() {
     const [clients, setClients] = useState<ClientInstance[]>([]);
-    const [firebaseUrl, setFirebaseUrlState] = useState<string>(DEFAULT_FIREBASE_URL);
+    const [firebaseUrl, setFirebaseUrlState] =
+        useState<string>(DEFAULT_FIREBASE_URL);
 
     useEffect(() => {
         loadFirebaseUrl();
@@ -40,10 +46,7 @@ export function useClients() {
             sharedSecret: client.sharedSecret,
         }));
 
-        SecureStore.setItem(
-            CLIENTS_KEY,
-            JSON.stringify(savedClients),
-        );
+        SecureStore.setItem(CLIENTS_KEY, JSON.stringify(savedClients));
     };
 
     const loadFirebaseUrl = () => {
@@ -61,7 +64,11 @@ export function useClients() {
             const data = JSON.parse(savedClients) as ClientInstance[];
             const loadedClients: ClientInstance[] = data.map((client) => ({
                 ...client,
-                client: createClient(client.sharedSecret, undefined, firebaseUrl),
+                client: createClient(
+                    client.sharedSecret,
+                    undefined,
+                    firebaseUrl,
+                ),
             }));
 
             setClients(loadedClients);
@@ -110,7 +117,9 @@ export function useClients() {
     const setFirebaseUrl = (url: string) => {
         //? useEffect automatically reloads clients with new URL
         setFirebaseUrlState(url);
-        SecureStore.setItem(FIREBASE_URL_KEY, url, { requireAuthentication: true });
+        SecureStore.setItem(FIREBASE_URL_KEY, url, {
+            requireAuthentication: true,
+        });
     };
 
     return {

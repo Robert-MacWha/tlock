@@ -1,4 +1,5 @@
-import { SharedSecret, isValidSharedSecret } from './crypto';
+import { SharedSecret } from './crypto';
+import { QrCodeDataSchema } from './validation';
 
 export interface QrCodeData {
     version: number;
@@ -29,23 +30,35 @@ export function parseQrCode(qrCode: string): QrCodeData {
 
     if (!qrCode.startsWith(expectedPrefix)) {
         throw new Error(
-            'Expected QR code to start with ' +
-            expectedPrefix +
-            ' but got: ' +
-            qrCode,
+            `Invalid QR code format: Expected '${expectedPrefix}' prefix but got: ${qrCode.substring(0, 50)}...`,
         );
     }
 
     const encodedData = qrCode.slice(expectedPrefix.length);
-    const qrData = JSON.parse(atob(encodedData)) as QrCodeData;
 
-    if (qrData.version !== QR_VERSION) {
-        throw new Error('Unsupported QR code version');
+    let rawData: unknown;
+    try {
+        rawData = JSON.parse(atob(encodedData));
+    } catch (_error) {
+        throw new Error(
+            'Invalid QR code: Unable to decode or parse QR code data',
+        );
     }
 
-    if (!isValidSharedSecret(qrData.sharedSecret)) {
+    // Validate using zod schema
+    const parseResult = QrCodeDataSchema.safeParse(rawData);
+    if (!parseResult.success) {
+        const errorDetails = parseResult.error.issues
+            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+            .join(', ');
+        throw new Error(`Invalid QR code data: ${errorDetails}`);
+    }
+
+    const qrData = parseResult.data;
+
+    if (qrData.version !== QR_VERSION) {
         throw new Error(
-            `Invalid shared secret in QR code: ${qrData.sharedSecret.toString()}`,
+            `Unsupported QR code version: ${qrData.version} (expected ${QR_VERSION})`,
         );
     }
 

@@ -19,7 +19,11 @@ export async function handleImportAccount(interfaceId: string) {
     );
 
     try {
-        const client = createClient(state.sharedSecret, state.fcmToken, state.firebaseUrl);
+        const client = createClient(
+            state.sharedSecret,
+            state.fcmToken,
+            state.firebaseUrl,
+        );
         const keyring = new TlockKeyring(client, state?.keyringState);
         const account = await keyring.createAccount({});
         await showTextScreen(

@@ -1,4 +1,5 @@
 import { sha256 } from 'viem';
+import { z } from 'zod';
 
 export type SharedSecret = number[];
 
@@ -37,9 +38,25 @@ export function encryptMessage<T>(
 export function decryptMessage<T>(
     encryptedMessage: string,
     _sharedSecret: SharedSecret,
+    validationSchema?: z.ZodTypeAny,
 ): T {
-    // TODO: Implement actual decryption logic
-    return JSON.parse(encryptedMessage) as T;
+    const decrypted = JSON.parse(encryptedMessage) as T;
+
+    // If validation schema is provided, validate the decrypted data
+    if (validationSchema) {
+        const result = validationSchema.safeParse(decrypted);
+        if (!result.success) {
+            const errorDetails = result.error.issues
+                .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+                .join(', ');
+            throw new Error(
+                `Decrypted message validation failed: ${errorDetails}`,
+            );
+        }
+        return result.data as T;
+    }
+
+    return decrypted;
 }
 
 function generateSecureRandom(length: number): number[] {

@@ -23,7 +23,11 @@ export class PairingService {
         try {
             const sharedSecret = generateSharedSecret();
             const state = await getState();
-            const client = createClient(sharedSecret, undefined, state?.firebaseUrl);
+            const client = createClient(
+                sharedSecret,
+                undefined,
+                state?.firebaseUrl,
+            );
 
             const requestId = await client.submitRequest('pair', {
                 status: 'pending',
