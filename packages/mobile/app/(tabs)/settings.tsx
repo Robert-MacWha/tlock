@@ -45,13 +45,14 @@ export default function SettingsScreen() {
             setIsSetupComplete(false);
             router.replace('/_setup');
         } catch (_error) {
+            console.log('Failed to reset setup:', _error);
             alert('Error', 'Failed to reset setup. Please try again.');
         }
     };
 
-    const showSeedPhrase = () => {
+    const showSeedPhrase = async () => {
         try {
-            const phrase = getSeedPhrase();
+            const phrase = await getSeedPhrase();
             setSeedPhrase(phrase);
             setShowSeedPhrasePopup(true);
         } catch (_error) {
@@ -65,7 +66,7 @@ export default function SettingsScreen() {
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
                 { text: 'Cancel' },
-                { text: 'Show', mode: 'contained', onPress: showSeedPhrase },
+                { text: 'Show', mode: 'contained', onPress: () => void showSeedPhrase() },
             ],
         );
     };

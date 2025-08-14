@@ -23,9 +23,9 @@ export default function AccountsScreen() {
         ? accounts
         : accounts.filter((account) => !account.isHidden);
 
-    function handleAddAccount() {
+    async function handleAddAccount() {
         try {
-            addAccount();
+            await addAccount();
         } catch (error) {
             console.error('Failed to create account:', error);
             alert('Error', 'Failed to create new account. Please try again.');
@@ -48,7 +48,7 @@ export default function AccountsScreen() {
                             />
                             <IconButton
                                 icon="plus"
-                                onPress={handleAddAccount}
+                                onPress={() => void handleAddAccount()}
                             />
                         </View>
                     ),

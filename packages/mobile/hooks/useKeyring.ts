@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { useSecureStorage } from './useSecureStorage';
 import { entropyToMnemonic, mnemonicToSeedSync } from 'bip39';
 import { HDKey } from '@scure/bip32';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -27,26 +28,25 @@ export function useKeyring() {
     //? Stateful accounts variable for external use. Internally make sure to
     //? always use the _loadAccounts function to ensure data consistency.
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const secureStorage = useSecureStorage();
 
     useEffect(() => {
-        const accounts = _loadAccounts();
-        setAccounts(accounts);
+        const loadAccounts = async () => {
+            await _loadAccounts();
+        };
+        void loadAccounts();
     }, []);
 
-    const getSeedPhrase = (): string => {
-        const seedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
-            requireAuthentication: true,
-        });
+    const getSeedPhrase = async (): Promise<string> => {
+        const seedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY);
         if (!seedPhrase) {
             throw new Error('No seed phrase found');
         }
         return seedPhrase;
     };
 
-    const generateSeedPhrase = (override: boolean = false): string => {
-        const existingSeedPhrase = SecureStore.getItem(SEED_PHRASE_KEY, {
-            requireAuthentication: true,
-        });
+    const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
+        const existingSeedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY);
         if (existingSeedPhrase && !override) {
             throw new Error(
                 'Seed phrase already exists. Use override to replace it.',
@@ -58,18 +58,18 @@ export function useKeyring() {
         if (!seedPhrase) {
             throw new Error('No seed phrase generated');
         }
-        SecureStore.setItem(SEED_PHRASE_KEY, seedPhrase);
+        await secureStorage.setItem(SEED_PHRASE_KEY, seedPhrase);
 
         // Reset accounts
-        _saveAccounts([]);
+        await _saveAccounts([]);
         setAccounts([]);
 
         return seedPhrase;
     };
 
-    const addAccount = (): Address => {
+    const addAccount = async (): Promise<Address> => {
         const newAccountId = accounts.length + 1;
-        const address = _deriveAddress(newAccountId);
+        const address = await _deriveAddress(newAccountId);
 
         const newAccount: Account = {
             id: newAccountId,
@@ -77,37 +77,37 @@ export function useKeyring() {
         };
 
         const newAccounts = [...accounts, newAccount];
-        _saveAccounts(newAccounts);
+        await _saveAccounts(newAccounts);
         setAccounts(newAccounts);
 
         return address;
     };
 
-    const renameAccount = (address: Address, name: string): void => {
+    const renameAccount = async (address: Address, name: string): Promise<void> => {
         const updatedAccounts = accounts.map((account) =>
             account.address === address ? { ...account, name } : account,
         );
-        _saveAccounts(updatedAccounts);
+        await _saveAccounts(updatedAccounts);
         setAccounts(updatedAccounts);
     };
 
-    const hideAccount = (address: Address, hide: boolean): void => {
+    const hideAccount = async (address: Address, hide: boolean): Promise<void> => {
         const updatedAccounts = accounts.map((account) =>
             account.address === address
                 ? { ...account, isHidden: hide }
                 : account,
         );
-        _saveAccounts(updatedAccounts);
+        await _saveAccounts(updatedAccounts);
         setAccounts(updatedAccounts);
     };
 
     const sign = async (from: Address, hash: Hex): Promise<Hex> => {
-        const account = _getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         return await account.sign({ hash });
     };
 
     const signPersonal = async (from: Address, raw: Hex): Promise<Hex> => {
-        const account = _getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         return await account.signMessage({ message: { raw } });
     };
 
@@ -115,7 +115,7 @@ export function useKeyring() {
         from: Address,
         data: TypedDataDefinition,
     ): Promise<Hex> => {
-        const account = _getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         return await account.signTypedData(data);
     };
 
@@ -123,14 +123,14 @@ export function useKeyring() {
         from: Address,
         transaction: Hex,
     ): Promise<TransactionSerialized> => {
-        const account = _getAccountFromAddress(from);
+        const account = await _getAccountFromAddress(from);
         const parsed = parseTransaction(transaction);
         const signedTransaction = await account.signTransaction(parsed);
         return signedTransaction;
     };
 
-    const _loadAccounts = (): Account[] => {
-        const accountsStr = SecureStore.getItem(ACCOUNTS_KEY);
+    const _loadAccounts = async (): Promise<Account[]> => {
+        const accountsStr = await secureStorage.getItem(ACCOUNTS_KEY, false);
 
         let accounts: Account[] = [];
         if (accountsStr) {
@@ -140,12 +140,12 @@ export function useKeyring() {
         return accounts;
     };
 
-    const _saveAccounts = (accounts: Account[]) => {
+    const _saveAccounts = async (accounts: Account[]): Promise<void> => {
         setAccounts(accounts);
-        SecureStore.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+        await secureStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts), false);
     };
 
-    const _getAccountFromAddress = (address: Address): PrivateKeyAccount => {
+    const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
         const account = accounts.find(
             (account) =>
                 account.address.toLowerCase() === address.toLowerCase(),
@@ -154,12 +154,12 @@ export function useKeyring() {
             throw new Error(`Account with address ${address} not found`);
         }
 
-        const privateKey = _getPrivateKey(account.id);
+        const privateKey = await _getPrivateKey(account.id);
         return privateKeyToAccount(privateKey);
     };
 
-    const _deriveAddress = (accountId: number): Address => {
-        const privateKey = _getPrivateKey(accountId);
+    const _deriveAddress = async (accountId: number): Promise<Address> => {
+        const privateKey = await _getPrivateKey(accountId);
         try {
             const account = privateKeyToAccount(privateKey);
             return account.address;
@@ -169,8 +169,8 @@ export function useKeyring() {
         }
     };
 
-    const _getPrivateKey = (accountId: number): Hex => {
-        const seedPhrase = getSeedPhrase();
+    const _getPrivateKey = async (accountId: number): Promise<Hex> => {
+        const seedPhrase = await getSeedPhrase();
         try {
             const seed = mnemonicToSeedSync(seedPhrase);
             const hdKey = HDKey.fromMasterSeed(seed);

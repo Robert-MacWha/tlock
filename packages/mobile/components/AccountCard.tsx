@@ -45,20 +45,20 @@ export function AccountCard({ address }: AccountCardProps) {
     }
 
     async function handleRenameConfirm() {
-        renameAccount(address, nameInput);
+        await renameAccount(address, nameInput);
         setRenameVisible(false);
     }
 
     const cardStyle = account.isHidden
         ? {
-              opacity: 0.6,
-          }
+            opacity: 0.6,
+        }
         : undefined;
 
     const textStyle = account.isHidden
         ? {
-              color: '#666',
-          }
+            color: '#666',
+        }
         : undefined;
 
     return (
