@@ -229,7 +229,14 @@ export default function SettingsScreen() {
                         left={<TextInput.Icon icon="server" />}
                     />
                     {firebaseUrlError ? (
-                        <Text style={{ color: 'red', marginHorizontal: 16, marginBottom: 16, fontSize: 12 }}>
+                        <Text
+                            style={{
+                                color: 'red',
+                                marginHorizontal: 16,
+                                marginBottom: 16,
+                                fontSize: 12,
+                            }}
+                        >
                             {firebaseUrlError}
                         </Text>
                     ) : null}

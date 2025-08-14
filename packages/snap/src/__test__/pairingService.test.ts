@@ -79,7 +79,11 @@ describe('PairingService', () => {
             });
 
             expect(mockGenerateSharedSecret).toHaveBeenCalled();
-            expect(mockCreateClient).toHaveBeenCalledWith(mockSharedSecret, undefined, undefined);
+            expect(mockCreateClient).toHaveBeenCalledWith(
+                mockSharedSecret,
+                undefined,
+                undefined,
+            );
             expect(mockClient.submitRequest).toHaveBeenCalledWith('pair', {
                 status: 'pending',
                 fcmToken: '',

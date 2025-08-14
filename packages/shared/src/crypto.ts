@@ -47,9 +47,11 @@ export function decryptMessage<T>(
         const result = validationSchema.safeParse(decrypted);
         if (!result.success) {
             const errorDetails = result.error.issues
-                .map(issue => `${issue.path.join('.')}: ${issue.message}`)
+                .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
                 .join(', ');
-            throw new Error(`Decrypted message validation failed: ${errorDetails}`);
+            throw new Error(
+                `Decrypted message validation failed: ${errorDetails}`,
+            );
         }
         return result.data;
     }

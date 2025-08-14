@@ -5,7 +5,11 @@ describe('decryptMessage validation', () => {
     const sharedSecret = generateSharedSecret();
 
     it('should decrypt valid JSON without validation', () => {
-        const data = { status: 'pending', fcmToken: 'token', deviceName: 'device' };
+        const data = {
+            status: 'pending',
+            fcmToken: 'token',
+            deviceName: 'device',
+        };
         const encrypted = JSON.stringify(data);
 
         const result = decryptMessage(encrypted, sharedSecret);
@@ -13,10 +17,18 @@ describe('decryptMessage validation', () => {
     });
 
     it('should decrypt and validate with schema', () => {
-        const validData = { status: 'pending', fcmToken: 'token', deviceName: 'device' };
+        const validData = {
+            status: 'pending',
+            fcmToken: 'token',
+            deviceName: 'device',
+        };
         const encrypted = JSON.stringify(validData);
 
-        const result = decryptMessage(encrypted, sharedSecret, PairRequestSchema);
+        const result = decryptMessage(
+            encrypted,
+            sharedSecret,
+            PairRequestSchema,
+        );
         expect(result).toEqual(validData);
     });
 
@@ -24,14 +36,14 @@ describe('decryptMessage validation', () => {
         const invalidData = { status: 'invalid-status' };
         const encrypted = JSON.stringify(invalidData);
 
-        expect(() => decryptMessage(encrypted, sharedSecret, PairRequestSchema)).toThrow(
-            'Decrypted message validation failed'
-        );
+        expect(() =>
+            decryptMessage(encrypted, sharedSecret, PairRequestSchema),
+        ).toThrow('Decrypted message validation failed');
     });
 
     it('should throw error for invalid JSON', () => {
         expect(() => decryptMessage('{ invalid json }', sharedSecret)).toThrow(
-            "Expected property name or '}' in JSON at position 2"
+            "Expected property name or '}' in JSON at position 2",
         );
     });
 });

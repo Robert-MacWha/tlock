@@ -9,7 +9,8 @@ import { getState } from './state';
 export async function showPairingScreen(interfaceId: string) {
     try {
         const pairingService = new PairingService();
-        const { qrSrc, requestId, sharedSecret } = await pairingService.startPairing();
+        const { qrSrc, requestId, sharedSecret } =
+            await pairingService.startPairing();
 
         await showScreen(
             interfaceId,
@@ -25,7 +26,11 @@ export async function showPairingScreen(interfaceId: string) {
 
         try {
             const state = await getState();
-            const client = createClient(sharedSecret, undefined, state?.firebaseUrl);
+            const client = createClient(
+                sharedSecret,
+                undefined,
+                state?.firebaseUrl,
+            );
             const response = await pairingService.waitForPairing(
                 requestId,
                 client,

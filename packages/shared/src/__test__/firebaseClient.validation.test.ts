@@ -10,8 +10,8 @@ class MockHttpClient implements HttpClient {
         return this.mockData as T;
     }
 
-    async put(): Promise<void> { }
-    async delete(): Promise<void> { }
+    async put(): Promise<void> {}
+    async delete(): Promise<void> {}
 }
 
 describe('FirebaseClient validation', () => {
@@ -22,7 +22,7 @@ describe('FirebaseClient validation', () => {
     beforeEach(() => {
         mockHttp = new MockHttpClient();
         client = new FirebaseClient(sharedSecret, undefined, mockHttp);
-        jest.spyOn(console, 'warn').mockImplementation(() => { });
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -33,19 +33,27 @@ describe('FirebaseClient validation', () => {
         it('should validate and return valid stored request', async () => {
             mockHttp.mockData = {
                 type: 'pair',
-                data: JSON.stringify({ status: 'pending', fcmToken: 'token', deviceName: 'device' }),
+                data: JSON.stringify({
+                    status: 'pending',
+                    fcmToken: 'token',
+                    deviceName: 'device',
+                }),
                 lastUpdated: 1640995200000,
             };
 
             const result = await client.getRequest('test-id', 'pair');
-            expect(result).toEqual({ status: 'pending', fcmToken: 'token', deviceName: 'device' });
+            expect(result).toEqual({
+                status: 'pending',
+                fcmToken: 'token',
+                deviceName: 'device',
+            });
         });
 
         it('should throw error for invalid stored request structure', async () => {
             mockHttp.mockData = { type: 'pair' }; // Missing required fields
 
             await expect(client.getRequest('test-id', 'pair')).rejects.toThrow(
-                'Invalid stored request data from Firebase'
+                'Invalid stored request data from Firebase',
             );
         });
 
@@ -57,7 +65,7 @@ describe('FirebaseClient validation', () => {
             };
 
             await expect(client.getRequest('test-id', 'pair')).rejects.toThrow(
-                'Request type mismatch: expected pair, got importAccount'
+                'Request type mismatch: expected pair, got importAccount',
             );
         });
 
@@ -69,7 +77,7 @@ describe('FirebaseClient validation', () => {
             };
 
             await expect(client.getRequest('test-id', 'pair')).rejects.toThrow(
-                "Decrypted message validation failed: status: Invalid option: expected one of \"pending\"|\"approved\"|\"rejected\"|\"error\", fcmToken: Invalid input: expected string, received undefined, deviceName: Invalid input: expected string, received undefined"
+                'Decrypted message validation failed: status: Invalid option: expected one of "pending"|"approved"|"rejected"|"error", fcmToken: Invalid input: expected string, received undefined, deviceName: Invalid input: expected string, received undefined',
             );
         });
     });
@@ -83,12 +91,16 @@ describe('FirebaseClient validation', () => {
 
         it('should skip invalid requests and continue processing', async () => {
             mockHttp.mockData = {
-                'valid': {
+                valid: {
                     type: 'pair',
-                    data: JSON.stringify({ status: 'pending', fcmToken: 'token', deviceName: 'device' }),
+                    data: JSON.stringify({
+                        status: 'pending',
+                        fcmToken: 'token',
+                        deviceName: 'device',
+                    }),
                     lastUpdated: 1640995200000,
                 },
-                'invalid': { type: 'invalid-type' }, // Missing required fields
+                invalid: { type: 'invalid-type' }, // Missing required fields
             };
 
             const result = await client.getRequests();

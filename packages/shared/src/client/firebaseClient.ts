@@ -100,46 +100,61 @@ export class FirebaseClient implements Client {
         }
 
         // Validate StoredRequest structure
-        const storedRequestResult = StoredRequestSchema.safeParse(rawStoredRequest);
+        const storedRequestResult =
+            StoredRequestSchema.safeParse(rawStoredRequest);
         if (!storedRequestResult.success) {
             const errorDetails = storedRequestResult.error.issues
-                .map(issue => `${issue.path.join('.')}: ${issue.message}`)
+                .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
                 .join(', ');
-            throw new Error(`Invalid stored request data from Firebase: ${errorDetails}`);
+            throw new Error(
+                `Invalid stored request data from Firebase: ${errorDetails}`,
+            );
         }
 
         const storedRequest = storedRequestResult.data;
 
         // Verify request type matches
         if (storedRequest.type !== requestType) {
-            throw new Error(`Request type mismatch: expected ${requestType}, got ${storedRequest.type}`);
+            throw new Error(
+                `Request type mismatch: expected ${requestType}, got ${storedRequest.type}`,
+            );
         }
 
         // Decrypt and validate the data
         const schema = RequestTypeSchemaMap[requestType];
-        return decryptMessage(storedRequest.data, this.sharedSecret, schema) as RequestTypeMap[T];
+        return decryptMessage(
+            storedRequest.data,
+            this.sharedSecret,
+            schema,
+        ) as RequestTypeMap[T];
     }
 
     async getRequests(): Promise<Request[]> {
         const rawData = await this.http.get<unknown>(
             this.firebaseUrl,
-            FirebasePaths.requests(this.roomId)
+            FirebasePaths.requests(this.roomId),
         );
 
         if (!rawData) return [];
 
         // Validate that we got an object
         if (typeof rawData !== 'object' || rawData === null) {
-            throw new Error('Invalid requests data from Firebase: expected object');
+            throw new Error(
+                'Invalid requests data from Firebase: expected object',
+            );
         }
 
         const requests: Request[] = [];
         for (const [requestId, rawStoredRequest] of Object.entries(rawData)) {
             try {
                 // Validate each StoredRequest structure
-                const storedRequestResult = StoredRequestSchema.safeParse(rawStoredRequest);
+                const storedRequestResult =
+                    StoredRequestSchema.safeParse(rawStoredRequest);
                 if (!storedRequestResult.success) {
-                    console.warn(`Skipping invalid stored request ${requestId}:`, storedRequestResult.error.issues);
+                    console.warn(
+                        `Skipping invalid stored request ${requestId}:`,
+                        storedRequestResult.error.issues,
+                    );
                     continue;
                 }
 
@@ -148,7 +163,11 @@ export class FirebaseClient implements Client {
 
                 // Decrypt and validate the data
                 const schema = RequestTypeSchemaMap[requestType];
-                const decryptedData = decryptMessage(storedRequest.data, this.sharedSecret, schema);
+                const decryptedData = decryptMessage(
+                    storedRequest.data,
+                    this.sharedSecret,
+                    schema,
+                );
 
                 const request: Request = {
                     id: requestId,

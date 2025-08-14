@@ -4,7 +4,10 @@ import { SHARED_SECRET_LENGTH } from './crypto';
 // Shared Secret validation
 export const SharedSecretSchema = z
     .array(z.number().int().min(0).max(4294967295))
-    .length(SHARED_SECRET_LENGTH, `SharedSecret must be exactly ${SHARED_SECRET_LENGTH} numbers`);
+    .length(
+        SHARED_SECRET_LENGTH,
+        `SharedSecret must be exactly ${SHARED_SECRET_LENGTH} numbers`,
+    );
 
 // QR Code validation
 export const QrCodeDataSchema = z.object({
@@ -14,7 +17,12 @@ export const QrCodeDataSchema = z.object({
 });
 
 // Request status validation
-export const RequestStatusSchema = z.enum(['pending', 'approved', 'rejected', 'error']);
+export const RequestStatusSchema = z.enum([
+    'pending',
+    'approved',
+    'rejected',
+    'error',
+]);
 
 // Individual request schemas
 export const PairRequestSchema = z.object({
@@ -72,7 +80,14 @@ export const RequestDataSchema = z.union([
 
 // Firebase StoredRequest validation
 export const StoredRequestSchema = z.object({
-    type: z.enum(['pair', 'importAccount', 'signPersonal', 'signTransaction', 'signTypedData', 'signMessage']),
+    type: z.enum([
+        'pair',
+        'importAccount',
+        'signPersonal',
+        'signTransaction',
+        'signTypedData',
+        'signMessage',
+    ]),
     data: z.string().min(1), // encrypted data
     lastUpdated: z.number().int().positive(),
 });

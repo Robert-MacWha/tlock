@@ -35,19 +35,21 @@ export function parseQrCode(qrCode: string): QrCodeData {
     }
 
     const encodedData = qrCode.slice(expectedPrefix.length);
-    
+
     let rawData: unknown;
     try {
         rawData = JSON.parse(atob(encodedData));
     } catch (error) {
-        throw new Error('Invalid QR code: Unable to decode or parse QR code data');
+        throw new Error(
+            'Invalid QR code: Unable to decode or parse QR code data',
+        );
     }
 
     // Validate using zod schema
     const parseResult = QrCodeDataSchema.safeParse(rawData);
     if (!parseResult.success) {
         const errorDetails = parseResult.error.issues
-            .map(issue => `${issue.path.join('.')}: ${issue.message}`)
+            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
             .join(', ');
         throw new Error(`Invalid QR code data: ${errorDetails}`);
     }
@@ -55,7 +57,9 @@ export function parseQrCode(qrCode: string): QrCodeData {
     const qrData = parseResult.data;
 
     if (qrData.version !== QR_VERSION) {
-        throw new Error(`Unsupported QR code version: ${qrData.version} (expected ${QR_VERSION})`);
+        throw new Error(
+            `Unsupported QR code version: ${qrData.version} (expected ${QR_VERSION})`,
+        );
     }
 
     return qrData;

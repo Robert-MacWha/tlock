@@ -57,7 +57,11 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     const state = await getState();
     validatePairedState(state);
 
-    const client = createClient(state.sharedSecret, state.fcmToken, state.firebaseUrl);
+    const client = createClient(
+        state.sharedSecret,
+        state.fcmToken,
+        state.firebaseUrl,
+    );
     const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
     return (await handleKeyringRequest(keyring, request)) ?? null;
