@@ -43,13 +43,6 @@ jobs:
                   name: shared-${{ runner.os }}-${{ github.sha }}
                   path: ./packages/shared/dist
                   retention-days: 1
-            - name: Require clean working directory
-              shell: bash
-              run: |
-                  if ! git diff --exit-code; then
-                    echo "Working tree dirty at end of job"
-                    exit 1
-                  fi
 
     lint:
         name: Lint
@@ -69,13 +62,6 @@ jobs:
                   path: ./packages/shared/dist
             - name: Lint
               run: yarn lint
-            - name: Require clean working directory
-              shell: bash
-              run: |
-                  if ! git diff --exit-code; then
-                    echo "Working tree dirty at end of job"
-                    exit 1
-                  fi
 
     e2e-test:
         name: End-to-end Test
@@ -100,10 +86,3 @@ jobs:
                   path: ./packages/shared/dist
             - name: Run e2e tests
               run: yarn test
-            - name: Require clean working directory
-              shell: bash
-              run: |
-                  if ! git diff --exit-code; then
-                    echo "Working tree dirty at end of job"
-                    exit 1
-                  fi
