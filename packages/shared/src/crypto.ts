@@ -38,7 +38,7 @@ export function encryptMessage<T>(
 export function decryptMessage<T>(
     encryptedMessage: string,
     _sharedSecret: SharedSecret,
-    validationSchema?: z.ZodType<T>,
+    validationSchema?: z.ZodTypeAny,
 ): T {
     const decrypted = JSON.parse(encryptedMessage) as T;
 
@@ -53,7 +53,7 @@ export function decryptMessage<T>(
                 `Decrypted message validation failed: ${errorDetails}`,
             );
         }
-        return result.data;
+        return result.data as T;
     }
 
     return decrypted;
