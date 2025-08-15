@@ -126,7 +126,7 @@ export class FirebaseClient implements Client {
             storedRequest.data,
             this.sharedSecret,
             schema,
-        ) as RequestTypeMap[T];
+        );
     }
 
     async getRequests(): Promise<Request[]> {
