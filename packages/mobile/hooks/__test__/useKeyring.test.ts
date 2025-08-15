@@ -114,6 +114,7 @@ describe('useKeyring', () => {
         it(`${methodName} should throw error when account does not exist`, async () => {
             setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(methodCall(result.current)).rejects.toThrow(
                 'Account with address 0x123 not found',
@@ -164,6 +165,7 @@ describe('useKeyring', () => {
         it('should throw error when seed phrase does not exist', async () => {
             setupStorageState({ seedPhrase: null });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(result.current.getSeedPhrase()).rejects.toThrow(
                 'No seed phrase found',
@@ -173,6 +175,7 @@ describe('useKeyring', () => {
         it('should handle empty string seed phrase', async () => {
             setupStorageState({ seedPhrase: '' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(result.current.getSeedPhrase()).rejects.toThrow(
                 'No seed phrase found',
@@ -183,9 +186,9 @@ describe('useKeyring', () => {
             const mockSeedPhrase = 'test seed phrase';
             setupStorageState({ seedPhrase: mockSeedPhrase });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             const seedPhrase = await result.current.getSeedPhrase();
-
             expect(seedPhrase).toBe(mockSeedPhrase);
         });
     });
@@ -194,6 +197,7 @@ describe('useKeyring', () => {
         it('should throw error when seed phrase already exists without override', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(result.current.generateSeedPhrase(false)).rejects.toThrow(
                 'Seed phrase already exists. Use override to replace it.',
@@ -242,7 +246,6 @@ describe('useKeyring', () => {
         it('should return empty array when no accounts exist', async () => {
             setupStorageState({ accounts: null });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, []);
         });
 
@@ -250,7 +253,6 @@ describe('useKeyring', () => {
             const mockAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({ accounts: JSON.stringify(mockAccounts) });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, mockAccounts);
         });
     });
@@ -259,6 +261,7 @@ describe('useKeyring', () => {
         it('should throw error when no seed phrase exists', async () => {
             setupStorageState({ seedPhrase: null, accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(result.current.addAccount()).rejects.toThrow(
                 'No seed phrase found',
@@ -292,7 +295,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify(existingAccounts),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, existingAccounts);
 
             let address: string;
@@ -320,6 +322,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(
                 result.current.sign(
@@ -341,7 +344,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const signature = await result.current.sign(
@@ -361,7 +363,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const signature = await result.current.sign(
@@ -387,7 +388,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const signature = await result.current.signPersonal(
@@ -413,7 +413,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const transaction: TransactionSerializableLegacy = {
@@ -459,7 +458,6 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
-
             await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const typedData: TypedDataDefinition = {
