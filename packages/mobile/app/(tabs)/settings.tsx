@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
 import { useSetupStatus } from '../../hooks/useSetupStatus';
 import { useKeyringContext } from '../../contexts/KeyringContext';
 import { router } from 'expo-router';
@@ -6,6 +7,7 @@ import { SeedPhraseDisplay } from '../../components/SeedPhraseDisplay';
 import {
     Badge,
     Button,
+    IconButton,
     List,
     Modal,
     Portal,
@@ -27,6 +29,7 @@ export default function SettingsScreen() {
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const [firebaseUrlInput, setFirebaseUrlInput] = useState<string>('');
     const [firebaseUrlError, setFirebaseUrlError] = useState<string>('');
+    const [hasFirebaseUrlChanges, setHasFirebaseUrlChanges] = useState<boolean>(false);
     const { alert } = useAlert();
     const { clientRequests } = useRequestManagerContext();
     const { clients, firebaseUrl, setFirebaseUrl } = useClientsContext();
@@ -38,6 +41,7 @@ export default function SettingsScreen() {
     // Initialize Firebase URL input when firebaseUrl changes
     useEffect(() => {
         setFirebaseUrlInput(firebaseUrl);
+        setHasFirebaseUrlChanges(false);
     }, [firebaseUrl]);
 
     const resetApp = () => {
@@ -104,18 +108,34 @@ export default function SettingsScreen() {
     };
 
     const handleFirebaseUrlChange = (text: string) => {
+        console.log('Firebase URL input changed:', text, hasFirebaseUrlChanges);
         setFirebaseUrlInput(text);
         const error = validateFirebaseUrl(text);
         setFirebaseUrlError(error);
+        setHasFirebaseUrlChanges(text !== firebaseUrl);
+    };
 
-        if (!error && text !== firebaseUrl) {
-            setFirebaseUrl(text).then(() => {
-                alert('Success', 'Firebase server URL updated successfully.');
-            }).catch(() => {
-                alert('Error', 'Failed to update Firebase URL.');
-                setFirebaseUrlInput(firebaseUrl);
-            });
+    const saveFirebaseUrl = async () => {
+        const error = validateFirebaseUrl(firebaseUrlInput);
+        if (error) {
+            setFirebaseUrlError(error);
+            return;
         }
+
+        setFirebaseUrl(firebaseUrlInput).then(() => {
+            setHasFirebaseUrlChanges(false);
+            alert('Success', 'Firebase server URL updated successfully.');
+        }).catch(() => {
+            setFirebaseUrlInput(firebaseUrl);
+            setFirebaseUrlError('');
+            setHasFirebaseUrlChanges(false);
+        });
+    };
+
+    const resetFirebaseUrl = () => {
+        setFirebaseUrlInput(firebaseUrl);
+        setFirebaseUrlError('');
+        setHasFirebaseUrlChanges(false);
     };
 
     return (
@@ -219,15 +239,39 @@ export default function SettingsScreen() {
 
                     <List.Subheader>Advanced</List.Subheader>
 
-                    <TextInput
-                        label="Firebase Server URL"
-                        value={firebaseUrlInput}
-                        onChangeText={handleFirebaseUrlChange}
-                        mode="outlined"
-                        placeholder={DEFAULT_FIREBASE_URL}
-                        error={!!firebaseUrlError}
-                        left={<TextInput.Icon icon="server" />}
-                    />
+                    <View style={{ position: 'relative' }}>
+                        <TextInput
+                            label="Firebase Server URL"
+                            value={firebaseUrlInput}
+                            onChangeText={handleFirebaseUrlChange}
+                            mode="outlined"
+                            placeholder={DEFAULT_FIREBASE_URL}
+                            error={!!firebaseUrlError}
+                            left={<TextInput.Icon icon="server" />}
+                        />
+                        {hasFirebaseUrlChanges && (
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    right: 8,
+                                    top: 8,
+                                    flexDirection: 'row'
+                                }}
+                            >
+                                <IconButton
+                                    icon="content-save"
+                                    size={20}
+                                    onPress={() => void saveFirebaseUrl()}
+                                    disabled={!!firebaseUrlError}
+                                />
+                                <IconButton
+                                    icon="undo"
+                                    size={20}
+                                    onPress={resetFirebaseUrl}
+                                />
+                            </View>
+                        )}
+                    </View>
                     {firebaseUrlError ? (
                         <Text
                             style={{
