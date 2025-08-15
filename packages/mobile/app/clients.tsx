@@ -37,7 +37,7 @@ export default function App() {
             addClient(qrData.sharedSecret, 'New Client');
             alert('Success', 'Device paired successfully!');
         } catch (error) {
-            console.error('Pairing failed:', error);
+            console.warn('Pairing failed:', error);
             alert('Error', 'Failed to pair device. Please try again.');
         } finally {
             setPairing(false);

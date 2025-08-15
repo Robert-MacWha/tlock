@@ -27,7 +27,7 @@ export default function AccountsScreen() {
         try {
             await addAccount();
         } catch (error) {
-            console.error('Failed to create account:', error);
+            console.warn('Failed to create account:', error);
             alert('Error', 'Failed to create new account. Please try again.');
         }
     }

@@ -11,7 +11,7 @@ export function useSecureStorage() {
                 const level = await LocalAuthentication.getEnrolledLevelAsync();
                 setSecurityLevel(level);
             } catch (error) {
-                console.error('Failed to get security level:', error);
+                console.warn('Failed to get security level:', error);
                 setSecurityLevel(LocalAuthentication.SecurityLevel.NONE);
             }
         };
