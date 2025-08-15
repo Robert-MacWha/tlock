@@ -57,6 +57,7 @@ describe('useRequestManager', () => {
                 pollingInterval: 0,
             }),
         );
+        const _ = result;
 
         await waitFor(() => {
             expect(mockRouter.push).toHaveBeenCalled();
