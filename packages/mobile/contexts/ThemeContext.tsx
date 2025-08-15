@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import * as SecureStore from 'expo-secure-store';
 import {
     DefaultTheme as NavLightTheme,
     DarkTheme as NavDarkTheme,
@@ -20,6 +19,7 @@ import {
     PaperProvider,
 } from 'react-native-paper';
 import { customDarkTheme, customLightTheme } from '../lib/theme';
+import { useSecureStorage } from '../hooks/useSecureStorage';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -38,6 +38,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
+    const secureStorage = useSecureStorage();
     const systemColorScheme = useColorScheme();
     const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
 
@@ -69,35 +70,31 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const currentNavTheme = isDark
         ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          { ...DarkTheme, fonts: NavDarkTheme.fonts }
+        { ...DarkTheme, fonts: NavDarkTheme.fonts }
         : // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          { ...LightTheme, fonts: NavLightTheme.fonts };
+        { ...LightTheme, fonts: NavLightTheme.fonts };
 
     const currentPaperTheme = isDark ? darkTheme : lightTheme;
 
     // Load saved theme preference
     useEffect(() => {
         const loadTheme = () => {
-            try {
-                const saved = SecureStore.getItem(THEME_STORAGE_KEY);
+            secureStorage.getItem(THEME_STORAGE_KEY, false).then((saved) => {
                 if (saved && ['light', 'dark', 'system'].includes(saved)) {
                     setThemeModeState(saved as ThemeMode);
                 }
-            } catch (error) {
+            }).catch((error) => {
                 console.warn('Failed to load theme preference:', error);
-            }
+            });
         };
         void loadTheme();
     }, []);
 
     const setThemeMode = async (mode: ThemeMode) => {
-        try {
-            SecureStore.setItem(THEME_STORAGE_KEY, mode);
-            setThemeModeState(mode);
-        } catch (error) {
+        setThemeModeState(mode);
+        secureStorage.setItem(THEME_STORAGE_KEY, mode, false).catch((error) => {
             console.warn('Failed to save theme preference:', error);
-            setThemeModeState(mode); // Still update state even if storage fails
-        }
+        });
     };
 
     return (
