@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { useSecureStorage } from './useSecureStorage';
 import { entropyToMnemonic, mnemonicToSeedSync } from 'bip39';
 import { HDKey } from '@scure/bip32';
@@ -31,10 +30,9 @@ export function useKeyring() {
     const secureStorage = useSecureStorage();
 
     useEffect(() => {
-        const loadAccounts = async () => {
-            await _loadAccounts();
-        };
-        void loadAccounts();
+        _loadAccounts().catch(() => {
+            console.warn('Failed to load accounts');
+        });
     }, []);
 
     const getSeedPhrase = async (): Promise<string> => {

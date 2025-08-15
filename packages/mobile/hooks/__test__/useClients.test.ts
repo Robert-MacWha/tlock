@@ -36,7 +36,7 @@ describe('useClients', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => { });
 
         // Setup default mocks for sync methods
         mockSecureStore.getItem.mockReturnValue(null);
