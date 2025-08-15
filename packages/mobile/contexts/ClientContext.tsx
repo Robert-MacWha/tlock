@@ -5,10 +5,10 @@ import { ClientInstance, useClients } from '../hooks/useClients';
 interface ClientsContextType {
     clients: ClientInstance[];
     firebaseUrl: string;
-    addClient: (sharedSecret: SharedSecret, name?: string) => ClientInstance;
-    removeClient: (clientId: string) => void;
-    setClientName: (clientId: string, name: string) => void;
-    setFirebaseUrl: (url: string) => void;
+    addClient: (sharedSecret: SharedSecret, name?: string) => Promise<ClientInstance>;
+    removeClient: (clientId: string) => Promise<void>;
+    setClientName: (clientId: string, name: string) => Promise<void>;
+    setFirebaseUrl: (url: string) => Promise<void>;
 }
 
 const ClientsContext = createContext<ClientsContextType | undefined>(undefined);

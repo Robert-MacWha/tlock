@@ -109,13 +109,12 @@ export default function SettingsScreen() {
         setFirebaseUrlError(error);
 
         if (!error && text !== firebaseUrl) {
-            try {
-                setFirebaseUrl(text);
+            setFirebaseUrl(text).then(() => {
                 alert('Success', 'Firebase server URL updated successfully.');
-            } catch (_error) {
+            }).catch(() => {
                 alert('Error', 'Failed to update Firebase URL.');
-                setFirebaseUrlInput(firebaseUrl); // Reset to original value
-            }
+                setFirebaseUrlInput(firebaseUrl);
+            });
         }
     };
 
