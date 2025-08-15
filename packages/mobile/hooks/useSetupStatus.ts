@@ -8,7 +8,7 @@ export function useSetupStatus() {
     );
 
     useEffect(() => {
-        secureStorage.getItem('tlock_setup_complete').then((value) => {
+        secureStorage.getItem('tlock_setup_complete', false).then((value) => {
             setIsSetupComplete(value === 'true');
         }).catch(() => {
             setIsSetupComplete(false);
@@ -17,7 +17,7 @@ export function useSetupStatus() {
 
     const updateIsSetupComplete = (isSetupComplete: boolean) => {
         setIsSetupComplete(isSetupComplete);
-        void secureStorage.setItem('tlock_setup_complete', isSetupComplete ? 'true' : 'false', isSetupComplete);
+        void secureStorage.setItem('tlock_setup_complete', isSetupComplete ? 'true' : 'false', !isSetupComplete);
     };
 
     return { isSetupComplete, setIsSetupComplete: updateIsSetupComplete };

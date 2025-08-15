@@ -19,18 +19,23 @@ export function useSecureStorage() {
         void checkSecurityLevel();
     }, []);
 
-    const authenticate = async (prompt?: string): Promise<void> => {
+    const authenticate = async (): Promise<void> => {
         const hasHardware = await LocalAuthentication.hasHardwareAsync();
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
-        if (!hasHardware || !isEnrolled) {
+        if (!hasHardware && securityLevel === LocalAuthentication.SecurityLevel.NONE) {
             throw new Error(
-                'No authentication method available. Please set up device lock screen or biometrics in your device settings.'
+                'No authentication method available. Please set up a device lock screen (PIN, pattern, or password) in your device settings.'
+            );
+        }
+
+        if (!isEnrolled && securityLevel === LocalAuthentication.SecurityLevel.NONE) {
+            throw new Error(
+                'No authentication method set up. Please enable device lock screen or biometrics in your device settings.'
             );
         }
 
         const authResult = await LocalAuthentication.authenticateAsync({
-            promptMessage: prompt || 'Authenticate to access secure data',
             fallbackLabel: 'Use device passcode',
             disableDeviceFallback: false,
         });
@@ -43,16 +48,17 @@ export function useSecureStorage() {
         }
     };
 
-    const getItem = async (key: string, authenticated: boolean = true, prompt?: string): Promise<string | null> => {
+    const getItem = async (key: string, authenticated: boolean): Promise<string | null> => {
+        console.log('getItem called with key:', key, 'authenticated:', authenticated);
         if (authenticated) {
-            await authenticate(prompt);
+            await authenticate();
         }
         return SecureStore.getItem(key);
     };
 
-    const setItem = async (key: string, value: string, authenticated: boolean = true, prompt?: string): Promise<void> => {
+    const setItem = async (key: string, value: string, authenticated: boolean): Promise<void> => {
         if (authenticated) {
-            await authenticate(prompt);
+            await authenticate();
         }
         await SecureStore.setItemAsync(key, value);
     };

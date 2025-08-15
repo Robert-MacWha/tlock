@@ -18,9 +18,14 @@ export default function SetupScreen() {
     const { alert } = useAlert();
 
     const handleNextFromIntro = async () => {
-        const seedPhrase = await generateSeedPhrase(true);
-        setSeedPhrase(seedPhrase);
-        setCurrentStep('seedPhrase');
+        console.log('Generating seed phrase...');
+        try {
+            const seedPhrase = await generateSeedPhrase(true);
+            setSeedPhrase(seedPhrase);
+            setCurrentStep('seedPhrase');
+        } catch (error) {
+            console.error('Error generating seed phrase:', error);
+        }
     };
 
     const handleNextFromSeedPhrase = () => {

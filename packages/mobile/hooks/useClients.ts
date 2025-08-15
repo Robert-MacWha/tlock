@@ -40,6 +40,12 @@ export function useClients() {
         }
     }, [firebaseUrl]);
 
+    const setFirebaseUrl = async (url: string) => {
+        //? useEffect automatically reloads clients with new URL
+        setFirebaseUrlState(url);
+        await secureStorage.setItem(FIREBASE_URL_KEY, url, true);
+    };
+
     const saveClients = async (clientsToSave: ClientInstance[] = clients) => {
         const savedClients: SavedClient[] = clientsToSave.map((client) => ({
             id: client.id,
@@ -47,11 +53,11 @@ export function useClients() {
             sharedSecret: client.sharedSecret,
         }));
 
-        await secureStorage.setItem(CLIENTS_KEY, JSON.stringify(savedClients), true);
+        await secureStorage.setItem(CLIENTS_KEY, JSON.stringify(savedClients), false);
     };
 
     const loadFirebaseUrl = async () => {
-        const savedUrl = await secureStorage.getItem(FIREBASE_URL_KEY);
+        const savedUrl = await secureStorage.getItem(FIREBASE_URL_KEY, false);
         if (savedUrl) {
             setFirebaseUrlState(savedUrl);
         } else {
@@ -60,7 +66,7 @@ export function useClients() {
     };
 
     const loadClients = async () => {
-        const savedClients = await secureStorage.getItem(CLIENTS_KEY);
+        const savedClients = await secureStorage.getItem(CLIENTS_KEY, false);
         if (savedClients) {
             const data = JSON.parse(savedClients) as ClientInstance[];
             const loadedClients: ClientInstance[] = data.map((client) => ({
@@ -113,12 +119,6 @@ export function useClients() {
 
         setClients(updatedClients);
         await saveClients(updatedClients);
-    };
-
-    const setFirebaseUrl = async (url: string) => {
-        //? useEffect automatically reloads clients with new URL
-        setFirebaseUrlState(url);
-        await secureStorage.setItem(FIREBASE_URL_KEY, url, true);
     };
 
     return {

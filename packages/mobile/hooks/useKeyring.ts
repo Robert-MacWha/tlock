@@ -36,7 +36,7 @@ export function useKeyring() {
     }, []);
 
     const getSeedPhrase = async (): Promise<string> => {
-        const seedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY);
+        const seedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY, true);
         if (!seedPhrase) {
             throw new Error('No seed phrase found');
         }
@@ -44,7 +44,7 @@ export function useKeyring() {
     };
 
     const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
-        const existingSeedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY);
+        const existingSeedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY, true);
         if (existingSeedPhrase && !override) {
             throw new Error(
                 'Seed phrase already exists. Use override to replace it.',
@@ -56,7 +56,7 @@ export function useKeyring() {
         if (!seedPhrase) {
             throw new Error('No seed phrase generated');
         }
-        await secureStorage.setItem(SEED_PHRASE_KEY, seedPhrase);
+        await secureStorage.setItem(SEED_PHRASE_KEY, seedPhrase, false);
 
         // Reset accounts
         await _saveAccounts([]);
