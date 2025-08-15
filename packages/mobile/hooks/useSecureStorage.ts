@@ -57,17 +57,9 @@ export function useSecureStorage() {
         await SecureStore.setItemAsync(key, value);
     };
 
-    const deleteItem = async (key: string, authenticated: boolean = true, prompt?: string): Promise<void> => {
-        if (authenticated) {
-            await authenticate(prompt);
-        }
-        await SecureStore.deleteItemAsync(key);
-    };
-
     return {
         getItem,
         setItem,
-        deleteItem,
         securityLevel,
     };
 }
