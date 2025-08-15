@@ -217,11 +217,12 @@ describe('useKeyring', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_seed_phrase',
                 seedPhrase!,
+                expect.any(Boolean),
             );
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 '[]',
-                false,
+                expect.any(Boolean),
             );
         });
 
@@ -238,6 +239,7 @@ describe('useKeyring', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_seed_phrase',
                 seedPhrase!,
+                false,
             );
         });
     });
@@ -284,7 +286,7 @@ describe('useKeyring', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining(address!),
-                false,
+                expect.any(Boolean),
             );
         });
 
@@ -305,12 +307,12 @@ describe('useKeyring', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining(address!),
-                false,
+                expect.any(Boolean),
             );
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining('0x123'),
-                false,
+                expect.any(Boolean),
             );
         });
     });

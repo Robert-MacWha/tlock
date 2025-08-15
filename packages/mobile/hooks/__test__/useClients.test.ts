@@ -144,7 +144,7 @@ describe('useClients', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('Test Client'),
-                true,
+                false,
             );
         });
     });
@@ -209,7 +209,7 @@ describe('useClients', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 '[]',
-                true,
+                false,
             );
         });
 
@@ -279,7 +279,7 @@ describe('useClients', () => {
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('New Name'),
-                true,
+                false,
             );
         });
 
