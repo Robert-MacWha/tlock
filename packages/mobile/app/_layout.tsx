@@ -11,6 +11,7 @@ import SetupFlow from './_setup';
 import { AlertProvider } from '../components/AlertProvider';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { RequestManagerProvider } from '../contexts/RequestManagerContext';
+import { PushNotificationsProvider } from '../contexts/PushNotificationsContext';
 
 export default function RootLayout() {
     const { isSetupComplete } = useSetupStatus();
@@ -38,44 +39,46 @@ export default function RootLayout() {
 
     return (
         <ThemeProvider>
-            <KeyringProvider>
-                <ClientsProvider>
-                    <RequestManagerProvider pollingInterval={2000}>
-                        <AlertProvider>
-                            <Stack>
-                                <Stack.Screen
-                                    name="(tabs)"
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen
-                                    name="_requests"
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen
-                                    name="_setup"
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen
-                                    name="_docs"
-                                    options={{ headerShown: false }}
-                                />
-                                <Stack.Screen
-                                    name="clients"
-                                    options={{
-                                        title: 'Connected Devices',
-                                    }}
-                                />
-                                <Stack.Screen
-                                    name="requests"
-                                    options={{
-                                        title: 'Requests',
-                                    }}
-                                />
-                            </Stack>
-                        </AlertProvider>
-                    </RequestManagerProvider>
-                </ClientsProvider>
-            </KeyringProvider>
+            <PushNotificationsProvider>
+                <KeyringProvider>
+                    <ClientsProvider>
+                        <RequestManagerProvider pollingInterval={2000}>
+                            <AlertProvider>
+                                <Stack>
+                                    <Stack.Screen
+                                        name="(tabs)"
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="_requests"
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="_setup"
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="_docs"
+                                        options={{ headerShown: false }}
+                                    />
+                                    <Stack.Screen
+                                        name="clients"
+                                        options={{
+                                            title: 'Connected Devices',
+                                        }}
+                                    />
+                                    <Stack.Screen
+                                        name="requests"
+                                        options={{
+                                            title: 'Requests',
+                                        }}
+                                    />
+                                </Stack>
+                            </AlertProvider>
+                        </RequestManagerProvider>
+                    </ClientsProvider>
+                </KeyringProvider>
+            </PushNotificationsProvider>
         </ThemeProvider>
     );
 }
