@@ -33,8 +33,13 @@ export async function getState(
         params: { operation: 'get' },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const parsedState = stored ? JSON.parse(stored.state as string) : null;
+    let parsedState;
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        parsedState = stored ? JSON.parse(stored.state as string) : null;
+    } catch (error) {
+        console.error('Error parsing stored state:', error);
+    }
     const state = { ...d, ...parsedState } as SnapState;
 
     if (!state.firebaseUrl) {
@@ -47,8 +52,12 @@ export async function getState(
 async function setState(value: SnapState): Promise<void> {
     const serialized = JSON.stringify(value);
 
-    await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'update', newState: { state: serialized } },
-    });
+    try {
+        await snap.request({
+            method: 'snap_manageState',
+            params: { operation: 'update', newState: { state: serialized } },
+        });
+    } catch (error) {
+        console.error('Error updating state:', error);
+    }
 }

@@ -19,7 +19,7 @@ export interface PairingQrData {
 }
 
 export class PairingService {
-    async startPairing(): Promise<PairingQrData> {
+    async start(): Promise<PairingQrData> {
         try {
             const sharedSecret = generateSharedSecret();
             const state = await getState();

@@ -1,4 +1,4 @@
-import { createClient, PairRequest } from '@tlock/shared';
+import { createClient } from '@tlock/shared';
 import { showErrorScreen, showScreen } from './screen';
 import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
 import { SCREENS, ERROR_CODES } from './constants';
@@ -8,9 +8,8 @@ import { getState } from './state';
 
 export async function showPairingScreen(interfaceId: string) {
     try {
-        const pairingService = new PairingService();
-        const { qrSrc, requestId, sharedSecret } =
-            await pairingService.startPairing();
+        const pairing = new PairingService();
+        const { qrSrc, requestId, sharedSecret } = await pairing.start();
 
         await showScreen(
             interfaceId,
@@ -31,12 +30,26 @@ export async function showPairingScreen(interfaceId: string) {
                 undefined,
                 state?.firebaseUrl,
             );
-            const response = await pairingService.waitForPairing(
+
+            const response = await pairing.waitForPairing(
                 requestId,
                 client,
                 sharedSecret,
             );
-            await showConfirmPairingScreen(interfaceId, response);
+
+            await showScreen(
+                interfaceId,
+                <Box>
+                    <Heading>Pairing Successful!</Heading>
+                    <Text>
+                        Your device {response.deviceName} has been successfully
+                        paired.
+                    </Text>
+                    <Button name={SCREENS.IMPORT_ACCOUNT}>
+                        Import First Account
+                    </Button>
+                </Box>,
+            );
         } catch (error) {
             console.error('Error polling for device registration:', error);
             await showErrorScreen(
@@ -51,20 +64,4 @@ export async function showPairingScreen(interfaceId: string) {
             'Error generating pairing data',
         );
     }
-}
-
-export async function showConfirmPairingScreen(
-    interfaceId: string,
-    resp: PairRequest,
-) {
-    await showScreen(
-        interfaceId,
-        <Box>
-            <Heading>Pairing Successful!</Heading>
-            <Text>
-                Your device {resp.deviceName} has been successfully paired.
-            </Text>
-            <Button name={SCREENS.IMPORT_ACCOUNT}>Import First Account</Button>
-        </Box>,
-    );
 }
