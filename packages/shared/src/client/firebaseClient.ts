@@ -11,7 +11,7 @@ import { StoredRequestSchema, RequestTypeSchemaMap } from '../validation';
 
 interface StoredRequest {
     type: RequestType;
-    data: string; // encrypted
+    data: string;
     lastUpdated: number;
 }
 
@@ -99,7 +99,6 @@ export class FirebaseClient implements Client {
             throw new Error('Request not found');
         }
 
-        // Validate StoredRequest structure
         const storedRequestResult =
             StoredRequestSchema.safeParse(rawStoredRequest);
         if (!storedRequestResult.success) {
@@ -113,14 +112,12 @@ export class FirebaseClient implements Client {
 
         const storedRequest = storedRequestResult.data;
 
-        // Verify request type matches
         if (storedRequest.type !== requestType) {
             throw new Error(
                 `Request type mismatch: expected ${requestType}, got ${storedRequest.type}`,
             );
         }
 
-        // Decrypt and validate the data
         const schema = RequestTypeSchemaMap[requestType];
         return decryptMessage(storedRequest.data, this.sharedSecret, schema);
     }
@@ -133,17 +130,9 @@ export class FirebaseClient implements Client {
 
         if (!rawData) return [];
 
-        // Validate that we got an object
-        if (typeof rawData !== 'object' || rawData === null) {
-            throw new Error(
-                'Invalid requests data from Firebase: expected object',
-            );
-        }
-
         const requests: Request[] = [];
         for (const [requestId, rawStoredRequest] of Object.entries(rawData)) {
             try {
-                // Validate each StoredRequest structure
                 const storedRequestResult =
                     StoredRequestSchema.safeParse(rawStoredRequest);
                 if (!storedRequestResult.success) {
@@ -157,7 +146,6 @@ export class FirebaseClient implements Client {
                 const storedRequest = storedRequestResult.data;
                 const requestType = storedRequest.type;
 
-                // Decrypt and validate the data
                 const schema = RequestTypeSchemaMap[requestType];
                 const decryptedData = decryptMessage(
                     storedRequest.data,
@@ -167,9 +155,9 @@ export class FirebaseClient implements Client {
 
                 const request: Request = {
                     id: requestId,
+                    lastUpdated: storedRequest.lastUpdated,
                     type: requestType,
                     request: decryptedData,
-                    lastUpdated: storedRequest.lastUpdated,
                 } as Request;
 
                 requests.push(request);

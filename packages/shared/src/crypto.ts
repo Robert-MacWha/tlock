@@ -1,5 +1,6 @@
 import { sha256 } from 'viem';
 import { z } from 'zod';
+import * as nacl from 'tweetnacl';
 
 export type SharedSecret = number[];
 
@@ -8,7 +9,7 @@ export const ROOM_ID_LENGTH = 32;
 export const ROOM_ID_PATTERN = /^[0-9A-F]{32}$/;
 
 export function generateSharedSecret(): SharedSecret {
-    const sharedSecret = generateSecureRandom(SHARED_SECRET_LENGTH);
+    const sharedSecret = nacl.randomBytes(SHARED_SECRET_LENGTH);
     return Array.from(sharedSecret);
 }
 
@@ -29,38 +30,61 @@ export function deriveRoomId(sharedSecret: SharedSecret): string {
 
 export function encryptMessage<T>(
     message: T,
-    _sharedSecret: SharedSecret,
+    sharedSecret: SharedSecret,
 ): string {
-    // TODO: Implement actual encryption logic
-    return JSON.stringify(message);
+    const messageString = JSON.stringify(message);
+    const messageBytes = new TextEncoder().encode(messageString);
+    const nonce = nacl.randomBytes(24);
+    const key = new Uint8Array(sharedSecret.slice(0, 32));
+
+    const encrypted = nacl.secretbox(messageBytes, nonce, key);
+
+    const result = new Uint8Array(nonce.length + encrypted.length);
+    result.set(nonce);
+    result.set(encrypted, nonce.length);
+
+    return btoa(String.fromCharCode(...result));
 }
 
 export function decryptMessage<T>(
     encryptedMessage: string,
-    _sharedSecret: SharedSecret,
+    sharedSecret: SharedSecret,
     validationSchema?: z.ZodTypeAny,
 ): T {
-    const decrypted = JSON.parse(encryptedMessage) as T;
+    try {
+        const data = new Uint8Array(
+            atob(encryptedMessage)
+                .split('')
+                .map((char) => char.charCodeAt(0)),
+        );
 
-    // If validation schema is provided, validate the decrypted data
-    if (validationSchema) {
-        const result = validationSchema.safeParse(decrypted);
-        if (!result.success) {
-            const errorDetails = result.error.issues
-                .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
-                .join(', ');
-            throw new Error(
-                `Decrypted message validation failed: ${errorDetails}`,
-            );
+        const nonce = data.slice(0, 24);
+        const encrypted = data.slice(24);
+        const key = new Uint8Array(sharedSecret.slice(0, 32));
+
+        const decryptedBytes = nacl.secretbox.open(encrypted, nonce, key);
+        if (!decryptedBytes) {
+            throw new Error('Failed to decrypt message');
         }
-        return result.data as T;
+
+        const decryptedText = new TextDecoder().decode(decryptedBytes);
+        const decrypted = JSON.parse(decryptedText) as T;
+
+        if (validationSchema) {
+            const result = validationSchema.safeParse(decrypted);
+            if (!result.success) {
+                const errorDetails = result.error.issues
+                    .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+                    .join(', ');
+                throw new Error(
+                    `Decrypted message validation failed: ${errorDetails}`,
+                );
+            }
+            return result.data as T;
+        }
+
+        return decrypted;
+    } catch (error) {
+        throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    return decrypted;
-}
-
-function generateSecureRandom(length: number): number[] {
-    const bytes = new Uint32Array(length);
-    crypto.getRandomValues(bytes);
-    return Array.from(bytes);
 }
