@@ -20,10 +20,26 @@ export interface Account {
     isHidden?: boolean;
 }
 
+export interface UseKeyringReturn {
+    accounts: Account[];
+    getSeedPhrase: () => Promise<string>;
+    generateSeedPhrase: (override?: boolean) => Promise<string>;
+    addAccount: () => Promise<Address>;
+    renameAccount: (address: Address, name: string) => Promise<void>;
+    hideAccount: (address: Address, hide: boolean) => Promise<void>;
+    sign: (from: Address, hash: Hex) => Promise<Hex>;
+    signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
+    signTypedData: (from: Address, data: TypedDataDefinition) => Promise<Hex>;
+    signTransaction: (
+        from: Address,
+        transaction: Hex,
+    ) => Promise<TransactionSerialized>;
+}
+
 const SEED_PHRASE_KEY = 'tlock_seed_phrase';
 const ACCOUNTS_KEY = 'tlock_accounts';
 
-export function useKeyring() {
+export function useKeyring(): UseKeyringReturn {
     //? Stateful accounts variable for external use. Internally make sure to
     //? always use the _loadAccounts function to ensure data consistency.
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -43,8 +59,13 @@ export function useKeyring() {
         return seedPhrase;
     };
 
-    const generateSeedPhrase = async (override: boolean = false): Promise<string> => {
-        const existingSeedPhrase = await secureStorage.getItem(SEED_PHRASE_KEY, true);
+    const generateSeedPhrase = async (
+        override: boolean = false,
+    ): Promise<string> => {
+        const existingSeedPhrase = await secureStorage.getItem(
+            SEED_PHRASE_KEY,
+            true,
+        );
         if (existingSeedPhrase && !override) {
             throw new Error(
                 'Seed phrase already exists. Use override to replace it.',
@@ -81,7 +102,10 @@ export function useKeyring() {
         return address;
     };
 
-    const renameAccount = async (address: Address, name: string): Promise<void> => {
+    const renameAccount = async (
+        address: Address,
+        name: string,
+    ): Promise<void> => {
         const updatedAccounts = accounts.map((account) =>
             account.address === address ? { ...account, name } : account,
         );
@@ -89,7 +113,10 @@ export function useKeyring() {
         setAccounts(updatedAccounts);
     };
 
-    const hideAccount = async (address: Address, hide: boolean): Promise<void> => {
+    const hideAccount = async (
+        address: Address,
+        hide: boolean,
+    ): Promise<void> => {
         const updatedAccounts = accounts.map((account) =>
             account.address === address
                 ? { ...account, isHidden: hide }
@@ -140,10 +167,16 @@ export function useKeyring() {
 
     const _saveAccounts = async (accounts: Account[]): Promise<void> => {
         setAccounts(accounts);
-        await secureStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts), false);
+        await secureStorage.setItem(
+            ACCOUNTS_KEY,
+            JSON.stringify(accounts),
+            false,
+        );
     };
 
-    const _getAccountFromAddress = async (address: Address): Promise<PrivateKeyAccount> => {
+    const _getAccountFromAddress = async (
+        address: Address,
+    ): Promise<PrivateKeyAccount> => {
         const account = accounts.find(
             (account) =>
                 account.address.toLowerCase() === address.toLowerCase(),

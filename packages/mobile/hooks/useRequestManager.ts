@@ -14,6 +14,12 @@ interface UseRequestManagerOptions {
     clients: ClientInstance[];
 }
 
+export interface UseRequestManagerReturn {
+    clientRequests: ClientRequest[];
+    fetchRequests: () => Promise<void>;
+    handleRequest: (request: ClientRequest) => Promise<void>;
+}
+
 /**
  * RequestManager handles fetching client requests and triggering actions based
  * on said events.  It can poll for new requests or receive them via push notifications.
@@ -22,7 +28,7 @@ interface UseRequestManagerOptions {
 export function useRequestManager({
     pollingInterval,
     clients,
-}: UseRequestManagerOptions) {
+}: UseRequestManagerOptions): UseRequestManagerReturn {
     const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
     const previousRequestIds = useRef(new Set<string>());
     const clientsRef = useRef(clients);

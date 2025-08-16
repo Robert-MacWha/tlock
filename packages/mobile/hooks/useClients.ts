@@ -21,10 +21,22 @@ export interface ClientInstance {
     client: Client;
 }
 
+export interface UseClientsReturn {
+    clients: ClientInstance[];
+    firebaseUrl: string;
+    addClient: (
+        sharedSecret: SharedSecret,
+        name?: string,
+    ) => Promise<ClientInstance>;
+    removeClient: (clientId: string) => Promise<void>;
+    setClientName: (clientId: string, name: string) => Promise<void>;
+    setFirebaseUrl: (url: string) => Promise<void>;
+}
+
 const CLIENTS_KEY = 'tlock_clients';
 const FIREBASE_URL_KEY = 'tlock_firebase_url';
 
-export function useClients() {
+export function useClients(): UseClientsReturn {
     const secureStorage = useSecureStorage();
     const [clients, setClients] = useState<ClientInstance[]>([]);
     const [firebaseUrl, setFirebaseUrlState] =
@@ -53,7 +65,11 @@ export function useClients() {
             sharedSecret: client.sharedSecret,
         }));
 
-        await secureStorage.setItem(CLIENTS_KEY, JSON.stringify(savedClients), false);
+        await secureStorage.setItem(
+            CLIENTS_KEY,
+            JSON.stringify(savedClients),
+            false,
+        );
     };
 
     const loadFirebaseUrl = async () => {

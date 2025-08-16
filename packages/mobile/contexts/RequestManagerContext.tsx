@@ -1,15 +1,12 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useClientsContext } from './ClientContext';
-import { ClientRequest, useRequestManager } from '../hooks/useRequestManager';
-
-interface RequestManagerContextType {
-    clientRequests: ClientRequest[];
-    fetchRequests: () => Promise<void>;
-    handleRequest: (request: ClientRequest) => Promise<void>;
-}
+import {
+    useRequestManager,
+    UseRequestManagerReturn,
+} from '../hooks/useRequestManager';
 
 const RequestManagerContext = createContext<
-    RequestManagerContextType | undefined
+    UseRequestManagerReturn | undefined
 >(undefined);
 
 interface RequestManagerProviderProps {
@@ -27,25 +24,19 @@ export function RequestManagerProvider({
     pollingInterval,
 }: RequestManagerProviderProps) {
     const { clients } = useClientsContext();
-    const { clientRequests, fetchRequests, handleRequest } = useRequestManager({
+    const requestManager = useRequestManager({
         pollingInterval,
         clients,
     });
 
     return (
-        <RequestManagerContext.Provider
-            value={{
-                clientRequests,
-                fetchRequests,
-                handleRequest,
-            }}
-        >
+        <RequestManagerContext.Provider value={requestManager}>
             {children}
         </RequestManagerContext.Provider>
     );
 }
 
-export function useRequestManagerContext() {
+export function useRequestManagerContext(): UseRequestManagerReturn {
     const context = useContext(RequestManagerContext);
     if (!context) {
         throw new Error(
