@@ -51,7 +51,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     const projectId =
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         (Constants?.expoConfig?.extra?.eas?.projectId as string) ??
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Constants?.easConfig?.projectId;
     if (!projectId) {
         throw new Error('Project ID not found');
@@ -111,6 +110,10 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
         void initializePushNotifications();
     }, []);
+
+    useEffect(() => {
+        console.log(`Push Token: ${expoPushToken}`)
+    }, [expoPushToken]);
 
     const addNotificationReceivedListener = (
         listener: (notification: Notifications.Notification) => void,
