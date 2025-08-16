@@ -1,6 +1,6 @@
-import { FirebaseClient } from '../client/firebaseClient';
-import { generateSharedSecret } from '../crypto';
-import { HttpClient } from '../client/client';
+import { FirebaseClient } from '../firebaseClient';
+import { encryptMessage, generateSharedSecret } from '../../crypto';
+import { HttpClient } from '../client';
 
 // Simple mock HTTP client
 class MockHttpClient implements HttpClient {
@@ -10,8 +10,8 @@ class MockHttpClient implements HttpClient {
         return this.mockData as T;
     }
 
-    async put(): Promise<void> {}
-    async delete(): Promise<void> {}
+    async put(): Promise<void> { }
+    async delete(): Promise<void> { }
 }
 
 describe('FirebaseClient validation', () => {
@@ -22,7 +22,7 @@ describe('FirebaseClient validation', () => {
     beforeEach(() => {
         mockHttp = new MockHttpClient();
         client = new FirebaseClient(sharedSecret, undefined, mockHttp);
-        jest.spyOn(console, 'warn').mockImplementation(() => {});
+        jest.spyOn(console, 'warn').mockImplementation(() => { });
     });
 
     afterEach(() => {
@@ -31,22 +31,19 @@ describe('FirebaseClient validation', () => {
 
     describe('getRequest validation', () => {
         it('should validate and return valid stored request', async () => {
+            const requestData = {
+                status: 'pending',
+                fcmToken: 'token',
+                deviceName: 'device',
+            };
             mockHttp.mockData = {
                 type: 'pair',
-                data: JSON.stringify({
-                    status: 'pending',
-                    fcmToken: 'token',
-                    deviceName: 'device',
-                }),
+                data: encryptMessage(requestData, sharedSecret),
                 lastUpdated: 1640995200000,
             };
 
             const result = await client.getRequest('test-id', 'pair');
-            expect(result).toEqual({
-                status: 'pending',
-                fcmToken: 'token',
-                deviceName: 'device',
-            });
+            expect(result).toEqual(requestData);
         });
 
         it('should throw error for invalid stored request structure', async () => {
@@ -60,7 +57,7 @@ describe('FirebaseClient validation', () => {
         it('should throw error for type mismatch', async () => {
             mockHttp.mockData = {
                 type: 'importAccount',
-                data: JSON.stringify({ status: 'pending' }),
+                data: encryptMessage({ status: 'pending' }, sharedSecret),
                 lastUpdated: 1640995200000,
             };
 
@@ -70,9 +67,10 @@ describe('FirebaseClient validation', () => {
         });
 
         it('should throw error for invalid decrypted data', async () => {
+            const invalidData = { status: 'invalid-status' };
             mockHttp.mockData = {
                 type: 'pair',
-                data: JSON.stringify({ status: 'invalid-status' }), // Invalid data
+                data: encryptMessage(invalidData, sharedSecret),
                 lastUpdated: 1640995200000,
             };
 
@@ -90,14 +88,15 @@ describe('FirebaseClient validation', () => {
         });
 
         it('should skip invalid requests and continue processing', async () => {
+            const validRequestData = {
+                status: 'pending',
+                fcmToken: 'token',
+                deviceName: 'device',
+            };
             mockHttp.mockData = {
                 valid: {
                     type: 'pair',
-                    data: JSON.stringify({
-                        status: 'pending',
-                        fcmToken: 'token',
-                        deviceName: 'device',
-                    }),
+                    data: encryptMessage(validRequestData, sharedSecret),
                     lastUpdated: 1640995200000,
                 },
                 invalid: { type: 'invalid-type' }, // Missing required fields
