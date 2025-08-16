@@ -67,7 +67,7 @@ describe('PairingService', () => {
         });
 
         it('should successfully start pairing flow', async () => {
-            const result = await pairingService.startPairing();
+            const result = await pairingService.start();
 
             expect(result).toEqual({
                 qrData: 'tlock://pair/eyJ2ZXJzaW9uIjoxLCJzaGFyZWRTZWNyZXQiOlsxLDIsMyw0LDVdLCJwYWlyUmVxdWVzdElkIjoidGVzdC1yZXF1ZXN0LWlkIn0=',
@@ -99,7 +99,7 @@ describe('PairingService', () => {
                 new Error('Network error'),
             );
 
-            await expect(pairingService.startPairing()).rejects.toThrow(
+            await expect(pairingService.start()).rejects.toThrow(
                 'Error generating pairing data',
             );
         });
