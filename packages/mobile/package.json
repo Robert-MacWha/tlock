@@ -4,7 +4,9 @@
     "private": true,
     "main": "expo-router/entry",
     "scripts": {
+        "android": "expo run:android --device",
         "dev": "expo start",
+        "ios": "expo run:ios",
         "lint": "eslint . --cache --ext js,ts,tsx",
         "test": "jest"
     },
@@ -12,7 +14,7 @@
         "preset": "jest-expo"
     },
     "dependencies": {
-        "@react-navigation/native": "^7.1.16",
+        "@react-navigation/native": "^7.1.6",
         "@scure/bip32": "^1.7.0",
         "@tlock/shared": "workspace:*",
         "bip39": "^3.1.0",
@@ -21,6 +23,7 @@
         "expo-clipboard": "~7.1.5",
         "expo-constants": "~17.1.7",
         "expo-crypto": "~14.1.5",
+        "expo-device": "~7.1.4",
         "expo-linking": "~7.1.7",
         "expo-local-authentication": "~16.0.5",
         "expo-notifications": "~0.31.4",
@@ -28,6 +31,7 @@
         "expo-secure-store": "~14.2.3",
         "expo-standard-web-crypto": "^2.1.4",
         "expo-status-bar": "~2.2.3",
+        "expo-updates": "~0.28.17",
         "react": "19.0.0",
         "react-native": "0.79.5",
         "react-native-paper": "^5.14.5",

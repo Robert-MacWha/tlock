@@ -59,7 +59,7 @@ export class FirebaseClient implements Client {
             FirebasePaths.request(this.roomId, requestId),
             storedRequest,
         );
-        await this.sendNotification(this.fcmToken, requestId);
+        await this.sendNotification(`New ${type} request pending`);
 
         return requestId;
     }
@@ -122,11 +122,7 @@ export class FirebaseClient implements Client {
 
         // Decrypt and validate the data
         const schema = RequestTypeSchemaMap[requestType];
-        return decryptMessage(
-            storedRequest.data,
-            this.sharedSecret,
-            schema,
-        ) as RequestTypeMap[T];
+        return decryptMessage(storedRequest.data, this.sharedSecret, schema);
     }
 
     async getRequests(): Promise<Request[]> {
@@ -194,8 +190,8 @@ export class FirebaseClient implements Client {
     }
 
     async pollUntil<T extends RequestType>(
-        requestId: string,
-        requestType: T,
+        id: string,
+        type: T,
         intervalMs: number,
         timeoutSeconds: number,
         condition: (response: RequestTypeMap[T]) => boolean,
@@ -205,7 +201,7 @@ export class FirebaseClient implements Client {
         while (true) {
             await new Promise((resolve) => setTimeout(resolve, intervalMs));
 
-            const data = await this.getRequest(requestId, requestType);
+            const data = await this.getRequest(id, type);
             if (condition(data)) {
                 return data;
             }
@@ -217,26 +213,39 @@ export class FirebaseClient implements Client {
     }
 
     private async sendNotification(
-        fcmToken: string | undefined,
-        requestId: string,
+        body: string,
     ): Promise<void> {
-        if (!fcmToken) {
+        if (!this.fcmToken) {
+            console.log('No FCM token available for notifications');
             return;
         }
 
         console.log(
-            'TODO: Send notification to FCM token:',
-            fcmToken,
-            'for request ID:',
-            requestId,
+            'Sending push notification to:',
+            this.fcmToken,
+            'with body:',
+            body,
         );
-        // await this.http.post(CLOUD_FUNCTION_URL, {
-        //     data: {
-        //         roomId: this.roomId,
-        //         requestId,
-        //         fcmToken: fcmToken
-        //     }
-        // });
+
+        const message = {
+            to: this.fcmToken,
+            sound: 'default',
+            title: `New Request`,
+            body
+        };
+
+        //? Use Firebase Function as proxy to expo's CORS
+        const functionUrl = `https://sendpushnotification-clnhgoo57a-uc.a.run.app`;
+
+        await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: { message }
+            }),
+        });
     }
 }
 

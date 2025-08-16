@@ -43,7 +43,7 @@ describe('decryptMessage validation', () => {
 
     it('should throw error for invalid JSON', () => {
         expect(() => decryptMessage('{ invalid json }', sharedSecret)).toThrow(
-            "Expected property name or '}' in JSON at position 2",
+            /JSON at position 2/,
         );
     });
 });

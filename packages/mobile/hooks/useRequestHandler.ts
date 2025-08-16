@@ -45,7 +45,7 @@ export function useRequestHandler<T extends RequestType>(
                 );
                 setRequest(req);
             } catch (err) {
-                console.error('Failed to fetch request:', err);
+                console.warn('Failed to fetch request:', err);
                 setError(
                     err instanceof Error
                         ? err.message
@@ -78,7 +78,7 @@ export function useRequestHandler<T extends RequestType>(
                 params: { type: config.type },
             });
         } catch (err) {
-            console.error('Failed to approve request:', err);
+            console.warn('Failed to approve request:', err);
             setError(
                 err instanceof Error
                     ? err.message
@@ -102,7 +102,7 @@ export function useRequestHandler<T extends RequestType>(
             });
             router.back();
         } catch (err) {
-            console.error('Failed to reject request:', err);
+            console.warn('Failed to reject request:', err);
             setError(
                 err instanceof Error ? err.message : 'Failed to reject request',
             );

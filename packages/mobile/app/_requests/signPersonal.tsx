@@ -33,12 +33,6 @@ export default function SignPersonalScreen() {
     );
     if (!account) return <ErrorScreen error="Account not found" />;
 
-    console.log('time, loading, error', {
-        time: new Date().toISOString(),
-        loading,
-        error,
-    });
-
     return (
         <>
             <Stack.Screen

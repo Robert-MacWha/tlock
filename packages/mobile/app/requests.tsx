@@ -21,7 +21,7 @@ export default function AccountsScreen() {
         setLoading(true);
 
         await fetchRequests().catch((error) => {
-            console.error('Failed to fetch requests:', error);
+            console.warn('Failed to fetch requests:', error);
             setError('Failed to fetch requests. Please try again later.');
         });
 

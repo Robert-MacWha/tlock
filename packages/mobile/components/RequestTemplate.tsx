@@ -63,6 +63,7 @@ export function RequestTemplate({
                     }}
                 >
                     <Button
+                        mode="outlined"
                         onPress={() => {
                             void onReject();
                         }}

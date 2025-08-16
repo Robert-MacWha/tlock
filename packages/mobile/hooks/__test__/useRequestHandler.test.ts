@@ -35,15 +35,12 @@ describe('useRequestHandler', () => {
         sharedSecret: [1, 2, 3, 4, 5] as SharedSecret,
         client: {
             roomId: 'test-room-id',
-            submitDevice: jest.fn(),
-            getDevice: jest.fn(),
             submitRequest: jest.fn(),
             updateRequest: mockUpdateRequest,
             getRequest: mockGetRequest,
             getRequests: jest.fn(),
             deleteRequest: jest.fn(),
             pollUntil: jest.fn(),
-            pollUntilDeviceRegistered: jest.fn(),
         },
     };
 
@@ -55,7 +52,6 @@ describe('useRequestHandler', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockUseLocalSearchParams.mockReturnValue({
             clientId: 'test-client-id',
@@ -67,6 +63,8 @@ describe('useRequestHandler', () => {
             addClient: jest.fn(),
             removeClient: jest.fn(),
             setClientName: jest.fn(),
+            firebaseUrl: 'test-firebase-url',
+            setFirebaseUrl: jest.fn(),
         });
 
         mockGetRequest.mockResolvedValue(mockRequest);
@@ -155,6 +153,8 @@ describe('useRequestHandler', () => {
             addClient: jest.fn(),
             removeClient: jest.fn(),
             setClientName: jest.fn(),
+            firebaseUrl: 'test-firebase-url',
+            setFirebaseUrl: jest.fn(),
         });
 
         const { result } = renderHook(() =>

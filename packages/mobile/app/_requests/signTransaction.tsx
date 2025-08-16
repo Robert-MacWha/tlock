@@ -40,10 +40,10 @@ export default function SignTransaction() {
     const valueWei = transaction.value ? formatEther(transaction.value) : '0';
     const chain = transaction.chainId
         ? extractChain({
-              chains: Object.values(chains),
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-              id: transaction.chainId as any,
-          }).name
+            chains: Object.values(chains),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+            id: transaction.chainId as any,
+        }).name
         : 'Unknown Chain';
 
     return (

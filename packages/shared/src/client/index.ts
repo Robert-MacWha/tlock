@@ -128,8 +128,8 @@ export interface Client {
     deleteRequest(id: string): Promise<void>;
 
     pollUntil<T extends RequestType>(
-        requestId: string,
-        requestType: T,
+        id: string,
+        type: T,
         intervalMs: number,
         timeoutSeconds: number,
         condition: (response: RequestTypeMap[T]) => boolean,

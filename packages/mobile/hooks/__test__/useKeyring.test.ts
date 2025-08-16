@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useKeyring } from '../useKeyring';
-import * as SecureStore from 'expo-secure-store';
+import { useSecureStorage } from '../useSecureStorage';
 import {
     Address,
     Hex,
@@ -14,8 +14,7 @@ import {
 const MOCK_SEED_PHRASE =
     'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
-// Mock only specific dependencies
-jest.mock('expo-secure-store');
+jest.mock('../useSecureStorage');
 //? constant mnemonic for testing
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('bip39', () => ({
@@ -23,21 +22,33 @@ jest.mock('bip39', () => ({
     entropyToMnemonic: jest.fn(() => MOCK_SEED_PHRASE),
 }));
 
-const mockSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
+const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<
+    typeof useSecureStorage
+>;
+
+const mockSecureStorageReturn = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    securityLevel: null,
+};
 
 describe('useKeyring', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
-        // Mock SecureStore methods directly
-        mockSecureStore.getItem.mockImplementation(jest.fn());
-        mockSecureStore.setItem.mockImplementation(jest.fn());
+        mockUseSecureStorage.mockReturnValue(mockSecureStorageReturn);
+        mockSecureStorageReturn.getItem.mockResolvedValue(null);
+        mockSecureStorageReturn.setItem.mockResolvedValue(undefined);
     });
 
     describe('Hook initialization', () => {
-        it('should initialize without errors', () => {
+        it('should initialize without errors', async () => {
+            setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
-            expect(result.current).toBeDefined();
+
+            await waitFor(() => {
+                expect(result.current).toBeDefined();
+            });
         });
     });
 
@@ -46,15 +57,27 @@ describe('useKeyring', () => {
         seedPhrase?: string | null;
         accounts?: string | null;
     }) => {
-        mockSecureStore.getItem.mockImplementation((key: string) => {
-            switch (key) {
-                case 'tlock_seed_phrase':
-                    return options.seedPhrase ?? null;
-                case 'tlock_accounts':
-                    return options.accounts ?? null;
-                default:
-                    return null;
-            }
+        mockSecureStorageReturn.getItem.mockImplementation(
+            async (key: string, authenticated: boolean = true) => {
+                const _ = authenticated;
+                switch (key) {
+                    case 'tlock_seed_phrase':
+                        return options.seedPhrase ?? null;
+                    case 'tlock_accounts':
+                        return options.accounts ?? null;
+                    default:
+                        return null;
+                }
+            },
+        );
+    };
+
+    const waitForEquals = async (
+        getValue: () => unknown,
+        expected: unknown,
+    ) => {
+        await waitFor(() => {
+            expect(getValue()).toEqual(expected);
         });
     };
 
@@ -70,14 +93,24 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify(existingAccounts),
             });
 
-            mockSecureStore.getItem.mockImplementation((key: string) => {
-                if (key === 'tlock_seed_phrase') {
-                    throw new Error('Authentication failed');
-                }
-                return JSON.stringify(existingAccounts);
-            });
+            mockSecureStorageReturn.getItem.mockImplementation(
+                async (key: string, authenticated: boolean = true) => {
+                    if (authenticated) {
+                        throw new Error('Authentication failed');
+                    }
+                    if (key === 'tlock_accounts') {
+                        return JSON.stringify(existingAccounts);
+                    }
+                    throw new Error('Item not found');
+                },
+            );
 
             const { result } = renderHook(() => useKeyring());
+
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             await expect(methodCall(result.current)).rejects.toThrow(
                 'Authentication failed',
@@ -93,6 +126,7 @@ describe('useKeyring', () => {
         it(`${methodName} should throw error when account does not exist`, async () => {
             setupStorageState({ accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(methodCall(result.current)).rejects.toThrow(
                 'Account with address 0x123 not found',
@@ -140,78 +174,86 @@ describe('useKeyring', () => {
     });
 
     describe('getSeedPhrase', () => {
-        it('should throw error when seed phrase does not exist', () => {
+        it('should throw error when seed phrase does not exist', async () => {
             setupStorageState({ seedPhrase: null });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
-            expect(() => result.current.getSeedPhrase()).toThrow(
+            await expect(result.current.getSeedPhrase()).rejects.toThrow(
                 'No seed phrase found',
             );
         });
 
-        it('should handle empty string seed phrase', () => {
+        it('should handle empty string seed phrase', async () => {
             setupStorageState({ seedPhrase: '' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
-            expect(() => result.current.getSeedPhrase()).toThrow(
+            await expect(result.current.getSeedPhrase()).rejects.toThrow(
                 'No seed phrase found',
             );
         });
 
-        it('should return seed phrase when it exists', () => {
+        it('should return seed phrase when it exists', async () => {
             const mockSeedPhrase = 'test seed phrase';
             setupStorageState({ seedPhrase: mockSeedPhrase });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
-            const seedPhrase = result.current.getSeedPhrase();
-
+            const seedPhrase = await result.current.getSeedPhrase();
             expect(seedPhrase).toBe(mockSeedPhrase);
         });
     });
 
     describe('generateSeedPhrase', () => {
-        it('should throw error when seed phrase already exists without override', () => {
+        it('should throw error when seed phrase already exists without override', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
-            expect(() => result.current.generateSeedPhrase(false)).toThrow(
+            await expect(
+                result.current.generateSeedPhrase(false),
+            ).rejects.toThrow(
                 'Seed phrase already exists. Use override to replace it.',
             );
         });
 
-        it('should generate new seed phrase successfully', () => {
+        it('should generate new seed phrase successfully', async () => {
             setupStorageState({ seedPhrase: null });
             const { result } = renderHook(() => useKeyring());
 
             let seedPhrase: string;
-            act(() => {
-                seedPhrase = result.current.generateSeedPhrase();
+            await act(async () => {
+                seedPhrase = await result.current.generateSeedPhrase();
             });
 
             expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_seed_phrase',
                 seedPhrase!,
+                expect.any(Boolean),
             );
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 '[]',
+                expect.any(Boolean),
             );
         });
 
-        it('should override existing seed phrase when override is true', () => {
+        it('should override existing seed phrase when override is true', async () => {
             setupStorageState({ seedPhrase: 'existing seed phrase' });
             const { result } = renderHook(() => useKeyring());
 
             let seedPhrase: string;
-            act(() => {
-                seedPhrase = result.current.generateSeedPhrase(true);
+            await act(async () => {
+                seedPhrase = await result.current.generateSeedPhrase(true);
             });
 
             expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_seed_phrase',
                 seedPhrase!,
+                false,
             );
         });
     });
@@ -220,34 +262,29 @@ describe('useKeyring', () => {
         it('should return empty array when no accounts exist', async () => {
             setupStorageState({ accounts: null });
             const { result } = renderHook(() => useKeyring());
-
-            await waitFor(() => {
-                expect(result.current.accounts).toEqual([]);
-            });
+            await waitForEquals(() => result.current.accounts, []);
         });
 
         it('should return accounts when they exist', async () => {
             const mockAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({ accounts: JSON.stringify(mockAccounts) });
             const { result } = renderHook(() => useKeyring());
-
-            await waitFor(() => {
-                expect(result.current.accounts).toEqual(mockAccounts);
-            });
+            await waitForEquals(() => result.current.accounts, mockAccounts);
         });
     });
 
     describe('addAccount', () => {
-        it('should throw error when no seed phrase exists', () => {
+        it('should throw error when no seed phrase exists', async () => {
             setupStorageState({ seedPhrase: null, accounts: '[]' });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
-            expect(() => result.current.addAccount()).toThrow(
+            await expect(result.current.addAccount()).rejects.toThrow(
                 'No seed phrase found',
             );
         });
 
-        it('should add first account successfully', () => {
+        it('should add first account successfully', async () => {
             setupStorageState({
                 seedPhrase: MOCK_SEED_PHRASE,
                 accounts: '[]',
@@ -255,37 +292,44 @@ describe('useKeyring', () => {
             const { result } = renderHook(() => useKeyring());
 
             let address: string;
-            act(() => {
-                address = result.current.addAccount();
+            await act(async () => {
+                address = await result.current.addAccount();
             });
 
             expect(address!).toBeDefined();
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining(address!),
+                expect.any(Boolean),
             );
         });
 
-        it('should add new accounts successfully', () => {
+        it('should add new accounts successfully', async () => {
             const existingAccounts = [{ id: 1, address: '0x123' }];
             setupStorageState({
                 seedPhrase: MOCK_SEED_PHRASE,
                 accounts: JSON.stringify(existingAccounts),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             let address: string;
-            act(() => {
-                address = result.current.addAccount();
+            await act(async () => {
+                address = await result.current.addAccount();
             });
             expect(address!).toBeDefined();
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining(address!),
+                expect.any(Boolean),
             );
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 expect.stringContaining('0x123'),
+                expect.any(Boolean),
             );
         });
     });
@@ -297,6 +341,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, []);
 
             await expect(
                 result.current.sign(
@@ -318,8 +363,8 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, [mockAccount]);
 
-            // Test with lowercase address
             const signature = await result.current.sign(
                 mockAccount.address.toLowerCase() as Address,
                 '0x11223344' as Hex,
@@ -337,6 +382,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const signature = await result.current.sign(
                 mockAccount.address as Address,
@@ -361,6 +407,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const signature = await result.current.signPersonal(
                 mockAccount.address as Address,
@@ -385,6 +432,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const transaction: TransactionSerializableLegacy = {
                 chainId: 1,
@@ -429,6 +477,7 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify([mockAccount]),
             });
             const { result } = renderHook(() => useKeyring());
+            await waitForEquals(() => result.current.accounts, [mockAccount]);
 
             const typedData: TypedDataDefinition = {
                 domain: {
@@ -475,7 +524,7 @@ describe('useKeyring', () => {
     });
 
     describe('Account ', () => {
-        it('should rename an existing account', () => {
+        it('should rename an existing account', async () => {
             const existingAccounts = [
                 { id: 1, address: '0x123', name: 'Account 1' },
                 { id: 2, address: '0x456', name: 'Account 2' },
@@ -486,23 +535,32 @@ describe('useKeyring', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            act(() => {
-                result.current.renameAccount('0x123' as Address, 'New Name');
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
+
+            await act(async () => {
+                await result.current.renameAccount(
+                    '0x123' as Address,
+                    'New Name',
+                );
             });
 
             const expectedAccounts = [
                 { id: 1, address: '0x123', name: 'New Name' },
                 { id: 2, address: '0x456', name: 'Account 2' },
             ];
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 JSON.stringify(expectedAccounts),
+                false,
             );
         });
     });
 
     describe('hideAccount', () => {
-        it('should hide an existing account', () => {
+        it('should hide an existing account', async () => {
             const existingAccounts = [
                 { id: 1, address: '0x123', isHidden: false },
                 { id: 2, address: '0x456', isHidden: false },
@@ -513,51 +571,57 @@ describe('useKeyring', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            act(() => {
-                result.current.hideAccount('0x123' as Address, true);
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
+
+            await act(async () => {
+                await result.current.hideAccount('0x123' as Address, true);
             });
 
             const expectedAccounts = [
                 { id: 1, address: '0x123', isHidden: true },
                 { id: 2, address: '0x456', isHidden: false },
             ];
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_accounts',
                 JSON.stringify(expectedAccounts),
+                false,
             );
         });
     });
 
     describe('SecureStore failures', () => {
-        it('should handle SecureStore setItem failures in generateSeedPhrase', () => {
+        it('should handle SecureStore setItem failures in generateSeedPhrase', async () => {
             setupStorageState({ seedPhrase: null });
-            mockSecureStore.setItem.mockImplementation(() => {
-                throw new Error('SecureStore write failed');
-            });
+            mockSecureStorageReturn.setItem.mockRejectedValue(
+                new Error('SecureStore write failed'),
+            );
             const { result } = renderHook(() => useKeyring());
 
-            expect(() => {
-                act(() => {
-                    result.current.generateSeedPhrase();
-                });
-            }).toThrow('SecureStore write failed');
+            await expect(
+                act(async () => {
+                    await result.current.generateSeedPhrase();
+                }),
+            ).rejects.toThrow('SecureStore write failed');
         });
 
-        it('should handle SecureStore failures in addAccount', () => {
+        it('should handle SecureStore failures in addAccount', async () => {
             setupStorageState({
                 seedPhrase: MOCK_SEED_PHRASE,
                 accounts: '[]',
             });
-            mockSecureStore.setItem.mockImplementation(() => {
-                throw new Error('SecureStore write failed');
-            });
+            mockSecureStorageReturn.setItem.mockRejectedValue(
+                new Error('SecureStore write failed'),
+            );
             const { result } = renderHook(() => useKeyring());
 
-            expect(() => {
-                act(() => {
-                    result.current.addAccount();
-                });
-            }).toThrow('SecureStore write failed');
+            await expect(
+                act(async () => {
+                    await result.current.addAccount();
+                }),
+            ).rejects.toThrow('SecureStore write failed');
         });
     });
 });
