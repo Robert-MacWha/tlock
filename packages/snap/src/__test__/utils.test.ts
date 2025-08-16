@@ -1,7 +1,5 @@
 import { validatePairedState, validateSharedSecret } from '../utils';
-import { SnapState } from '../state';
 import { TlockSnapError } from '../errors';
-import { ERROR_CODES } from '../constants';
 import type { SharedSecret } from '@tlock/shared';
 
 describe('utils', () => {

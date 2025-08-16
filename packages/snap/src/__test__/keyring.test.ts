@@ -47,8 +47,8 @@ describe('TlockKeyring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => {});
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'log').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => { });
 
         mockUuid.mockImplementation(() => mockAccountId);
         mockUpdateState.mockResolvedValue();

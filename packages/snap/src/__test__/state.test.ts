@@ -1,4 +1,4 @@
-import { updateState, getState, SnapState } from '../state';
+import { updateState, getState } from '../state';
 import { DEFAULT_FIREBASE_URL } from '@tlock/shared';
 import type { SharedSecret } from '@tlock/shared';
 
