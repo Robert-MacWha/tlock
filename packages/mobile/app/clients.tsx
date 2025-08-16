@@ -25,7 +25,10 @@ export default function App() {
     const onBarcodeScanned = async (data: string) => {
         try {
             const qrData = parseQrCode(data);
-            const client = await addClient(qrData.sharedSecret, 'React Native App');
+            const client = await addClient(
+                qrData.sharedSecret,
+                'React Native App',
+            );
 
             // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
             const fcmToken = 'new-fcm-token';

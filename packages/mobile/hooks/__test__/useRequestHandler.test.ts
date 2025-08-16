@@ -52,7 +52,6 @@ describe('useRequestHandler', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => { });
 
         mockUseLocalSearchParams.mockReturnValue({
             clientId: 'test-client-id',

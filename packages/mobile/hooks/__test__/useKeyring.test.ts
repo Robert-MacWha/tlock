@@ -22,7 +22,9 @@ jest.mock('bip39', () => ({
     entropyToMnemonic: jest.fn(() => MOCK_SEED_PHRASE),
 }));
 
-const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<typeof useSecureStorage>;
+const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<
+    typeof useSecureStorage
+>;
 
 const mockSecureStorageReturn = {
     getItem: jest.fn(),
@@ -55,20 +57,25 @@ describe('useKeyring', () => {
         seedPhrase?: string | null;
         accounts?: string | null;
     }) => {
-        mockSecureStorageReturn.getItem.mockImplementation(async (key: string, authenticated: boolean = true) => {
-            const _ = authenticated;
-            switch (key) {
-                case 'tlock_seed_phrase':
-                    return options.seedPhrase ?? null;
-                case 'tlock_accounts':
-                    return options.accounts ?? null;
-                default:
-                    return null;
-            }
-        });
+        mockSecureStorageReturn.getItem.mockImplementation(
+            async (key: string, authenticated: boolean = true) => {
+                const _ = authenticated;
+                switch (key) {
+                    case 'tlock_seed_phrase':
+                        return options.seedPhrase ?? null;
+                    case 'tlock_accounts':
+                        return options.accounts ?? null;
+                    default:
+                        return null;
+                }
+            },
+        );
     };
 
-    const waitForEquals = async (getValue: () => unknown, expected: unknown) => {
+    const waitForEquals = async (
+        getValue: () => unknown,
+        expected: unknown,
+    ) => {
         await waitFor(() => {
             expect(getValue()).toEqual(expected);
         });
@@ -86,19 +93,24 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify(existingAccounts),
             });
 
-            mockSecureStorageReturn.getItem.mockImplementation(async (key: string, authenticated: boolean = true) => {
-                if (authenticated) {
-                    throw new Error('Authentication failed');
-                }
-                if (key === 'tlock_accounts') {
-                    return JSON.stringify(existingAccounts);
-                }
-                throw new Error('Item not found');
-            });
+            mockSecureStorageReturn.getItem.mockImplementation(
+                async (key: string, authenticated: boolean = true) => {
+                    if (authenticated) {
+                        throw new Error('Authentication failed');
+                    }
+                    if (key === 'tlock_accounts') {
+                        return JSON.stringify(existingAccounts);
+                    }
+                    throw new Error('Item not found');
+                },
+            );
 
             const { result } = renderHook(() => useKeyring());
 
-            await waitForEquals(() => result.current.accounts, existingAccounts);
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             await expect(methodCall(result.current)).rejects.toThrow(
                 'Authentication failed',
@@ -199,7 +211,9 @@ describe('useKeyring', () => {
             const { result } = renderHook(() => useKeyring());
             await waitForEquals(() => result.current.accounts, []);
 
-            await expect(result.current.generateSeedPhrase(false)).rejects.toThrow(
+            await expect(
+                result.current.generateSeedPhrase(false),
+            ).rejects.toThrow(
                 'Seed phrase already exists. Use override to replace it.',
             );
         });
@@ -297,7 +311,10 @@ describe('useKeyring', () => {
                 accounts: JSON.stringify(existingAccounts),
             });
             const { result } = renderHook(() => useKeyring());
-            await waitForEquals(() => result.current.accounts, existingAccounts);
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             let address: string;
             await act(async () => {
@@ -518,10 +535,16 @@ describe('useKeyring', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            await waitForEquals(() => result.current.accounts, existingAccounts);
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             await act(async () => {
-                await result.current.renameAccount('0x123' as Address, 'New Name');
+                await result.current.renameAccount(
+                    '0x123' as Address,
+                    'New Name',
+                );
             });
 
             const expectedAccounts = [
@@ -548,7 +571,10 @@ describe('useKeyring', () => {
             });
             const { result } = renderHook(() => useKeyring());
 
-            await waitForEquals(() => result.current.accounts, existingAccounts);
+            await waitForEquals(
+                () => result.current.accounts,
+                existingAccounts,
+            );
 
             await act(async () => {
                 await result.current.hideAccount('0x123' as Address, true);
@@ -569,13 +595,15 @@ describe('useKeyring', () => {
     describe('SecureStore failures', () => {
         it('should handle SecureStore setItem failures in generateSeedPhrase', async () => {
             setupStorageState({ seedPhrase: null });
-            mockSecureStorageReturn.setItem.mockRejectedValue(new Error('SecureStore write failed'));
+            mockSecureStorageReturn.setItem.mockRejectedValue(
+                new Error('SecureStore write failed'),
+            );
             const { result } = renderHook(() => useKeyring());
 
             await expect(
                 act(async () => {
                     await result.current.generateSeedPhrase();
-                })
+                }),
             ).rejects.toThrow('SecureStore write failed');
         });
 
@@ -584,13 +612,15 @@ describe('useKeyring', () => {
                 seedPhrase: MOCK_SEED_PHRASE,
                 accounts: '[]',
             });
-            mockSecureStorageReturn.setItem.mockRejectedValue(new Error('SecureStore write failed'));
+            mockSecureStorageReturn.setItem.mockRejectedValue(
+                new Error('SecureStore write failed'),
+            );
             const { result } = renderHook(() => useKeyring());
 
             await expect(
                 act(async () => {
                     await result.current.addAccount();
-                })
+                }),
             ).rejects.toThrow('SecureStore write failed');
         });
     });

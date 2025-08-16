@@ -24,7 +24,9 @@ jest.mock('@tlock/shared', () => ({
 }));
 jest.mock('expo-crypto');
 
-const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<typeof useSecureStorage>;
+const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<
+    typeof useSecureStorage
+>;
 const mockExportoCrypto = ExportoCrypto as jest.Mocked<typeof ExportoCrypto>;
 
 const mockSecureStorageReturn = {

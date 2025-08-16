@@ -29,7 +29,8 @@ export default function SettingsScreen() {
     const [seedPhrase, setSeedPhrase] = useState<string>('');
     const [firebaseUrlInput, setFirebaseUrlInput] = useState<string>('');
     const [firebaseUrlError, setFirebaseUrlError] = useState<string>('');
-    const [hasFirebaseUrlChanges, setHasFirebaseUrlChanges] = useState<boolean>(false);
+    const [hasFirebaseUrlChanges, setHasFirebaseUrlChanges] =
+        useState<boolean>(false);
     const { alert } = useAlert();
     const { clientRequests } = useRequestManagerContext();
     const { clients, firebaseUrl, setFirebaseUrl } = useClientsContext();
@@ -70,7 +71,11 @@ export default function SettingsScreen() {
             'Your seed phrase will be displayed on screen. Make sure no one else can see your device.',
             [
                 { text: 'Cancel' },
-                { text: 'Show', mode: 'contained', onPress: () => void showSeedPhrase() },
+                {
+                    text: 'Show',
+                    mode: 'contained',
+                    onPress: () => void showSeedPhrase(),
+                },
             ],
         );
     };
@@ -122,14 +127,16 @@ export default function SettingsScreen() {
             return;
         }
 
-        setFirebaseUrl(firebaseUrlInput).then(() => {
-            setHasFirebaseUrlChanges(false);
-            alert('Success', 'Firebase server URL updated successfully.');
-        }).catch(() => {
-            setFirebaseUrlInput(firebaseUrl);
-            setFirebaseUrlError('');
-            setHasFirebaseUrlChanges(false);
-        });
+        setFirebaseUrl(firebaseUrlInput)
+            .then(() => {
+                setHasFirebaseUrlChanges(false);
+                alert('Success', 'Firebase server URL updated successfully.');
+            })
+            .catch(() => {
+                setFirebaseUrlInput(firebaseUrl);
+                setFirebaseUrlError('');
+                setHasFirebaseUrlChanges(false);
+            });
     };
 
     const resetFirebaseUrl = () => {
@@ -255,7 +262,7 @@ export default function SettingsScreen() {
                                     position: 'absolute',
                                     right: 8,
                                     top: 8,
-                                    flexDirection: 'row'
+                                    flexDirection: 'row',
                                 }}
                             >
                                 <IconButton

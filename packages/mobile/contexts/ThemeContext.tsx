@@ -79,13 +79,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // Load saved theme preference
     useEffect(() => {
         const loadTheme = () => {
-            secureStorage.getItem(THEME_STORAGE_KEY, false).then((saved) => {
-                if (saved && ['light', 'dark', 'system'].includes(saved)) {
-                    setThemeModeState(saved as ThemeMode);
-                }
-            }).catch((error) => {
-                console.warn('Failed to load theme preference:', error);
-            });
+            secureStorage
+                .getItem(THEME_STORAGE_KEY, false)
+                .then((saved) => {
+                    if (saved && ['light', 'dark', 'system'].includes(saved)) {
+                        setThemeModeState(saved as ThemeMode);
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Failed to load theme preference:', error);
+                });
         };
         void loadTheme();
     }, []);

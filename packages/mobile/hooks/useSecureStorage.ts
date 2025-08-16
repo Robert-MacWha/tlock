@@ -3,7 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 export function useSecureStorage() {
-    const [securityLevel, setSecurityLevel] = useState<LocalAuthentication.SecurityLevel | null>(null);
+    const [securityLevel, setSecurityLevel] =
+        useState<LocalAuthentication.SecurityLevel | null>(null);
 
     useEffect(() => {
         const checkSecurityLevel = async () => {
@@ -23,15 +24,21 @@ export function useSecureStorage() {
         const hasHardware = await LocalAuthentication.hasHardwareAsync();
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
-        if (!hasHardware && securityLevel === LocalAuthentication.SecurityLevel.NONE) {
+        if (
+            !hasHardware &&
+            securityLevel === LocalAuthentication.SecurityLevel.NONE
+        ) {
             throw new Error(
-                'No authentication method available. Please set up a device lock screen (PIN, pattern, or password) in your device settings.'
+                'No authentication method available. Please set up a device lock screen (PIN, pattern, or password) in your device settings.',
             );
         }
 
-        if (!isEnrolled && securityLevel === LocalAuthentication.SecurityLevel.NONE) {
+        if (
+            !isEnrolled &&
+            securityLevel === LocalAuthentication.SecurityLevel.NONE
+        ) {
             throw new Error(
-                'No authentication method set up. Please enable device lock screen or biometrics in your device settings.'
+                'No authentication method set up. Please enable device lock screen or biometrics in your device settings.',
             );
         }
 
@@ -48,15 +55,27 @@ export function useSecureStorage() {
         }
     };
 
-    const getItem = async (key: string, authenticated: boolean): Promise<string | null> => {
-        console.log('getItem called with key:', key, 'authenticated:', authenticated);
+    const getItem = async (
+        key: string,
+        authenticated: boolean,
+    ): Promise<string | null> => {
+        console.log(
+            'getItem called with key:',
+            key,
+            'authenticated:',
+            authenticated,
+        );
         if (authenticated) {
             await authenticate();
         }
         return SecureStore.getItem(key);
     };
 
-    const setItem = async (key: string, value: string, authenticated: boolean): Promise<void> => {
+    const setItem = async (
+        key: string,
+        value: string,
+        authenticated: boolean,
+    ): Promise<void> => {
         if (authenticated) {
             await authenticate();
         }

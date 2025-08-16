@@ -122,11 +122,7 @@ export class FirebaseClient implements Client {
 
         // Decrypt and validate the data
         const schema = RequestTypeSchemaMap[requestType];
-        return decryptMessage(
-            storedRequest.data,
-            this.sharedSecret,
-            schema,
-        );
+        return decryptMessage(storedRequest.data, this.sharedSecret, schema);
     }
 
     async getRequests(): Promise<Request[]> {
