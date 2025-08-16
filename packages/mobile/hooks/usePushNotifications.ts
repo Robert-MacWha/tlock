@@ -48,9 +48,10 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const projectId =
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         (Constants?.expoConfig?.extra?.eas?.projectId as string) ??
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         Constants?.easConfig?.projectId;
     if (!projectId) {
         throw new Error('Project ID not found');
@@ -92,6 +93,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
                     await secureStorage.setItem(PUSH_TOKEN_KEY, token, false);
                     setExpoPushToken(token);
                 }
+
             } catch (error) {
                 console.error(
                     'Failed to initialize push notifications:',
@@ -108,7 +110,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         };
 
         void initializePushNotifications();
-    }, [secureStorage]);
+    }, []);
 
     const addNotificationReceivedListener = (
         listener: (notification: Notifications.Notification) => void,

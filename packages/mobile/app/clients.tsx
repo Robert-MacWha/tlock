@@ -15,27 +15,29 @@ import { useClientsContext } from '../contexts/ClientContext';
 import { ClientCard } from '../components/ClientCard';
 import { QrCodeDialog } from '../components/QrCodeDialog';
 import { useAlert } from '../components/AlertProvider';
+import { usePushNotificationsContext } from '../contexts/PushNotificationsContext';
+import * as Device from 'expo-device';
 
 export default function App() {
     const [pairing, setPairing] = useState<boolean>(false);
     const [helpVisible, setHelpVisible] = useState<boolean>(false);
     const { clients, addClient } = useClientsContext();
     const { alert } = useAlert();
+    const { expoPushToken } = usePushNotificationsContext();
 
     const onBarcodeScanned = async (data: string) => {
         try {
             const qrData = parseQrCode(data);
             const client = await addClient(
                 qrData.sharedSecret,
-                'React Native App',
+                'New Metamask Client',
             );
 
-            // const fcmToken = (await Notifications.getExpoPushTokenAsync()).data;
-            const fcmToken = 'new-fcm-token';
+            const fcmToken: string = expoPushToken || "";
             await client.client.updateRequest(qrData.pairRequestId, 'pair', {
                 status: 'approved',
                 fcmToken,
-                deviceName: 'React Native App',
+                deviceName: Device.modelName || 'Unknown Device',
             });
             await addClient(qrData.sharedSecret, 'New Client');
             alert('Success', 'Device paired successfully!');

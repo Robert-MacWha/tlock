@@ -59,12 +59,6 @@ export function useSecureStorage() {
         key: string,
         authenticated: boolean,
     ): Promise<string | null> => {
-        console.log(
-            'getItem called with key:',
-            key,
-            'authenticated:',
-            authenticated,
-        );
         if (authenticated) {
             await authenticate();
         }
