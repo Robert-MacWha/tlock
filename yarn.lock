@@ -4294,7 +4294,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/snaps-sdk@npm:^6.17.0, @metamask/snaps-sdk@npm:^6.17.1, @metamask/snaps-sdk@npm:^6.19.0, @metamask/snaps-sdk@npm:^6.5.1":
+"@metamask/snaps-sdk@npm:^6.17.0, @metamask/snaps-sdk@npm:^6.17.1, @metamask/snaps-sdk@npm:^6.5.1":
   version: 6.24.0
   resolution: "@metamask/snaps-sdk@npm:6.24.0"
   dependencies:
@@ -6426,7 +6426,7 @@ __metadata:
     "@metamask/keyring-api": ^8.1.3
     "@metamask/snaps-cli": ^6.7.0
     "@metamask/snaps-jest": ^9.4.0
-    "@metamask/snaps-sdk": ^6.19.0
+    "@metamask/snaps-sdk": ^9.3.0
     "@tlock/shared": "workspace:*"
     "@types/qrcode": ^1.5.5
     "@types/react": 18.2.4
