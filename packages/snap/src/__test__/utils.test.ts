@@ -7,7 +7,9 @@ describe('utils', () => {
 
     describe('validateSharedSecret', () => {
         it('should pass for valid state', () => {
-            expect(() => validateSharedSecret({ sharedSecret: mockSharedSecret })).not.toThrow();
+            expect(() =>
+                validateSharedSecret({ sharedSecret: mockSharedSecret }),
+            ).not.toThrow();
         });
 
         it('should throw for null state', () => {

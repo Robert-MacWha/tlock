@@ -42,9 +42,12 @@ export async function showPairingScreen(interfaceId: string) {
                 <Box>
                     <Heading>Pairing Successful!</Heading>
                     <Text>
-                        Your device {response.deviceName} has been successfully paired.
+                        Your device {response.deviceName} has been successfully
+                        paired.
                     </Text>
-                    <Button name={SCREENS.IMPORT_ACCOUNT}>Import First Account</Button>
+                    <Button name={SCREENS.IMPORT_ACCOUNT}>
+                        Import First Account
+                    </Button>
                 </Box>,
             );
         } catch (error) {

@@ -13,11 +13,21 @@ jest.mock('../settings');
 jest.mock('../screen');
 
 const mockHandlers = {
-    handleHomeScreen: handleHomeScreen as jest.MockedFunction<typeof handleHomeScreen>,
-    showPairingScreen: showPairingScreen as jest.MockedFunction<typeof showPairingScreen>,
-    handleImportAccount: handleImportAccount as jest.MockedFunction<typeof handleImportAccount>,
-    handleSettingsScreen: handleSettingsScreen as jest.MockedFunction<typeof handleSettingsScreen>,
-    showErrorScreen: showErrorScreen as jest.MockedFunction<typeof showErrorScreen>,
+    handleHomeScreen: handleHomeScreen as jest.MockedFunction<
+        typeof handleHomeScreen
+    >,
+    showPairingScreen: showPairingScreen as jest.MockedFunction<
+        typeof showPairingScreen
+    >,
+    handleImportAccount: handleImportAccount as jest.MockedFunction<
+        typeof handleImportAccount
+    >,
+    handleSettingsScreen: handleSettingsScreen as jest.MockedFunction<
+        typeof handleSettingsScreen
+    >,
+    showErrorScreen: showErrorScreen as jest.MockedFunction<
+        typeof showErrorScreen
+    >,
 };
 
 describe('index', () => {
@@ -25,29 +35,37 @@ describe('index', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => { });
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'log').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     describe('selectScreen', () => {
         it('should route to home screen', async () => {
             await selectScreen(mockInterfaceId, SCREENS.HOME);
-            expect(mockHandlers.handleHomeScreen).toHaveBeenCalledWith(mockInterfaceId);
+            expect(mockHandlers.handleHomeScreen).toHaveBeenCalledWith(
+                mockInterfaceId,
+            );
         });
 
         it('should route to pairing screen', async () => {
             await selectScreen(mockInterfaceId, SCREENS.PAIR);
-            expect(mockHandlers.showPairingScreen).toHaveBeenCalledWith(mockInterfaceId);
+            expect(mockHandlers.showPairingScreen).toHaveBeenCalledWith(
+                mockInterfaceId,
+            );
         });
 
         it('should route to import account screen', async () => {
             await selectScreen(mockInterfaceId, SCREENS.IMPORT_ACCOUNT);
-            expect(mockHandlers.handleImportAccount).toHaveBeenCalledWith(mockInterfaceId);
+            expect(mockHandlers.handleImportAccount).toHaveBeenCalledWith(
+                mockInterfaceId,
+            );
         });
 
         it('should route to settings screen', async () => {
             await selectScreen(mockInterfaceId, SCREENS.SETTINGS);
-            expect(mockHandlers.handleSettingsScreen).toHaveBeenCalledWith(mockInterfaceId);
+            expect(mockHandlers.handleSettingsScreen).toHaveBeenCalledWith(
+                mockInterfaceId,
+            );
         });
 
         it('should handle unknown screens gracefully', async () => {
@@ -65,7 +83,7 @@ describe('index', () => {
 
             expect(mockHandlers.showErrorScreen).toHaveBeenCalledWith(
                 mockInterfaceId,
-                'Handler failed'
+                'Handler failed',
             );
         });
 
@@ -76,7 +94,7 @@ describe('index', () => {
 
             expect(mockHandlers.showErrorScreen).toHaveBeenCalledWith(
                 mockInterfaceId,
-                'An unexpected error occurred'
+                'An unexpected error occurred',
             );
         });
     });

@@ -54,7 +54,9 @@ describe('state', () => {
 describe('updateState', () => {
     it('should merge new state with existing', async () => {
         mockSnapRequest
-            .mockResolvedValueOnce({ state: JSON.stringify({ fcmToken: 'old' }) })
+            .mockResolvedValueOnce({
+                state: JSON.stringify({ fcmToken: 'old' }),
+            })
             .mockResolvedValueOnce(undefined);
 
         await updateState({ deviceName: 'new' });
@@ -65,10 +67,11 @@ describe('updateState', () => {
                 operation: 'update',
                 newState: {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    state: expect.stringContaining('"fcmToken":"old"') &&
-                        expect.stringContaining('"deviceName":"new"')
-                }
-            }
+                    state:
+                        expect.stringContaining('"fcmToken":"old"') &&
+                        expect.stringContaining('"deviceName":"new"'),
+                },
+            },
         });
     });
 
@@ -85,9 +88,9 @@ describe('updateState', () => {
                 operation: 'update',
                 newState: {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    state: expect.stringContaining('"fcmToken":"token"')
-                }
-            }
+                    state: expect.stringContaining('"fcmToken":"token"'),
+                },
+            },
         });
     });
 });
