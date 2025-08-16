@@ -13,11 +13,14 @@
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
-        "permissions": ["CAMERA", "NOTIFICATIONS"],
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "runtimeVersion": {
+                "policy": "appVersion"
+            }
         },
         "android": {
+            "googleServicesFile": "./google-services.json",
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
@@ -27,8 +30,12 @@
                 "CAMERA",
                 "NOTIFICATIONS",
                 "android.permission.RECORD_AUDIO",
-                "USE_BIOMETRIC"
-            ]
+                "USE_BIOMETRIC",
+                "android.permission.USE_BIOMETRIC",
+                "android.permission.USE_FINGERPRINT"
+            ],
+            "package": "com.robert.foxguard",
+            "runtimeVersion": "1.0.0"
         },
         "web": {
             "favicon": "./assets/favicon.png",
@@ -44,6 +51,16 @@
             ],
             "expo-router",
             "expo-local-authentication"
-        ]
+        ],
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "25586a41-4077-4cfd-9538-13d8c657f6e5"
+            }
+        },
+        "owner": "trevorinator",
+        "updates": {
+            "url": "https://u.expo.dev/25586a41-4077-4cfd-9538-13d8c657f6e5"
+        }
     }
 }

@@ -1,65 +1,19 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { Account, useKeyring } from '../hooks/useKeyring';
-import type {
-    Address,
-    Hex,
-    TransactionSerialized,
-    TypedDataDefinition,
-} from 'viem';
+import { useKeyring, UseKeyringReturn } from '../hooks/useKeyring';
 
-interface KeyringContextType {
-    accounts: Account[];
-    getSeedPhrase: () => string;
-    generateSeedPhrase: (override?: boolean) => string;
-    addAccount: () => Address;
-    renameAccount: (address: Address, name: string) => void;
-    hideAccount: (address: Address, hide: boolean) => void;
-    sign: (from: Address, hash: Hex) => Promise<Hex>;
-    signPersonal: (from: Address, raw: Hex) => Promise<Hex>;
-    signTypedData: (from: Address, data: TypedDataDefinition) => Promise<Hex>;
-    signTransaction: (
-        from: Address,
-        transaction: Hex,
-    ) => Promise<TransactionSerialized>;
-}
-
-const KeyringContext = createContext<KeyringContextType | undefined>(undefined);
+const KeyringContext = createContext<UseKeyringReturn | undefined>(undefined);
 
 export function KeyringProvider({ children }: { children: ReactNode }) {
-    const {
-        accounts,
-        getSeedPhrase,
-        generateSeedPhrase,
-        addAccount,
-        renameAccount,
-        hideAccount,
-        sign,
-        signPersonal,
-        signTypedData,
-        signTransaction,
-    } = useKeyring();
+    const keyring = useKeyring();
 
     return (
-        <KeyringContext.Provider
-            value={{
-                accounts,
-                getSeedPhrase,
-                generateSeedPhrase,
-                addAccount,
-                renameAccount,
-                hideAccount,
-                sign,
-                signPersonal,
-                signTypedData,
-                signTransaction,
-            }}
-        >
+        <KeyringContext.Provider value={keyring}>
             {children}
         </KeyringContext.Provider>
     );
 }
 
-export function useKeyringContext() {
+export function useKeyringContext(): UseKeyringReturn {
     const context = useContext(KeyringContext);
     if (!context) {
         throw new Error(

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useRequestManager } from '../useRequestManager';
 import { Request, SharedSecret } from '@tlock/shared';
 import { ClientInstance } from '../useClients';
@@ -45,19 +45,19 @@ describe('useRequestManager', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockGetRequests.mockResolvedValue([mockRequest]);
         mockUpdateRequest.mockResolvedValue(undefined);
     });
 
     it('should auto-navigate to new requests', async () => {
-        const { result: _result } = renderHook(() =>
+        const { result, unmount } = renderHook(() =>
             useRequestManager({
                 clients: [mockClient],
                 pollingInterval: 0,
             }),
         );
+        const _ = result;
 
         await waitFor(() => {
             expect(mockRouter.push).toHaveBeenCalled();
@@ -70,12 +70,17 @@ describe('useRequestManager', () => {
                 requestId: 'test-request-id',
             },
         });
+
+        // Clean up any ongoing operations
+        act(() => {
+            unmount();
+        });
     });
 
     it('should handle fetch errors gracefully', async () => {
         mockGetRequests.mockRejectedValue(new Error('Fetch failed'));
 
-        const { result } = renderHook(() =>
+        const { result, unmount } = renderHook(() =>
             useRequestManager({
                 clients: [mockClient],
                 pollingInterval: 0,
@@ -85,10 +90,14 @@ describe('useRequestManager', () => {
         await waitFor(() => {
             expect(result.current.clientRequests).toHaveLength(0);
         });
+
+        act(() => {
+            unmount();
+        });
     });
 
     it('should handle empty clients gracefully', async () => {
-        const { result } = renderHook(() =>
+        const { result, unmount } = renderHook(() =>
             useRequestManager({
                 clients: [],
                 pollingInterval: 0,
@@ -100,6 +109,10 @@ describe('useRequestManager', () => {
         });
 
         expect(mockGetRequests).not.toHaveBeenCalled();
+
+        act(() => {
+            unmount();
+        });
     });
 
     it('should not redirect for pairing requests', async () => {
@@ -116,7 +129,7 @@ describe('useRequestManager', () => {
 
         mockGetRequests.mockResolvedValue([pairingRequest]);
 
-        const { result } = renderHook(() =>
+        const { result, unmount } = renderHook(() =>
             useRequestManager({
                 clients: [mockClient],
                 pollingInterval: 0,
@@ -128,5 +141,9 @@ describe('useRequestManager', () => {
         });
 
         expect(mockRouter.push).not.toHaveBeenCalled();
+
+        act(() => {
+            unmount();
+        });
     });
 });

@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Core development principals
+
+- Prefer simple, concise code. Avoid over-complications, avoid verbosity, and avoid unnecessary tests and check.
+- Implement what is required to do the job and nothing more cleanly and elegantly.
+
 ## Project Overview
 
 Tlock is a 2FA wallet system that consists of a MetaMask Snap and a mobile app for secure transaction signing. The system uses Firebase for real-time communication between the browser extension and mobile device.

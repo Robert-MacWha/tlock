@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useClients } from '../useClients';
-import * as SecureStore from 'expo-secure-store';
+import { useSecureStorage } from '../useSecureStorage';
 import { SharedSecret } from '@tlock/shared';
 import * as ExportoCrypto from 'expo-crypto';
 
@@ -17,14 +17,23 @@ const mockClient = {
 };
 
 // Mock dependencies
-jest.mock('expo-secure-store');
+jest.mock('../useSecureStorage');
 jest.mock('@tlock/shared', () => ({
     createClient: jest.fn(() => mockClient),
+    DEFAULT_FIREBASE_URL: 'https://default-firebase-url.com',
 }));
 jest.mock('expo-crypto');
 
-const mockSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
+const mockUseSecureStorage = useSecureStorage as jest.MockedFunction<
+    typeof useSecureStorage
+>;
 const mockExportoCrypto = ExportoCrypto as jest.Mocked<typeof ExportoCrypto>;
+
+const mockSecureStorageReturn = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    securityLevel: null,
+};
 
 describe('useClients', () => {
     const mockSharedSecret: SharedSecret = [
@@ -36,11 +45,10 @@ describe('useClients', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'error').mockImplementation(() => {});
 
-        // Setup default mocks for sync methods
-        mockSecureStore.getItem.mockReturnValue(null);
-        mockSecureStore.setItem.mockReturnValue(void 0);
+        mockUseSecureStorage.mockReturnValue(mockSecureStorageReturn);
+        mockSecureStorageReturn.getItem.mockResolvedValue(null);
+        mockSecureStorageReturn.setItem.mockResolvedValue(undefined);
         mockExportoCrypto.randomUUID.mockReturnValue('test-uuid-123');
     });
 
@@ -61,7 +69,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -88,7 +96,7 @@ describe('useClients', () => {
 
             let newClient;
             await act(async () => {
-                newClient = result.current.addClient(
+                newClient = await result.current.addClient(
                     mockSharedSecret,
                     'My Client',
                 );
@@ -114,7 +122,7 @@ describe('useClients', () => {
 
             let newClient;
             await act(async () => {
-                newClient = result.current.addClient(mockSharedSecret);
+                newClient = await result.current.addClient(mockSharedSecret);
             });
 
             expect(newClient).toEqual(
@@ -132,12 +140,13 @@ describe('useClients', () => {
             const { result } = renderHook(() => useClients());
 
             await act(async () => {
-                result.current.addClient(mockSharedSecret, 'Test Client');
+                await result.current.addClient(mockSharedSecret, 'Test Client');
             });
 
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('Test Client'),
+                false,
             );
         });
     });
@@ -157,7 +166,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret2,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -168,7 +177,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                result.current.removeClient('client-1');
+                await result.current.removeClient('client-1');
             });
 
             await waitFor(() => {
@@ -185,7 +194,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -196,12 +205,13 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                result.current.removeClient('client-1');
+                await result.current.removeClient('client-1');
             });
 
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 '[]',
+                false,
             );
         });
 
@@ -209,7 +219,7 @@ describe('useClients', () => {
             const { result } = renderHook(() => useClients());
 
             await act(async () => {
-                result.current.removeClient('non-existent');
+                await result.current.removeClient('non-existent');
             });
 
             await waitFor(() => {
@@ -227,7 +237,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -238,7 +248,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                result.current.setClientName('client-1', 'New Name');
+                await result.current.setClientName('client-1', 'New Name');
             });
 
             await waitFor(() => {
@@ -254,7 +264,7 @@ describe('useClients', () => {
                     sharedSecret: mockSharedSecret,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -265,12 +275,13 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                result.current.setClientName('client-1', 'New Name');
+                await result.current.setClientName('client-1', 'New Name');
             });
 
-            expect(mockSecureStore.setItem).toHaveBeenCalledWith(
+            expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
                 'tlock_clients',
                 expect.stringContaining('New Name'),
+                false,
             );
         });
 
@@ -283,7 +294,7 @@ describe('useClients', () => {
                     client: mockClient,
                 },
             ];
-            mockSecureStore.getItem.mockReturnValue(
+            mockSecureStorageReturn.getItem.mockResolvedValue(
                 JSON.stringify(storedClients),
             );
 
@@ -294,7 +305,7 @@ describe('useClients', () => {
             });
 
             await act(async () => {
-                result.current.setClientName('non-existent', 'New Name');
+                await result.current.setClientName('non-existent', 'New Name');
             });
 
             await waitFor(() => {

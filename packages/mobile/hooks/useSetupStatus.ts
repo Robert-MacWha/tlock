@@ -1,29 +1,30 @@
 import { useEffect, useState } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import { useSecureStorage } from './useSecureStorage';
 
 export function useSetupStatus() {
+    const secureStorage = useSecureStorage();
     const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(
         null,
     );
 
     useEffect(() => {
-        try {
-            const value = SecureStore.getItem('tlock_setup_complete');
-            setIsSetupComplete(value === 'true');
-        } catch (_error) {
-            setIsSetupComplete(false);
-        }
+        secureStorage
+            .getItem('tlock_setup_complete', false)
+            .then((value) => {
+                setIsSetupComplete(value === 'true');
+            })
+            .catch(() => {
+                setIsSetupComplete(false);
+            });
     }, []);
 
     const updateIsSetupComplete = (isSetupComplete: boolean) => {
-        if (isSetupComplete) {
-            SecureStore.setItem('tlock_setup_complete', 'true');
-        } else {
-            SecureStore.setItem('tlock_setup_complete', 'false', {
-                requireAuthentication: true,
-            });
-        }
         setIsSetupComplete(isSetupComplete);
+        void secureStorage.setItem(
+            'tlock_setup_complete',
+            isSetupComplete ? 'true' : 'false',
+            !isSetupComplete,
+        );
     };
 
     return { isSetupComplete, setIsSetupComplete: updateIsSetupComplete };

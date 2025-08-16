@@ -14,6 +14,12 @@ interface UseRequestManagerOptions {
     clients: ClientInstance[];
 }
 
+export interface UseRequestManagerReturn {
+    clientRequests: ClientRequest[];
+    fetchRequests: () => Promise<void>;
+    handleRequest: (request: ClientRequest) => Promise<void>;
+}
+
 /**
  * RequestManager handles fetching client requests and triggering actions based
  * on said events.  It can poll for new requests or receive them via push notifications.
@@ -22,7 +28,7 @@ interface UseRequestManagerOptions {
 export function useRequestManager({
     pollingInterval,
     clients,
-}: UseRequestManagerOptions) {
+}: UseRequestManagerOptions): UseRequestManagerReturn {
     const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
     const previousRequestIds = useRef(new Set<string>());
     const clientsRef = useRef(clients);
@@ -32,7 +38,7 @@ export function useRequestManager({
         clientsRef.current = clients;
 
         fetchRequests().catch((error) => {
-            console.error('Failed to fetch requests:', error);
+            console.warn('Failed to fetch requests:', error);
         });
     }, [clients]);
 
@@ -42,7 +48,7 @@ export function useRequestManager({
 
         const interval = setInterval(() => {
             fetchRequests().catch((error) => {
-                console.error('Failed to fetch requests:', error);
+                console.warn('Failed to fetch requests:', error);
             });
         }, pollingInterval);
 
@@ -75,7 +81,7 @@ export function useRequestManager({
             try {
                 await handleRequest(req);
             } catch (error) {
-                console.error('Error handling request:', error);
+                console.warn('Error handling request:', error);
             }
         }
 
@@ -109,7 +115,7 @@ export function useRequestManager({
                     })),
                 );
             } catch (error) {
-                console.error(
+                console.warn(
                     `Failed to fetch requests for client ${clientInstance.id}:`,
                     error,
                 );
