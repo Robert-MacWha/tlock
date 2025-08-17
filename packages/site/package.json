@@ -4,9 +4,12 @@
     "private": true,
     "license": "(MIT-0 OR Apache-2.0)",
     "scripts": {
-        "build": "GATSBY_TELEMETRY_DISABLED=1 gatsby build",
+        "build": "node --version | grep -q '^v20\\.' || (echo 'Error: Node.js 20 required for site' && exit 1) && GATSBY_TELEMETRY_DISABLED=1 gatsby build",
         "clean": "gatsby clean",
-        "dev": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop --host 0.0.0.0 --port 8000"
+        "dev": "node --version | grep -q '^v20\\.' || (echo 'Error: Node.js 20 required for site' && exit 1) && GATSBY_TELEMETRY_DISABLED=1 gatsby develop --host 0.0.0.0 --port 8000"
+    },
+    "engines": {
+        "node": "20.x"
     },
     "browserslist": {
         "production": [

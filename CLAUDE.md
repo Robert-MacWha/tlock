@@ -20,6 +20,7 @@ This is a TypeScript monorepo with 5 packages:
 - **@tlock/mobile**: React Native/Expo mobile app for transaction approval
 - **@tlock/site**: Gatsby-based test application for development
 - **@tlock/functions**: Firebase Cloud Functions for backend services
+- **@tlock/foxguard-website**: Public sveltekit static website, using bootstrap for styling.
 
 Key architectural flows:
 
@@ -46,6 +47,7 @@ Key architectural flows:
 - Shared: `yarn workspace @tlock/shared build` (TypeScript compilation), `yarn workspace @tlock/shared dev` (watch mode)
 - Site: `yarn workspace @tlock/site dev` (Gatsby develop on port 8000)
 - Functions: `yarn workspace @tlock/functions serve` (local Firebase emulator)
+- Foxguard Website: `yarn workspace @tlock/foxguard-website dev`
 
 ### Testing
 

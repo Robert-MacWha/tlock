@@ -7,12 +7,15 @@
         "snap.manifest.json"
     ],
     "scripts": {
-        "build": "mm-snap build",
-        "dev": "mm-snap watch",
+        "build": "node --version | grep -q '^v18\\.' || (echo 'Error: Node.js 18 required for snap' && exit 1) && mm-snap build",
+        "dev": "node --version | grep -q '^v18\\.' || (echo 'Error: Node.js 18 required for snap' && exit 1) && mm-snap watch",
         "lint": "eslint . --cache --ext js,ts",
         "prepublishOnly": "mm-snap manifest",
         "serve": "mm-snap serve",
         "test": "jest"
+    },
+    "engines": {
+        "node": "18.x"
     },
     "dependencies": {
         "@ethereumjs/tx": "^10.0.0",

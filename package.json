@@ -10,10 +10,13 @@
     "scripts": {
         "build": "yarn workspaces foreach --parallel --topological run build",
         "build:shared": "yarn workspace @tlock/shared build",
-        "build:snap": "yarn workspace @tlock/snap build",
+        "build:snap": "(cd packages/snap && nvm use && yarn build)",
+        "build:site": "(cd packages/site && nvm use && yarn build)",
         "deploy:functions": "yarn workspace @tlock/functions deploy",
         "dev:mobile": "yarn workspace @tlock/mobile dev",
-        "dev:snap": "yarn workspaces foreach --parallel --interlaced --include '@tlock/snap' --include '@tlock/site' --include '@tlock/shared' run dev",
+        "dev:snap": "(cd packages/snap && nvm use && yarn dev)",
+        "dev:site": "(cd packages/site && nvm use && yarn dev)",
+        "dev:snap-and-site": "concurrently \"npm run dev:snap\" \"npm run dev:site\"",
         "format": "prettier --write .",
         "lint": "yarn workspaces foreach run lint",
         "test": "yarn workspaces foreach run test"
