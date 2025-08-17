@@ -1,6 +1,9 @@
 <script lang="ts">
+    import { Turnstile } from 'svelte-turnstile';
     import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
     import { db } from '$lib/firebase';
+
+    let turnstileToken = '';
 
     let email = '';
     let isSubmitting = false;
@@ -16,6 +19,12 @@
             return;
         }
 
+        if (!turnstileToken) {
+            errorMessage = 'Security verification required';
+            submitStatus = 'error';
+            return;
+        }
+
         isSubmitting = true;
         submitStatus = 'idle';
 
@@ -24,10 +33,12 @@
                 email: email.toLowerCase().trim(),
                 timestamp: serverTimestamp(),
                 source: 'lodgelock-website',
+                turnstileToken,
             });
 
             submitStatus = 'success';
             email = '';
+            turnstileToken = '';
         } catch (error) {
             console.error('Error adding email:', error);
             errorMessage = 'Failed to save email. Please try again.';
@@ -52,38 +63,50 @@
             </div>
             <div class="col-lg-8">
                 <div class="justify-content-center mb-4">
-                    <form on:submit={handleSubmit} class="d-flex gap-2">
-                        <div class="flex-grow-1">
-                            <input
-                                type="email"
-                                class="form-control"
-                                placeholder="Enter your email address"
-                                bind:value={email}
+                    <form on:submit={handleSubmit}>
+                        <div class="d-flex gap-2">
+                            <div class="flex-grow-1">
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    placeholder="Enter your email address"
+                                    bind:value={email}
+                                    disabled={isSubmitting}
+                                    required
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
                                 disabled={isSubmitting}
-                                required
+                            >
+                                {#if isSubmitting}
+                                    <span
+                                        class="spinner-border spinner-border-sm me-2"
+                                        role="status"
+                                    ></span>
+                                    Saving...
+                                {:else}
+                                    Notify Me
+                                {/if}
+                            </button>
+                            <a
+                                href="https://github.com/Robert-MacWha/lodgelock-snap"
+                                class="btn btn-outline-primary"
+                            >
+                                Learn More
+                            </a>
+                        </div>
+                        <div class="mt-3">
+                            <Turnstile
+                                siteKey="0x4AAAAAABspd8Xqi8HPpfii"
+                                size="flexible"
+                                on:turnstile-callback={(e) =>
+                                    (turnstileToken = e.detail.token)}
+                                on:turnstile-error={() => (turnstileToken = '')}
+                                theme="light"
                             />
                         </div>
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                            disabled={isSubmitting}
-                        >
-                            {#if isSubmitting}
-                                <span
-                                    class="spinner-border spinner-border-sm me-2"
-                                    role="status"
-                                ></span>
-                                Saving...
-                            {:else}
-                                Notify Me
-                            {/if}
-                        </button>
-                        <a
-                            href="https://github.com/Robert-MacWha/lodgelock-snap"
-                            class="btn btn-outline-primary"
-                        >
-                            Learn More
-                        </a>
                     </form>
 
                     {#if submitStatus === 'success'}
