@@ -51,14 +51,14 @@ export function AccountCard({ address }: AccountCardProps) {
 
     const cardStyle = account.isHidden
         ? {
-            opacity: 0.6,
-        }
+              opacity: 0.6,
+          }
         : undefined;
 
     const textStyle = account.isHidden
         ? {
-            color: '#666',
-        }
+              color: '#666',
+          }
         : undefined;
 
     return (

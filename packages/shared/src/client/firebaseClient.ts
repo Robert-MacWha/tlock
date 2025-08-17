@@ -200,9 +200,7 @@ export class FirebaseClient implements Client {
         }
     }
 
-    private async sendNotification(
-        body: string,
-    ): Promise<void> {
+    private async sendNotification(body: string): Promise<void> {
         if (!this.fcmToken) {
             console.log('No FCM token available for notifications');
             return;
@@ -219,7 +217,7 @@ export class FirebaseClient implements Client {
             to: this.fcmToken,
             sound: 'default',
             title: `New Request`,
-            body
+            body,
         };
 
         //? Use Firebase Function as proxy to expo's CORS
@@ -231,7 +229,7 @@ export class FirebaseClient implements Client {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                data: { message }
+                data: { message },
             }),
         });
     }

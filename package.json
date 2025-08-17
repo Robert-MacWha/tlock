@@ -10,17 +10,17 @@
     "scripts": {
         "build": "yarn workspaces foreach --parallel --topological run build",
         "build:shared": "yarn workspace @tlock/shared build",
-        "build:snap": "(cd packages/snap && nvm use && yarn build)",
         "build:site": "(cd packages/site && nvm use && yarn build)",
+        "build:snap": "(cd packages/snap && nvm use && yarn build)",
         "deploy:functions": "yarn workspace @tlock/functions deploy",
+        "deploy:hosting": "(cd packages/lodgelock-website && yarn build && firebase deploy --only hosting)",
         "dev:mobile": "yarn workspace @tlock/mobile dev",
-        "dev:snap": "(cd packages/snap && nvm use && yarn dev)",
         "dev:site": "(cd packages/site && nvm use && yarn dev)",
+        "dev:snap": "(cd packages/snap && nvm use && yarn dev)",
         "dev:snap-and-site": "concurrently \"npm run dev:snap\" \"npm run dev:site\"",
         "format": "prettier --write .",
         "lint": "yarn workspaces foreach run lint",
-        "test": "yarn workspaces foreach run test",
-        "deploy:hosting": "(cd packages/lodgelock-website && yarn build && firebase deploy --only hosting)"
+        "test": "yarn workspaces foreach run test"
     },
     "resolutions": {
         "abitype": "^1.0.0",

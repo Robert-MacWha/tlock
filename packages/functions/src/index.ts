@@ -70,17 +70,25 @@ export const validateEmailSignup = onDocumentCreated(
         const data = event.data?.data();
         if (!data) return;
 
-        const { email, turnstileToken } = data as { email: string; turnstileToken: string };
+        const { email, turnstileToken } = data as {
+            email: string;
+            turnstileToken: string;
+        };
 
         try {
-            const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    secret: process.env.TURNSTILE_SECRET_KEY!,
-                    response: turnstileToken,
-                }).toString(),
-            });
+            const response = await fetch(
+                'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        secret: process.env.TURNSTILE_SECRET_KEY!,
+                        response: turnstileToken,
+                    }).toString(),
+                },
+            );
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const result = await response.json();
@@ -115,5 +123,5 @@ export const validateEmailSignup = onDocumentCreated(
             console.error('Validation failed:', error);
             await event.data?.ref.delete();
         }
-    }
+    },
 );

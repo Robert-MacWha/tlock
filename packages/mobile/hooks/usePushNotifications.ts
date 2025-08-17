@@ -92,7 +92,6 @@ export function usePushNotifications(): UsePushNotificationsReturn {
                     await secureStorage.setItem(PUSH_TOKEN_KEY, token, false);
                     setExpoPushToken(token);
                 }
-
             } catch (error) {
                 console.error(
                     'Failed to initialize push notifications:',
@@ -112,7 +111,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }, []);
 
     useEffect(() => {
-        console.log(`Push Token: ${expoPushToken}`)
+        console.log(`Push Token: ${expoPushToken}`);
     }, [expoPushToken]);
 
     const addNotificationReceivedListener = (

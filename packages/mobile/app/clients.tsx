@@ -33,7 +33,7 @@ export default function App() {
                 'New Metamask Client',
             );
 
-            const fcmToken: string = expoPushToken || "";
+            const fcmToken: string = expoPushToken || '';
             await client.client.updateRequest(qrData.pairRequestId, 'pair', {
                 status: 'approved',
                 fcmToken,
