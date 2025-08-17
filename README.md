@@ -1,3 +1,7 @@
+# Foxguard
+
+Foxguard is a hardware-wallet-like wallet solution for private key management. It acts as a companion app to metamask, letting you keep your accounts in metamask and your keys on your mobile device. Foxguard keeps your private keys safe from most common private key thefts, keeping your funds safe in the event of an attack.
+
 ## Flows
 
 ## Develop
@@ -36,3 +40,8 @@ Mobile device and browser snap pair via a QR code containing a shared secret.
    TODO: Make a system that uses seed phrases to derive all private keys, so they can be backed up.
 4. Mobile device sends the created account's address back to metamask snap.
 5. Metamask snap registers with keyring.
+
+## License
+GPL-3.0
+
+Note: Originally forked from [MetaMask template](https://github.com/MetaMask/template-snap-monorepo/tree/main).
