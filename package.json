@@ -19,7 +19,8 @@
         "dev:snap-and-site": "concurrently \"npm run dev:snap\" \"npm run dev:site\"",
         "format": "prettier --write .",
         "lint": "yarn workspaces foreach run lint",
-        "test": "yarn workspaces foreach run test"
+        "test": "yarn workspaces foreach run test",
+        "deploy:hosting": "(cd packages/lodgelock-website && yarn build && firebase deploy --only hosting)"
     },
     "resolutions": {
         "abitype": "^1.0.0",
