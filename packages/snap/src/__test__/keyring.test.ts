@@ -7,7 +7,7 @@ import {
     KeyringRequest,
 } from '@metamask/keyring-api';
 import { updateState } from '../state';
-import type { Client } from '@/shared';
+import type { Client } from '@lodgelock/shared';
 import { v4 as uuid } from 'uuid';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { Address, Hex, TransactionSerializedLegacy } from 'viem';

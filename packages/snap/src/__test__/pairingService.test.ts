@@ -5,12 +5,12 @@ import {
     PairRequest,
     type Client,
     type SharedSecret,
-} from '@/shared';
+} from '@lodgelock/shared';
 import { updateState } from '../state';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@/shared', () => ({
-    ...jest.requireActual('@/shared'),
+jest.mock('@lodgelock/shared', () => ({
+    ...jest.requireActual('@lodgelock/shared'),
     generateSharedSecret: jest.fn(),
     createClient: jest.fn(),
 }));

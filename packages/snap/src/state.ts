@@ -1,5 +1,5 @@
 import { KeyringAccount, KeyringRequest } from '@metamask/keyring-api';
-import { SharedSecret, DEFAULT_FIREBASE_URL } from '@/shared';
+import { SharedSecret, DEFAULT_FIREBASE_URL } from '@lodgelock/shared';
 
 export interface SnapState {
     sharedSecret?: SharedSecret;

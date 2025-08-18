@@ -5,7 +5,7 @@ import {
     PairRequest,
     type Client,
     type SharedSecret,
-} from '@/shared';
+} from '@lodgelock/shared';
 import qrcode from 'qrcode';
 import { updateState, getState } from './state';
 import { POLL_INTERVAL, ERROR_CODES } from './constants';

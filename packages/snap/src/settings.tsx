@@ -9,7 +9,7 @@ import {
 import { getState, updateState } from './state';
 import { showScreen } from './screen';
 import { SCREENS } from './constants';
-import { DEFAULT_FIREBASE_URL } from '@/shared';
+import { DEFAULT_FIREBASE_URL } from '@lodgelock/shared';
 
 export async function handleSettingsScreen(interfaceId: string) {
     const state = await getState();
