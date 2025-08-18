@@ -54,7 +54,7 @@ Lodgelock is still in development, so there may be bugs or other undesired behav
 
 ### Requirements
 
-- Node v18
+- Node v20
 - Yarn
 - Expo Go for mobile testing
 
