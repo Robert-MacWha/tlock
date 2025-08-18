@@ -61,7 +61,7 @@ describe('useKeyring', () => {
             async (key: string, authenticated: boolean = true) => {
                 const _ = authenticated;
                 switch (key) {
-                    case 'lodgelock_seed_phrase':
+                    case SEED_PHRASE_KEY:
                         return options.seedPhrase ?? null;
                     case ACCOUNTS_KEY:
                         return options.accounts ?? null;
