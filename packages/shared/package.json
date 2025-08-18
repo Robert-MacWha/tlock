@@ -1,7 +1,7 @@
 {
-    "name": "@tlock/shared",
+    "name": "@lodgelock/shared",
     "version": "1.0.0",
-    "description": "Shared utilities for Tlock 2FA wallet",
+    "description": "Shared utilities for Lodgelock 2FA wallet",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [

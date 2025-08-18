@@ -11,7 +11,7 @@ import {
     EthMethod,
 } from '@metamask/keyring-api';
 import type { Json } from '@metamask/snaps-sdk';
-import type { Client, RequestType, RequestTypeMap } from '@tlock/shared';
+import type { Client, RequestType, RequestTypeMap } from '@lodgelock/shared';
 import { v4 as uuid } from 'uuid';
 import { serializeTransaction, type Address, type Hex } from 'viem';
 import type { KeyringState } from './state';
@@ -35,7 +35,7 @@ import { throwError, handleError } from './errors';
 import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
-export class TlockKeyring implements Keyring {
+export class LodgelockKeyring implements Keyring {
     private client: Client;
     private state: KeyringState;
     private origin?: string | undefined;

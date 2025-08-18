@@ -18,10 +18,10 @@ export async function handleHomeScreen(interfaceId: string) {
     await showScreen(
         interfaceId,
         <Box>
-            <Heading>Foxguard</Heading>
+            <Heading>Lodgelock</Heading>
             <Text>
                 Your wallet is not paired. Pair it with the app to start using
-                Foxguard accounts.
+                Lodgelock accounts.
             </Text>
             <Button name={SCREENS.PAIR}>Pair Wallet</Button>
             <Button name={SCREENS.SETTINGS}>Settings</Button>
@@ -33,7 +33,7 @@ async function showPairedScreen(state: SnapState, interfaceId: string) {
     await showScreen(
         interfaceId,
         <Box>
-            <Heading>Foxguard</Heading>
+            <Heading>Lodgelock</Heading>
             <Button name={SCREENS.IMPORT_ACCOUNT}>Import Account</Button>
             <Button name={SCREENS.PAIR}>Re-pair wallet</Button>
             <Button name={SCREENS.SETTINGS}>Settings</Button>

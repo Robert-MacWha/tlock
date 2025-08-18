@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useRequestHandler } from '../useRequestHandler';
-import { RequestTypeMap, SharedSecret } from '@tlock/shared';
+import { RequestTypeMap, SharedSecret } from '@lodgelock/shared';
 import { Address, Hex } from 'viem';
 import { ClientInstance } from '../useClients';
 

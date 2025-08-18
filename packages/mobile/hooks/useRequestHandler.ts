@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
-import { RequestType, RequestTypeMap } from '@tlock/shared';
+import { RequestType, RequestTypeMap } from '@lodgelock/shared';
 import { useClientsContext } from '../contexts/ClientContext';
 
 interface RequestHandlerConfig<T extends RequestType> {

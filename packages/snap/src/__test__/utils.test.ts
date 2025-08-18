@@ -1,6 +1,6 @@
 import { validatePairedState, validateSharedSecret } from '../utils';
-import { TlockSnapError } from '../errors';
-import type { SharedSecret } from '@tlock/shared';
+import { LodgelockSnapError } from '../errors';
+import type { SharedSecret } from '@lodgelock/shared';
 
 describe('utils', () => {
     const mockSharedSecret = [1, 2, 3, 4, 5] as SharedSecret;
@@ -13,11 +13,11 @@ describe('utils', () => {
         });
 
         it('should throw for null state', () => {
-            expect(() => validateSharedSecret(null)).toThrow(TlockSnapError);
+            expect(() => validateSharedSecret(null)).toThrow(LodgelockSnapError);
         });
 
         it('should throw for missing shared secret', () => {
-            expect(() => validateSharedSecret({})).toThrow(TlockSnapError);
+            expect(() => validateSharedSecret({})).toThrow(LodgelockSnapError);
         });
     });
 
@@ -29,12 +29,12 @@ describe('utils', () => {
 
         it('should throw for missing FCM token', () => {
             const state = { sharedSecret: mockSharedSecret };
-            expect(() => validatePairedState(state)).toThrow(TlockSnapError);
+            expect(() => validatePairedState(state)).toThrow(LodgelockSnapError);
         });
 
         it('should throw for empty FCM token', () => {
             const state = { sharedSecret: mockSharedSecret, fcmToken: '' };
-            expect(() => validatePairedState(state)).toThrow(TlockSnapError);
+            expect(() => validatePairedState(state)).toThrow(LodgelockSnapError);
         });
     });
 });

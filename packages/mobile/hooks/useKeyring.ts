@@ -36,8 +36,8 @@ export interface UseKeyringReturn {
     ) => Promise<TransactionSerialized>;
 }
 
-const SEED_PHRASE_KEY = 'tlock_seed_phrase';
-const ACCOUNTS_KEY = 'tlock_accounts';
+const SEED_PHRASE_KEY = 'lodgelock_seed_phrase';
+const ACCOUNTS_KEY = 'lodgelock_accounts';
 
 export function useKeyring(): UseKeyringReturn {
     //? Stateful accounts variable for external use. Internally make sure to

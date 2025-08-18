@@ -20,7 +20,7 @@ import { useAlert } from '../../components/AlertProvider';
 import { useClientsContext } from '../../contexts/ClientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useRequestManagerContext } from '../../contexts/RequestManagerContext';
-import { DEFAULT_FIREBASE_URL } from '@tlock/shared';
+import { DEFAULT_FIREBASE_URL } from '@lodgelock/shared';
 
 export default function SettingsScreen() {
     const { setIsSetupComplete } = useSetupStatus();

@@ -8,7 +8,7 @@ export interface QrCodeData {
 }
 
 export const QR_VERSION = 1;
-export const QR_PROTOCOL = 'tlock';
+export const QR_PROTOCOL = 'lodgelock';
 export const QR_ACTION = 'pair';
 
 export function createQrCode(

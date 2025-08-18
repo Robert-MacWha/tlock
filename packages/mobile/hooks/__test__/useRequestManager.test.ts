@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useRequestManager } from '../useRequestManager';
-import { Request, SharedSecret } from '@tlock/shared';
+import { Request, SharedSecret } from '@lodgelock/shared';
 import { ClientInstance } from '../useClients';
 
 // Mock dependencies

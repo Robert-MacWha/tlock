@@ -9,18 +9,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tlock is a 2FA wallet system that consists of a MetaMask Snap and a mobile app for secure transaction signing. The system uses Firebase for real-time communication between the browser extension and mobile device.
+Lodgelock is a 2FA wallet system that consists of a MetaMask Snap and a mobile app for secure transaction signing. The system uses Firebase for real-time communication between the browser extension and mobile device.
 
 ## Architecture
 
 This is a TypeScript monorepo with 5 packages:
 
-- **@tlock/shared**: Common utilities and types shared across all packages
-- **@tlock/snap**: MetaMask Snap for browser-based wallet interface
-- **@tlock/mobile**: React Native/Expo mobile app for transaction approval
-- **@tlock/site**: Gatsby-based test application for development
-- **@tlock/functions**: Firebase Cloud Functions for backend services
-- **@tlock/foxguard-website**: Public sveltekit static website, using bootstrap for styling.
+- **@lodgelock/shared**: Common utilities and types shared across all packages
+- **@lodgelock/snap**: MetaMask Snap for browser-based wallet interface
+- **@lodgelock/mobile**: React Native/Expo mobile app for transaction approval
+- **@lodgelock/site**: Gatsby-based test application for development
+- **@lodgelock/functions**: Firebase Cloud Functions for backend services
+- **@lodgelock/lodgelock-website**: Public sveltekit static website, using bootstrap for styling.
 
 Key architectural flows:
 
@@ -42,12 +42,12 @@ Key architectural flows:
 
 ### Package-Specific Commands
 
-- Snap: `yarn workspace @tlock/snap dev` (watch mode), `yarn workspace @tlock/snap build`
-- Mobile: `yarn workspace @tlock/mobile dev`, `yarn workspace @tlock/mobile test`
-- Shared: `yarn workspace @tlock/shared build` (TypeScript compilation), `yarn workspace @tlock/shared dev` (watch mode)
-- Site: `yarn workspace @tlock/site dev` (Gatsby develop on port 8000)
-- Functions: `yarn workspace @tlock/functions serve` (local Firebase emulator)
-- Foxguard Website: `yarn workspace @tlock/foxguard-website dev`
+- Snap: `yarn workspace @lodgelock/snap dev` (watch mode), `yarn workspace @lodgelock/snap build`
+- Mobile: `yarn workspace @lodgelock/mobile dev`, `yarn workspace @lodgelock/mobile test`
+- Shared: `yarn workspace @lodgelock/shared build` (TypeScript compilation), `yarn workspace @lodgelock/shared dev` (watch mode)
+- Site: `yarn workspace @lodgelock/site dev` (Gatsby develop on port 8000)
+- Functions: `yarn workspace @lodgelock/functions serve` (local Firebase emulator)
+- Lodgelock Website: `yarn workspace @lodgelock/lodgelock-website dev`
 
 ### Testing
 

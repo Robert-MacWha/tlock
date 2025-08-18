@@ -3,7 +3,7 @@ import {
     Client,
     SharedSecret,
     DEFAULT_FIREBASE_URL,
-} from '@tlock/shared';
+} from '@lodgelock/shared';
 import { useEffect, useState } from 'react';
 import { randomUUID } from 'expo-crypto';
 import { useSecureStorage } from './useSecureStorage';
@@ -33,8 +33,8 @@ export interface UseClientsReturn {
     setFirebaseUrl: (url: string) => Promise<void>;
 }
 
-const CLIENTS_KEY = 'tlock_clients';
-const FIREBASE_URL_KEY = 'tlock_firebase_url';
+const CLIENTS_KEY = 'lodgelock_clients';
+const FIREBASE_URL_KEY = 'lodgelock_firebase_url';
 
 export function useClients(): UseClientsReturn {
     const secureStorage = useSecureStorage();

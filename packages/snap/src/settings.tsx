@@ -9,7 +9,7 @@ import {
 import { getState, updateState } from './state';
 import { showScreen } from './screen';
 import { SCREENS } from './constants';
-import { DEFAULT_FIREBASE_URL } from '@tlock/shared';
+import { DEFAULT_FIREBASE_URL } from '@/shared';
 
 export async function handleSettingsScreen(interfaceId: string) {
     const state = await getState();
@@ -19,7 +19,7 @@ export async function handleSettingsScreen(interfaceId: string) {
         interfaceId,
         <Box>
             <Heading>Settings</Heading>
-            <Text>Configure your Foxguard settings</Text>
+            <Text>Configure your Lodgelock settings</Text>
 
             <Form name="firebaseSettings">
                 <Text>Firebase Server URL:</Text>

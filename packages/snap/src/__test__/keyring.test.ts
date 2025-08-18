@@ -1,4 +1,4 @@
-import { TlockKeyring } from '../keyring';
+import { LodgelockKeyring } from '../keyring';
 import {
     EthAccountType,
     EthMethod,
@@ -7,7 +7,7 @@ import {
     KeyringRequest,
 } from '@metamask/keyring-api';
 import { updateState } from '../state';
-import type { Client } from '@tlock/shared';
+import type { Client } from '@/shared';
 import { v4 as uuid } from 'uuid';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { Address, Hex, TransactionSerializedLegacy } from 'viem';
@@ -39,8 +39,8 @@ declare const snap: unknown;
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
 (global as any).snap = {};
 
-describe('TlockKeyring', () => {
-    let keyring: TlockKeyring;
+describe('Keyring', () => {
+    let keyring: LodgelockKeyring;
     let mockClient: jest.Mocked<Client>;
 
     const mockAddress = '0x8f72fcf695523A6FC7DD97EafDd7A083c386b7b6' as Address;
@@ -71,7 +71,7 @@ describe('TlockKeyring', () => {
         } as jest.Mocked<Client>;
 
         // Create keyring instance
-        keyring = new TlockKeyring(mockClient);
+        keyring = new LodgelockKeyring(mockClient);
     });
 
     // Helper function to setup keyring state
@@ -174,13 +174,13 @@ describe('TlockKeyring', () => {
                 wallets: { mockAccountId: { account: createMockAccount() } },
                 pendingRequests: {},
             };
-            const newKeyring = new TlockKeyring(mockClient, state);
+            const newKeyring = new LodgelockKeyring(mockClient, state);
             expect(newKeyring['state']).toBe(state);
         });
 
         it('should store origin', () => {
             const origin = 'https://example.com';
-            const newKeyring = new TlockKeyring(mockClient, undefined, origin);
+            const newKeyring = new LodgelockKeyring(mockClient, undefined, origin);
             expect(newKeyring['origin']).toBe(origin);
         });
     });
@@ -264,7 +264,7 @@ describe('TlockKeyring', () => {
                             type: EthAccountType.Eoa,
                             scopes: [],
                         } as KeyringAccount,
-                        accountNameSuggestion: 'Tlock Account',
+                        accountNameSuggestion: 'Lodgelock Account',
                     },
                 );
             });
