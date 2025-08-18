@@ -21,29 +21,34 @@ import * as Device from 'expo-device';
 export default function App() {
     const [pairing, setPairing] = useState<boolean>(false);
     const [helpVisible, setHelpVisible] = useState<boolean>(false);
-    const { clients, addClient } = useClientsContext();
+    const { clients, addClient, removeClient } = useClientsContext();
     const { alert } = useAlert();
     const { expoPushToken } = usePushNotificationsContext();
 
     const onBarcodeScanned = async (data: string) => {
+        let clientId: string | undefined = undefined;
         try {
             const qrData = parseQrCode(data);
             const client = await addClient(
                 qrData.sharedSecret,
                 'New Metamask Client',
             );
+            clientId = client.id;
 
             const fcmToken: string = expoPushToken || '';
+
             await client.client.updateRequest(qrData.pairRequestId, 'pair', {
                 status: 'approved',
                 fcmToken,
                 deviceName: Device.modelName || 'Unknown Device',
             });
-            await addClient(qrData.sharedSecret, 'New Client');
             alert('Success', 'Device paired successfully!');
         } catch (error) {
             console.warn('Pairing failed:', error);
             alert('Error', 'Failed to pair device. Please try again.');
+            if (clientId) {
+                await removeClient(clientId);
+            }
         } finally {
             setPairing(false);
         }

@@ -8,8 +8,14 @@ export const SHARED_SECRET_LENGTH = 32;
 export const ROOM_ID_LENGTH = 32;
 export const ROOM_ID_PATTERN = /^[0-9A-F]{32}$/;
 
+function getRandomBytes(length: number): Uint8Array {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return array;
+}
+
 export function generateSharedSecret(): SharedSecret {
-    const sharedSecret = nacl.randomBytes(SHARED_SECRET_LENGTH);
+    const sharedSecret = getRandomBytes(SHARED_SECRET_LENGTH);
     return Array.from(sharedSecret);
 }
 
@@ -34,7 +40,7 @@ export function encryptMessage<T>(
 ): string {
     const messageString = JSON.stringify(message);
     const messageBytes = new TextEncoder().encode(messageString);
-    const nonce = nacl.randomBytes(24);
+    const nonce = getRandomBytes(24);
     const key = new Uint8Array(sharedSecret.slice(0, 32));
 
     const encrypted = nacl.secretbox(messageBytes, nonce, key);
