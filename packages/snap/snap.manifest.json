@@ -7,7 +7,7 @@
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "@/snap",
+        "packageName": "@lodgelock/snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
