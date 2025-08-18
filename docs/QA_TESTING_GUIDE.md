@@ -1,8 +1,8 @@
-# TLock Mobile App - QA Testing Guide
+# Lodgelock Mobile App - QA Testing Guide
 
 ## Overview
 
-This document provides comprehensive manual testing procedures for the TLock mobile keystore companion app. These tests focus on user flows, state persistence, network communication, and multi-device coordination that are difficult to cover with automated unit tests.
+This document provides comprehensive manual testing procedures for the Lodgelock mobile keystore companion app. These tests focus on user flows, state persistence, network communication, and multi-device coordination that are difficult to cover with automated unit tests.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This document provides comprehensive manual testing procedures for the TLock mob
 
 - **Development Environment**: Expo oroduction build on-device (TODO setup production build environment)
 - **Test Browser**: MetaMask Snap enabled browser (`yarn dev:snap`)
-- **Test Site**: Foxguard test site (`yarn dev:snap`)
+- **Test Site**: Lodgelock test site (`yarn dev:snap`)
 - **Network**: Stable internet connection for Firebase communication
 - **Devices**: Test device with camera access for QR code scanning
 

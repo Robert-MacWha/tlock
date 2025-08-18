@@ -1,23 +1,23 @@
 {
-    "name": "tlock",
+    "name": "lodgelock",
     "version": "1.0.0",
     "private": true,
-    "description": "Tlock 2FA wallet system",
+    "description": "Lodgelock 2FA wallet system",
     "license": "MIT",
     "workspaces": [
         "packages/*"
     ],
     "scripts": {
         "build": "yarn workspaces foreach --parallel --topological run build",
-        "build:shared": "yarn workspace @tlock/shared build",
-        "build:site": "yarn workspace @tlock/site build",
-        "build:snap": "yarn workspace @tlock/snap build",
-        "deploy:functions": "yarn workspace @tlock/functions deploy",
-        "deploy:hosting": "yarn workspace @tlock/lodgelock-website deploy",
+        "build:shared": "yarn workspace @lodgelock/shared build",
+        "build:site": "yarn workspace @lodgelock/site build",
+        "build:snap": "yarn workspace @lodgelock/snap build",
+        "deploy:functions": "yarn workspace @lodgelock/functions deploy",
+        "deploy:hosting": "yarn workspace @lodgelock/lodgelock-website deploy",
         "dev": "concurrently \"yarn dev:mobile\" \"yarn dev:site\" \"yarn dev:snap\"",
-        "dev:mobile": "yarn workspace @tlock/mobile dev",
-        "dev:site": "yarn workspace @tlock/site dev",
-        "dev:snap": "yarn workspace @tlock/snap dev",
+        "dev:mobile": "yarn workspace @lodgelock/mobile dev",
+        "dev:site": "yarn workspace @lodgelock/site dev",
+        "dev:snap": "yarn workspace @lodgelock/snap dev",
         "format": "prettier --write .",
         "lint": "yarn workspaces foreach run lint",
         "test": "yarn workspaces foreach run test"

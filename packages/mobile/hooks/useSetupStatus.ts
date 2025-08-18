@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSecureStorage } from './useSecureStorage';
 
+const SETUP_FLAG_KEY = 'lodgelock_setup_complete';
+
 export function useSetupStatus() {
     const secureStorage = useSecureStorage();
     const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(
@@ -9,7 +11,7 @@ export function useSetupStatus() {
 
     useEffect(() => {
         secureStorage
-            .getItem('tlock_setup_complete', false)
+            .getItem(SETUP_FLAG_KEY, false)
             .then((value) => {
                 setIsSetupComplete(value === 'true');
             })
@@ -21,7 +23,7 @@ export function useSetupStatus() {
     const updateIsSetupComplete = (isSetupComplete: boolean) => {
         setIsSetupComplete(isSetupComplete);
         void secureStorage.setItem(
-            'tlock_setup_complete',
+            SETUP_FLAG_KEY,
             isSetupComplete ? 'true' : 'false',
             !isSetupComplete,
         );

@@ -5,12 +5,12 @@ import {
     PairRequest,
     type Client,
     type SharedSecret,
-} from '@tlock/shared';
+} from '@lodgelock/shared';
 import { updateState } from '../state';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@tlock/shared', () => ({
-    ...jest.requireActual('@tlock/shared'),
+jest.mock('@lodgelock/shared', () => ({
+    ...jest.requireActual('@lodgelock/shared'),
     generateSharedSecret: jest.fn(),
     createClient: jest.fn(),
 }));
@@ -70,7 +70,7 @@ describe('PairingService', () => {
             const result = await pairingService.start();
 
             expect(result).toEqual({
-                qrData: 'tlock://pair/eyJ2ZXJzaW9uIjoxLCJzaGFyZWRTZWNyZXQiOlsxLDIsMyw0LDVdLCJwYWlyUmVxdWVzdElkIjoidGVzdC1yZXF1ZXN0LWlkIn0=',
+                qrData: 'lodgelock://pair/eyJ2ZXJzaW9uIjoxLCJzaGFyZWRTZWNyZXQiOlsxLDIsMyw0LDVdLCJwYWlyUmVxdWVzdElkIjoidGVzdC1yZXF1ZXN0LWlkIn0=',
                 // QR code asci, so just check for a string
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 qrSrc: expect.any(String),

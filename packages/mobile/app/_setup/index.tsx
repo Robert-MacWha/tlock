@@ -60,13 +60,13 @@ export default function SetupScreen() {
                 variant="headlineMedium"
                 style={{ marginBottom: 24, textAlign: 'center' }}
             >
-                Welcome to Foxguard
+                Welcome to Lodgelock
             </Text>
             <Text
                 variant="bodyLarge"
                 style={{ marginBottom: 32, textAlign: 'center' }}
             >
-                Foxguard is a secure key management app that works seamlessly
+                Lodgelock is a secure key management app that works seamlessly
                 with MetaMask. To get started, you'll need to setup a seed
                 phrase.
             </Text>

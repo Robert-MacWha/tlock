@@ -69,9 +69,9 @@ const SnapDemo = () => {
     return (
         <div className="container">
             <header className="py-3 mb-4 border-bottom">
-                <h1 className="h2">Foxguard Snap Demo</h1>
+                <h1 className="h2">Lodgelock Snap Demo</h1>
                 <p className="text-muted">
-                    Follow these 17-ish* steps to install the Foxguard metamask
+                    Follow these 17-ish* steps to install the Lodgelock metamask
                     snap and the companion app so you can see what Robert's been
                     going on about!
                 </p>
@@ -132,12 +132,12 @@ const SnapDemo = () => {
                 <div className="col-12">
                     <div className="card h-100">
                         <div className="card-header">
-                            <h5>2. Foxguard Snap</h5>
+                            <h5>2. Lodgelock Snap</h5>
                         </div>
                         <div className="card-body">
                             <div>
                                 <p className="mb-2">
-                                    Install the Foxguard snap
+                                    Install the Lodgelock snap
                                 </p>
                                 <button
                                     className="btn btn-primary btn-sm"
@@ -180,7 +180,7 @@ const SnapDemo = () => {
                 <div className="col-12">
                     <div className="card h-100">
                         <div className="card-header">
-                            <h5>4. Foxguard Companion App</h5>
+                            <h5>4. Lodgelock Companion App</h5>
                         </div>
                         <div className="card-body text-center">
                             <QRCodeDisplay value={EXPO_URL} size={150} />
@@ -192,16 +192,16 @@ const SnapDemo = () => {
                     </div>
                 </div>
 
-                {/*  Foxguard Setup */}
+                {/*  Lodgelock Setup */}
                 <div className="col-12">
                     <div className="card h-100">
                         <div className="card-header">
-                            <h5>5. Foxguard Setup</h5>
+                            <h5>5. Lodgelock Setup</h5>
                         </div>
                         <div className="card-body">
                             <p className="mb-2">
                                 Follow the setup instructions within the
-                                Foxguard companion app, then pair it with the
+                                Lodgelock companion app, then pair it with the
                                 snap in metamask.
                             </p>
                         </div>

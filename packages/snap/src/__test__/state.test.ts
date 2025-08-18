@@ -1,6 +1,6 @@
 import { updateState, getState } from '../state';
-import { DEFAULT_FIREBASE_URL } from '@tlock/shared';
-import type { SharedSecret } from '@tlock/shared';
+import { DEFAULT_FIREBASE_URL } from '@lodgelock/shared';
+import type { SharedSecret } from '@lodgelock/shared';
 
 // Mock the snap global
 const mockSnapRequest = jest.fn();

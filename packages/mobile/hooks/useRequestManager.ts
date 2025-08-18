@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Request } from '@tlock/shared';
+import { Request } from '@lodgelock/shared';
 import { ClientInstance } from './useClients';
 import { router } from 'expo-router';
 // import * as Notifications from 'expo-notifications';

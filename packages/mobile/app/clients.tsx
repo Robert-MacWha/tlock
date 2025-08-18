@@ -10,7 +10,7 @@ import {
 } from 'react-native-paper';
 import { Stack } from 'expo-router';
 // import * as Notifications from 'expo-notifications';
-import { parseQrCode } from '@tlock/shared';
+import { parseQrCode } from '@lodgelock/shared';
 import { useClientsContext } from '../contexts/ClientContext';
 import { ClientCard } from '../components/ClientCard';
 import { QrCodeDialog } from '../components/QrCodeDialog';
@@ -108,7 +108,7 @@ export default function App() {
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
                             - On the device you want to connect, open Metamask
                             Flask, navigate to Settings {'>'} Snaps {'>'}{' '}
-                            Foxguard and click "Pair Device".
+                            Lodgelock and click "Pair Device".
                         </Text>
                         <Text variant="bodyMedium" style={{ marginBottom: 12 }}>
                             - In this app, tap the + button to pair a new device

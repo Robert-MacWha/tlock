@@ -6,9 +6,9 @@ import {
     type Json,
     UserInputEventType,
 } from '@metamask/snaps-sdk';
-import { createClient } from '@tlock/shared';
+import { createClient } from '@lodgelock/shared';
 import { getState } from './state';
-import { TlockKeyring } from './keyring';
+import { LodgelockKeyring } from './keyring';
 import { handleKeyringRequest } from '@metamask/keyring-snap-sdk';
 import { validatePairedState } from './utils';
 import { initializeInterface, showErrorScreen } from './screen';
@@ -62,7 +62,7 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
         state.fcmToken,
         state.firebaseUrl,
     );
-    const keyring = new TlockKeyring(client, state.keyringState, origin);
+    const keyring = new LodgelockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
     const resp = await handleKeyringRequest(keyring, request);
     if (resp) {

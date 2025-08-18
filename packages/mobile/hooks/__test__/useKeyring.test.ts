@@ -1,5 +1,5 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
-import { useKeyring } from '../useKeyring';
+import { ACCOUNTS_KEY, SEED_PHRASE_KEY, useKeyring } from '../useKeyring';
 import { useSecureStorage } from '../useSecureStorage';
 import {
     Address,
@@ -61,9 +61,9 @@ describe('useKeyring', () => {
             async (key: string, authenticated: boolean = true) => {
                 const _ = authenticated;
                 switch (key) {
-                    case 'tlock_seed_phrase':
+                    case SEED_PHRASE_KEY:
                         return options.seedPhrase ?? null;
-                    case 'tlock_accounts':
+                    case ACCOUNTS_KEY:
                         return options.accounts ?? null;
                     default:
                         return null;
@@ -98,7 +98,7 @@ describe('useKeyring', () => {
                     if (authenticated) {
                         throw new Error('Authentication failed');
                     }
-                    if (key === 'tlock_accounts') {
+                    if (key === ACCOUNTS_KEY) {
                         return JSON.stringify(existingAccounts);
                     }
                     throw new Error('Item not found');
@@ -229,12 +229,12 @@ describe('useKeyring', () => {
 
             expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_seed_phrase',
+                SEED_PHRASE_KEY,
                 seedPhrase!,
                 expect.any(Boolean),
             );
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 '[]',
                 expect.any(Boolean),
             );
@@ -251,7 +251,7 @@ describe('useKeyring', () => {
 
             expect(seedPhrase!).toBe(MOCK_SEED_PHRASE);
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_seed_phrase',
+                SEED_PHRASE_KEY,
                 seedPhrase!,
                 false,
             );
@@ -298,7 +298,7 @@ describe('useKeyring', () => {
 
             expect(address!).toBeDefined();
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 expect.stringContaining(address!),
                 expect.any(Boolean),
             );
@@ -322,12 +322,12 @@ describe('useKeyring', () => {
             });
             expect(address!).toBeDefined();
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 expect.stringContaining(address!),
                 expect.any(Boolean),
             );
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 expect.stringContaining('0x123'),
                 expect.any(Boolean),
             );
@@ -552,7 +552,7 @@ describe('useKeyring', () => {
                 { id: 2, address: '0x456', name: 'Account 2' },
             ];
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 JSON.stringify(expectedAccounts),
                 false,
             );
@@ -585,7 +585,7 @@ describe('useKeyring', () => {
                 { id: 2, address: '0x456', isHidden: false },
             ];
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'tlock_accounts',
+                ACCOUNTS_KEY,
                 JSON.stringify(expectedAccounts),
                 false,
             );

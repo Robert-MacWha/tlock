@@ -13,7 +13,7 @@ import {
     SimulationResponse,
     BalanceDelta,
     TokenInfo,
-} from '@tlock/shared';
+} from '@lodgelock/shared';
 import { TransactionSerializable, Address } from 'viem';
 
 interface TxSimulationProps {
@@ -151,14 +151,14 @@ export function TxSimulation({
                                                 delta={delta}
                                                 tokenInfo={
                                                     simulation.tokens[
-                                                        delta.token.toLowerCase()
+                                                    delta.token.toLowerCase()
                                                     ]
                                                 }
                                             />
                                             {index <
                                                 simulation.balance_deltas
                                                     .length -
-                                                    1 && <Divider />}
+                                                1 && <Divider />}
                                         </View>
                                     ),
                                 )}

@@ -11,7 +11,7 @@ export const SCREENS = {
 } as const;
 
 // Account name suggestion
-export const ACCOUNT_NAME_SUGGESTION = 'Tlock Account';
+export const ACCOUNT_NAME_SUGGESTION = 'Lodgelock Account';
 
 // Error codes for consistent error handling
 export const ERROR_CODES = {

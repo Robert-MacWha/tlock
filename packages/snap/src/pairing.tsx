@@ -1,4 +1,4 @@
-import { createClient } from '@tlock/shared';
+import { createClient } from '@lodgelock/shared';
 import { showErrorScreen, showScreen } from './screen';
 import { Box, Button, Heading, Image, Text } from '@metamask/snaps-sdk/jsx';
 import { SCREENS, ERROR_CODES } from './constants';
@@ -16,7 +16,7 @@ export async function showPairingScreen(interfaceId: string) {
             <Box>
                 <Heading>Pair Your Wallet</Heading>
                 <Text>
-                    Open the Foxguard mobile app and scan this QR code to pair:
+                    Open the Lodgelock mobile app and scan this QR code to pair:
                 </Text>
                 <Image src={qrSrc} alt="Pairing QR Code" />
                 <Button name={SCREENS.HOME}>Cancel Pairing</Button>

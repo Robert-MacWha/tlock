@@ -10,10 +10,10 @@ export default function DocsScreen() {
                 contentContainerStyle={{ padding: 16 }}
             >
                 <Text variant="headlineMedium" style={{ marginVertical: 16 }}>
-                    Foxguard Documentation
+                    Lodgelock Documentation
                 </Text>
                 <Text variant="bodyMedium" style={{ marginBottom: 16 }}>
-                    This is a feisability MVP for Foxguard. My goal is to see
+                    This is a feisability MVP for Lodgelock. My goal is to see
                     whether I can build a simple and secure wallet companion,
                     similar to a hardware wallet, that grants extra security to
                     users using wallet extensions. This is not intended to
@@ -48,17 +48,17 @@ export default function DocsScreen() {
                     Setup
                 </Text>
                 <Text variant="bodyMedium" style={{ marginBottom: 8 }}>
-                    - Install the Foxguard app on your mobile device (expo go
+                    - Install the Lodgelock app on your mobile device (expo go
                     right now).{'\n'}
                     <Divider style={{ marginVertical: 8 }} />- Install the
                     metamask snap on on your flask wallet (only works for flask
                     right now - need manual approval from metamask team),{'\n'}
                     <Divider style={{ marginVertical: 8 }} />- Connect to a
                     wallet client (metamask) by scanning the QR code from the
-                    snap using foxguard.{'\n'}
+                    snap using Lodgelock.{'\n'}
                     <Divider style={{ marginVertical: 8 }} />- When signing
-                    transactions or messages in metamask using the Foxguard
-                    account, they will automatically be sent to Foxguard for
+                    transactions or messages in metamask using the Lodgelock
+                    account, they will automatically be sent to Lodgelock for
                     approval.{'\n'}
                 </Text>
 

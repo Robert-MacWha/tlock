@@ -1,5 +1,5 @@
 {
-    "name": "@tlock/snap",
+    "name": "@lodgelock/snap",
     "version": "0.1.0",
     "main": "./dist/bundle.js",
     "files": [
@@ -21,7 +21,6 @@
         "@metamask/keyring-snap-sdk": "^6.0.0",
         "@metamask/snaps-jest": "^9.4.0",
         "@metamask/snaps-sdk": "^9.3.0",
-        "@tlock/shared": "workspace:*",
         "@types/qrcode": "^1.5.5",
         "qrcode": "^1.5.4",
         "uuid": "^11.1.0",

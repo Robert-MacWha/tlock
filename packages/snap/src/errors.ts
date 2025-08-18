@@ -1,15 +1,15 @@
 import { ErrorCode } from './constants';
 
 /**
- * Standardized error class for TLock Snap operations
+ * Standardized error class for Lodgelock Snap operations
  */
-export class TlockSnapError extends Error {
+export class LodgelockSnapError extends Error {
     public readonly code: ErrorCode;
     public readonly originalError?: Error | undefined;
 
     constructor(code: ErrorCode, message: string, originalError?: Error) {
         super(message);
-        this.name = 'TlockSnapError';
+        this.name = 'LodgelockSnapError';
         this.code = code;
         this.originalError = originalError;
     }
@@ -20,7 +20,7 @@ export function throwError(
     message: string,
     originalError?: Error,
 ): never {
-    throw new TlockSnapError(code, message, originalError);
+    throw new LodgelockSnapError(code, message, originalError);
 }
 
 export function handleError(
@@ -31,12 +31,12 @@ export function handleError(
     const contextMessage = context ? `${context}: ` : '';
 
     if (error instanceof Error) {
-        throw new TlockSnapError(
+        throw new LodgelockSnapError(
             code,
             `${contextMessage}${error.message}`,
             error,
         );
     } else {
-        throw new TlockSnapError(code, `${contextMessage}${String(error)}`);
+        throw new LodgelockSnapError(code, `${contextMessage}${String(error)}`);
     }
 }

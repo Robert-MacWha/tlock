@@ -17,13 +17,13 @@ describe('pairing', () => {
     it('should throw an error for invalid QR code prefix', () => {
         const invalidQrCode = 'invalid://pair/someData';
         expect(() => parseQrCode(invalidQrCode)).toThrow(
-            "Invalid QR code format: Expected 'tlock://pair/' prefix but got: invalid://pair/someData...",
+            "Invalid QR code format: Expected 'lodgelock://pair/' prefix but got: invalid://pair/someData...",
         );
     });
 
     it('should throw an error for unsupported QR code version', () => {
         const invalidQrCode =
-            'tlock://pair/' +
+            'lodgelock://pair/' +
             btoa(
                 JSON.stringify({
                     version: 2,
@@ -38,7 +38,7 @@ describe('pairing', () => {
 
     it('should throw an error for invalid shared secret in QR code', () => {
         const invalidQrCode =
-            'tlock://pair/' +
+            'lodgelock://pair/' +
             btoa(
                 JSON.stringify({
                     version: 1,
@@ -52,14 +52,14 @@ describe('pairing', () => {
     });
 
     it('should throw an error for malformed base64 in QR code', () => {
-        const invalidQrCode = 'tlock://pair/invalidBase64!!!';
+        const invalidQrCode = 'lodgelock://pair/invalidBase64!!!';
         expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Invalid QR code: Unable to decode or parse QR code data',
         );
     });
 
     it('should throw an error for invalid JSON in QR code', () => {
-        const invalidQrCode = 'tlock://pair/' + btoa('{ invalid json }');
+        const invalidQrCode = 'lodgelock://pair/' + btoa('{ invalid json }');
         expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Invalid QR code: Unable to decode or parse QR code data',
         );
@@ -67,7 +67,7 @@ describe('pairing', () => {
 
     it('should throw an error for missing required fields in QR code', () => {
         const invalidQrCode =
-            'tlock://pair/' + btoa(JSON.stringify({ version: 1 }));
+            'lodgelock://pair/' + btoa(JSON.stringify({ version: 1 }));
         expect(() => parseQrCode(invalidQrCode)).toThrow(
             'Invalid QR code data',
         );
@@ -75,7 +75,7 @@ describe('pairing', () => {
 
     it('should throw an error for invalid shared secret', () => {
         const invalidQrCode =
-            'tlock://pair/' +
+            'lodgelock://pair/' +
             btoa(
                 JSON.stringify({
                     version: 1,
