@@ -4,10 +4,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "nvm use && vite build",
-        "deploy": "nvm use && yarn build && firebase deploy --only hosting",
-        "dev": "nvm use && vite dev",
-        "preview": "nvm use && vite preview"
+        "build": "vite build",
+        "deploy": "yarn build && firebase deploy --only hosting",
+        "dev": "vite dev",
+        "preview": "vite preview"
     },
     "dependencies": {
         "firebase": "^10.0.0"
