@@ -70,7 +70,7 @@ describe('PairingService', () => {
             const result = await pairingService.start();
 
             expect(result).toEqual({
-                qrData: '://pair/eyJ2ZXJzaW9uIjoxLCJzaGFyZWRTZWNyZXQiOlsxLDIsMyw0LDVdLCJwYWlyUmVxdWVzdElkIjoidGVzdC1yZXF1ZXN0LWlkIn0=',
+                qrData: 'lodgelock://pair/eyJ2ZXJzaW9uIjoxLCJzaGFyZWRTZWNyZXQiOlsxLDIsMyw0LDVdLCJwYWlyUmVxdWVzdElkIjoidGVzdC1yZXF1ZXN0LWlkIn0=',
                 // QR code asci, so just check for a string
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 qrSrc: expect.any(String),
