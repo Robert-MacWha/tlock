@@ -64,10 +64,8 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     );
     const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const resp = await handleKeyringRequest(keyring, request);
     if (resp) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return resp;
     }
     return null;

@@ -2,22 +2,24 @@ import { TlockKeyring } from '../keyring';
 import {
     EthAccountType,
     EthMethod,
+    KeyringAccount,
     KeyringEvent,
     KeyringRequest,
 } from '@metamask/keyring-api';
 import { updateState } from '../state';
 import type { Client } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
-import { emitSnapKeyringEvent } from '@metamask/keyring-api';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { Address, Hex, TransactionSerializedLegacy } from 'viem';
+import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
+import { Json } from '@metamask/snaps-sdk';
 
 // Mock dependencies
 jest.mock('../state');
 jest.mock('uuid');
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@metamask/keyring-api', () => ({
-    ...jest.requireActual('@metamask/keyring-api'),
+jest.mock('@metamask/keyring-snap-sdk', () => ({
+    ...jest.requireActual('@metamask/keyring-snap-sdk'),
     emitSnapKeyringEvent: jest.fn(),
 }));
 jest.mock('@metamask/eth-sig-util');
@@ -47,8 +49,8 @@ describe('TlockKeyring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => {});
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'log').mockImplementation(() => { });
+        jest.spyOn(console, 'error').mockImplementation(() => { });
 
         mockUuid.mockImplementation(() => mockAccountId);
         mockUpdateState.mockResolvedValue();
@@ -100,6 +102,26 @@ describe('TlockKeyring', () => {
             EthMethod.SignTypedDataV4,
         ],
         type: EthAccountType.Eoa,
+        scopes: [],
+    });
+
+    // Helper function to create mock request
+    const getMockRequest = (
+        method: string = EthMethod.PersonalSign,
+        params: Record<string, Json> | Json[] = ['0x123456' as Hex, mockAddress],
+        id: string = mockRequestId,
+        accountId: string = mockAccountId,
+        scope: string = 'eip155:1',
+        origin: string = ""
+    ): KeyringRequest => ({
+        id,
+        account: accountId,
+        scope,
+        request: {
+            method,
+            params,
+        },
+        origin,
     });
 
     // Helper function to test common error scenarios across methods
@@ -240,7 +262,8 @@ describe('TlockKeyring', () => {
                                 EthMethod.SignTypedDataV4,
                             ],
                             type: EthAccountType.Eoa,
-                        },
+                            scopes: [],
+                        } as KeyringAccount,
                         accountNameSuggestion: 'Tlock Account',
                     },
                 );
@@ -364,15 +387,7 @@ describe('TlockKeyring', () => {
             });
 
             it('should return pending requests', async () => {
-                const request: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: ['0x123456' as Hex, mockAddress],
-                    },
-                };
+                const request = getMockRequest();
                 setupKeyringState({
                     pendingRequests: { [mockRequestId]: request },
                 });
@@ -384,15 +399,7 @@ describe('TlockKeyring', () => {
 
         describe('getRequest', () => {
             it('should return existing request', async () => {
-                const request: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: ['0x123456' as Hex, mockAddress],
-                    },
-                };
+                const request = getMockRequest();
                 setupKeyringState({
                     pendingRequests: { [mockRequestId]: request },
                 });
@@ -410,15 +417,7 @@ describe('TlockKeyring', () => {
             it('should approve request and emit event', async () => {
                 const signature = '0xabcdef' as Hex;
                 const message = '0x123456' as Hex;
-                const request: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: [message, mockAddress],
-                    },
-                };
+                const request = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
                 setupKeyringState({
                     pendingRequests: { [mockRequestId]: request },
                 });
@@ -456,15 +455,7 @@ describe('TlockKeyring', () => {
 
         describe('rejectRequest', () => {
             it('should remove request and emit event', async () => {
-                const request: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: ['0x123456' as Hex, mockAddress],
-                    },
-                };
+                const request = getMockRequest();
                 setupKeyringState({
                     pendingRequests: { [mockRequestId]: request },
                 });
@@ -500,15 +491,7 @@ describe('TlockKeyring', () => {
                 });
                 mockRecoverPersonalSignature.mockReturnValue(mockAddress);
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: [message, mockAddress],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
 
                 const response = await keyring.submitRequest(mockRequest);
 
@@ -530,15 +513,7 @@ describe('TlockKeyring', () => {
                 });
                 mockRecoverPersonalSignature.mockReturnValue('0x999');
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: [message, mockAddress],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -551,15 +526,7 @@ describe('TlockKeyring', () => {
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({ status: 'approved' });
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.PersonalSign,
-                        params: ['0x123456' as Hex, mockAddress],
-                    },
-                };
+                const mockRequest = getMockRequest();
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -585,6 +552,7 @@ describe('TlockKeyring', () => {
                         method: EthMethod.Sign,
                         params: [mockAddress, message],
                     },
+                    origin: "",
                 };
 
                 const response = await keyring.submitRequest(mockRequest);
@@ -605,15 +573,7 @@ describe('TlockKeyring', () => {
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({ status: 'approved' });
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.Sign,
-                        params: [mockAddress, '0x123456' as Hex],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.Sign, [mockAddress, '0x123456' as Hex]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -643,15 +603,7 @@ describe('TlockKeyring', () => {
                     maxPriorityFeePerGas: '0x59682f00',
                 };
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.SignTransaction,
-                        params: [mockTx],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.SignTransaction, [mockTx]);
 
                 const response = await keyring.submitRequest(mockRequest);
 
@@ -699,15 +651,7 @@ describe('TlockKeyring', () => {
                     chainId: '0x1' as Hex,
                 };
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.SignTransaction,
-                        params: [mockTx],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.SignTransaction, [mockTx]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -736,15 +680,7 @@ describe('TlockKeyring', () => {
                     signature,
                 });
 
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: EthMethod.SignTypedDataV4,
-                        params: [mockAddress, typedData],
-                    },
-                };
+                const mockRequest = getMockRequest(EthMethod.SignTypedDataV4, [mockAddress, typedData]);
 
                 const response = await keyring.submitRequest(mockRequest);
 
@@ -773,29 +709,13 @@ describe('TlockKeyring', () => {
                 'submitRequest',
                 () => mockClient.submitRequest.mockResolvedValue(mockRequestId),
                 () => {
-                    const mockRequest: KeyringRequest = {
-                        id: mockRequestId,
-                        account: mockAccountId,
-                        scope: 'eip155:1',
-                        request: {
-                            method: EthMethod.PersonalSign,
-                            params: ['0x123456' as Hex, mockAddress],
-                        },
-                    };
+                    const mockRequest = getMockRequest();
                     return keyring.submitRequest(mockRequest);
                 },
             );
 
             it('should reject unsupported methods', async () => {
-                const mockRequest: KeyringRequest = {
-                    id: mockRequestId,
-                    account: mockAccountId,
-                    scope: 'eip155:1',
-                    request: {
-                        method: 'eth_unsupported',
-                        params: [],
-                    },
-                };
+                const mockRequest = getMockRequest('eth_unsupported', []);
 
                 await expect(
                     keyring.submitRequest(mockRequest),

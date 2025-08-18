@@ -14,7 +14,6 @@ import type { Json } from '@metamask/snaps-sdk';
 import type { Client, RequestType, RequestTypeMap } from '@tlock/shared';
 import { v4 as uuid } from 'uuid';
 import { serializeTransaction, type Address, type Hex } from 'viem';
-
 import type { KeyringState } from './state';
 import { updateState } from './state';
 import {
@@ -33,7 +32,7 @@ import {
     ACCOUNT_NAME_SUGGESTION,
 } from './constants';
 import { throwError, handleError } from './errors';
-import { emitSnapKeyringEvent } from './snap-utils';
+import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
 export class TlockKeyring implements Keyring {
