@@ -10,8 +10,8 @@ class MockHttpClient implements HttpClient {
         return this.mockData as T;
     }
 
-    async put(): Promise<void> { }
-    async delete(): Promise<void> { }
+    async put(): Promise<void> {}
+    async delete(): Promise<void> {}
 }
 
 describe('FirebaseClient validation', () => {
@@ -22,7 +22,7 @@ describe('FirebaseClient validation', () => {
     beforeEach(() => {
         mockHttp = new MockHttpClient();
         client = new FirebaseClient(sharedSecret, undefined, mockHttp);
-        jest.spyOn(console, 'warn').mockImplementation(() => { });
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
     afterEach(() => {

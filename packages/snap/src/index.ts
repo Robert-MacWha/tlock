@@ -9,7 +9,7 @@ import {
 import { createClient } from '@tlock/shared';
 import { getState } from './state';
 import { TlockKeyring } from './keyring';
-import { handleKeyringRequest } from '@metamask/keyring-api';
+import { handleKeyringRequest } from '@metamask/keyring-snap-sdk';
 import { validatePairedState } from './utils';
 import { initializeInterface, showErrorScreen } from './screen';
 import { SCREENS } from './constants';
@@ -64,7 +64,11 @@ export const onKeyringRequest: OnKeyringRequestHandler = async ({
     );
     const keyring = new TlockKeyring(client, state.keyringState, origin);
     console.log('Handling keyring request:', request);
-    return (await handleKeyringRequest(keyring, request)) ?? null;
+    const resp = await handleKeyringRequest(keyring, request);
+    if (resp) {
+        return resp;
+    }
+    return null;
 };
 
 export async function selectScreen(

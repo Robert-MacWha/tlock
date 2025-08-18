@@ -4,8 +4,8 @@
     "private": true,
     "main": "expo-router/entry",
     "scripts": {
-        "android": "expo run:android --device",
-        "dev": "expo start",
+        "go": "expo start",
+        "dev": "expo run:android --device",
         "ios": "expo run:ios",
         "lint": "eslint . --cache --ext js,ts,tsx",
         "test": "jest"

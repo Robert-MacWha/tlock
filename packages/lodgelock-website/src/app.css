@@ -1,0 +1,280 @@
+:root,
+[data-bs-theme='light'] {
+    /* Primary brand colors - using green theme */
+    --bs-primary: rgb(73, 103, 12);
+    --bs-primary-rgb: 73, 103, 12;
+    --bs-primary-text-emphasis: rgb(19, 31, 0);
+    --bs-primary-bg-subtle: rgb(202, 240, 135);
+    --bs-primary-border-subtle: rgb(174, 211, 110);
+
+    /* Secondary colors - using orange theme */
+    --bs-secondary: rgb(146, 76, 0);
+    --bs-secondary-rgb: 146, 76, 0;
+    --bs-secondary-text-emphasis: rgb(47, 21, 0);
+    --bs-secondary-bg-subtle: rgb(255, 220, 196);
+    --bs-secondary-border-subtle: rgb(255, 200, 170);
+
+    /* Success - using primary green */
+    --bs-success: rgb(73, 103, 12);
+    --bs-success-rgb: 73, 103, 12;
+    --bs-success-text-emphasis: rgb(19, 31, 0);
+    --bs-success-bg-subtle: rgb(202, 240, 135);
+    --bs-success-border-subtle: rgb(174, 211, 110);
+
+    /* Info - using tertiary browns */
+    --bs-info: rgb(137, 81, 0);
+    --bs-info-rgb: 137, 81, 0;
+    --bs-info-text-emphasis: rgb(44, 23, 0);
+    --bs-info-bg-subtle: rgb(255, 220, 188);
+    --bs-info-border-subtle: rgb(240, 200, 160);
+
+    /* Warning - using secondary orange */
+    --bs-warning: rgb(146, 76, 0);
+    --bs-warning-rgb: 146, 76, 0;
+    --bs-warning-text-emphasis: rgb(47, 21, 0);
+    --bs-warning-bg-subtle: rgb(255, 220, 196);
+    --bs-warning-border-subtle: rgb(255, 200, 170);
+
+    /* Danger - using error colors */
+    --bs-danger: rgb(186, 26, 26);
+    --bs-danger-rgb: 186, 26, 26;
+    --bs-danger-text-emphasis: rgb(65, 0, 2);
+    --bs-danger-bg-subtle: rgb(255, 218, 214);
+    --bs-danger-border-subtle: rgb(255, 190, 185);
+
+    /* Background and surface colors */
+    --bs-body-bg: rgb(254, 252, 244);
+    --bs-body-bg-rgb: 254, 252, 244;
+    --bs-body-color: rgb(27, 28, 24);
+    --bs-body-color-rgb: 27, 28, 24;
+
+    /* Light/Dark variants */
+    --bs-light: rgb(245, 245, 232);
+    --bs-light-rgb: 245, 245, 232;
+    --bs-dark: rgb(48, 49, 44);
+    --bs-dark-rgb: 48, 49, 44;
+
+    /* Gray scale using surface variants */
+    --bs-gray-100: rgb(254, 252, 244);
+    --bs-gray-200: rgb(245, 245, 232);
+    --bs-gray-300: rgb(240, 240, 225);
+    --bs-gray-400: rgb(234, 236, 219);
+    --bs-gray-500: rgb(197, 200, 185);
+    --bs-gray-600: rgb(117, 120, 107);
+    --bs-gray-700: rgb(69, 72, 61);
+    --bs-gray-800: rgb(48, 49, 44);
+    --bs-gray-900: rgb(27, 28, 24);
+
+    /* Border colors */
+    --bs-border-color: rgb(117, 120, 107);
+    --bs-border-color-translucent: rgba(117, 120, 107, 0.175);
+
+    /* Link colors */
+    --bs-link-color: rgb(73, 103, 12);
+    --bs-link-color-rgb: 73, 103, 12;
+    --bs-link-hover-color: rgb(19, 31, 0);
+    --bs-link-hover-color-rgb: 19, 31, 0;
+
+    /* Code highlighting */
+    --bs-code-color: rgb(186, 26, 26);
+    --bs-highlight-bg: rgb(202, 240, 135);
+
+    /* Focus ring */
+    --bs-focus-ring-color: rgba(73, 103, 12, 0.25);
+
+    /* Form validation */
+    --bs-form-valid-color: rgb(73, 103, 12);
+    --bs-form-valid-border-color: rgb(73, 103, 12);
+    --bs-form-invalid-color: rgb(186, 26, 26);
+    --bs-form-invalid-border-color: rgb(186, 26, 26);
+
+    /* Additional semantic colors for backgrounds */
+    --bs-tertiary-bg: rgb(240, 240, 225);
+    --bs-tertiary-bg-rgb: 240, 240, 225;
+    --bs-tertiary-color: rgba(27, 28, 24, 0.5);
+    --bs-tertiary-color-rgb: 27, 28, 24;
+
+    /* Custom elevation levels using Material elevation system */
+    --bs-elevation-0: transparent;
+    --bs-elevation-1: rgb(245, 245, 232);
+    --bs-elevation-2: rgb(240, 240, 225);
+    --bs-elevation-3: rgb(234, 236, 219);
+    --bs-elevation-4: rgb(232, 234, 216);
+    --bs-elevation-5: rgb(229, 231, 212);
+
+    /* Box shadows with natural tint */
+    --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+
+    /* Surface disabled and backdrop */
+    --bs-surface-disabled: rgba(27, 28, 24, 0.12);
+    --bs-on-surface-disabled: rgba(27, 28, 24, 0.38);
+    --bs-backdrop: rgba(46, 50, 39, 0.4);
+}
+
+/* Button overrides */
+
+/* Primary button - green theme */
+.btn-primary {
+    --bs-btn-color: rgb(255, 255, 255);
+    --bs-btn-bg: rgb(73, 103, 12);
+    --bs-btn-border-color: rgb(73, 103, 12);
+    --bs-btn-hover-color: rgb(255, 255, 255);
+    --bs-btn-hover-bg: rgb(58, 82, 9);
+    --bs-btn-hover-border-color: rgb(50, 71, 8);
+    --bs-btn-focus-shadow-rgb: 73, 103, 12;
+    --bs-btn-active-color: rgb(255, 255, 255);
+    --bs-btn-active-bg: rgb(50, 71, 8);
+    --bs-btn-active-border-color: rgb(42, 60, 7);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: rgb(255, 255, 255);
+    --bs-btn-disabled-bg: rgb(73, 103, 12);
+    --bs-btn-disabled-border-color: rgb(73, 103, 12);
+}
+
+/* Primary outline button */
+.btn-outline-primary {
+    --bs-btn-color: rgb(73, 103, 12);
+    --bs-btn-border-color: rgb(73, 103, 12);
+    --bs-btn-hover-color: rgb(255, 255, 255);
+    --bs-btn-hover-bg: rgb(73, 103, 12);
+    --bs-btn-hover-border-color: rgb(73, 103, 12);
+    --bs-btn-focus-shadow-rgb: 73, 103, 12;
+    --bs-btn-active-color: rgb(255, 255, 255);
+    --bs-btn-active-bg: rgb(73, 103, 12);
+    --bs-btn-active-border-color: rgb(73, 103, 12);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: rgb(73, 103, 12);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: rgb(73, 103, 12);
+    --bs-gradient: none;
+}
+
+/* Secondary button - orange theme */
+.btn-secondary {
+    --bs-btn-color: rgb(255, 255, 255);
+    --bs-btn-bg: rgb(146, 76, 0);
+    --bs-btn-border-color: rgb(146, 76, 0);
+    --bs-btn-hover-color: rgb(255, 255, 255);
+    --bs-btn-hover-bg: rgb(117, 61, 0);
+    --bs-btn-hover-border-color: rgb(102, 53, 0);
+    --bs-btn-focus-shadow-rgb: 146, 76, 0;
+    --bs-btn-active-color: rgb(255, 255, 255);
+    --bs-btn-active-bg: rgb(102, 53, 0);
+    --bs-btn-active-border-color: rgb(88, 46, 0);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: rgb(255, 255, 255);
+    --bs-btn-disabled-bg: rgb(146, 76, 0);
+    --bs-btn-disabled-border-color: rgb(146, 76, 0);
+}
+
+/* Secondary outline button */
+.btn-outline-secondary {
+    --bs-btn-color: rgb(146, 76, 0);
+    --bs-btn-border-color: rgb(146, 76, 0);
+    --bs-btn-hover-color: rgb(255, 255, 255);
+    --bs-btn-hover-bg: rgb(146, 76, 0);
+    --bs-btn-hover-border-color: rgb(146, 76, 0);
+    --bs-btn-focus-shadow-rgb: 146, 76, 0;
+    --bs-btn-active-color: rgb(255, 255, 255);
+    --bs-btn-active-bg: rgb(146, 76, 0);
+    --bs-btn-active-border-color: rgb(146, 76, 0);
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: rgb(146, 76, 0);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: rgb(146, 76, 0);
+    --bs-gradient: none;
+}
+
+/* Custom utility classes for elevation system */
+.bg-elevation-0 {
+    background-color: var(--bs-elevation-0) !important;
+}
+
+.bg-elevation-1 {
+    background-color: var(--bs-elevation-1) !important;
+}
+
+.bg-elevation-2 {
+    background-color: var(--bs-elevation-2) !important;
+}
+
+.bg-elevation-3 {
+    background-color: var(--bs-elevation-3) !important;
+}
+
+.bg-elevation-4 {
+    background-color: var(--bs-elevation-4) !important;
+}
+
+.bg-elevation-5 {
+    background-color: var(--bs-elevation-5) !important;
+}
+
+/* Card variants */
+.card-elevated {
+    background-color: var(--bs-elevation-2);
+    box-shadow: var(--bs-box-shadow-sm);
+}
+
+.card-elevated-lg {
+    background-color: var(--bs-elevation-3);
+    box-shadow: var(--bs-box-shadow);
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .lead {
+        font-size: 1.1rem;
+    }
+
+    .phone-mockup {
+        max-width: 250px !important;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .lead {
+        font-size: 1.1rem;
+    }
+
+    .phone-mockup {
+        max-width: 250px !important;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}

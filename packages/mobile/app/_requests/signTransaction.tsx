@@ -90,8 +90,9 @@ export default function SignTransaction() {
                             <KeyValueRow
                                 label="To"
                                 value={
-                                    formatAddressForDisplay(account.address) ??
-                                    'Create Contract'
+                                    transaction.to ?
+                                        formatAddressForDisplay(transaction.to) :
+                                        'Create Contract'
                                 }
                             />
                             <KeyValueRow

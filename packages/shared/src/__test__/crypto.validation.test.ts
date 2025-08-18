@@ -1,4 +1,8 @@
-import { decryptMessage, encryptMessage, generateSharedSecret } from '../crypto';
+import {
+    decryptMessage,
+    encryptMessage,
+    generateSharedSecret,
+} from '../crypto';
 import { PairRequestSchema } from '../validation';
 
 describe('decryptMessage validation', () => {
@@ -42,8 +46,8 @@ describe('decryptMessage validation', () => {
     });
 
     it('should throw error for invalid encrypted data', () => {
-        expect(() => decryptMessage('invalid-encrypted-data', sharedSecret)).toThrow(
-            'Decryption failed',
-        );
+        expect(() =>
+            decryptMessage('invalid-encrypted-data', sharedSecret),
+        ).toThrow('Decryption failed');
     });
 });
