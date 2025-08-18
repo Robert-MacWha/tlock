@@ -4,13 +4,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-        "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-        "deploy": "yarn build && firebase deploy --only hosting",
-        "dev": "vite dev",
-        "prepare": "svelte-kit sync || echo ''",
-        "preview": "vite preview"
+        "build": "nvm use && vite build",
+        "deploy": "nvm use && yarn build && firebase deploy --only hosting",
+        "dev": "nvm use && vite dev",
+        "preview": "nvm use && vite preview"
     },
     "dependencies": {
         "firebase": "^10.0.0"
