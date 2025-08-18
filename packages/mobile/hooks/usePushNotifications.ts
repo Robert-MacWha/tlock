@@ -5,7 +5,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { useSecureStorage } from './useSecureStorage';
 
-const PUSH_TOKEN_KEY = 'lodgelock_push_token';
+export const PUSH_TOKEN_KEY = 'lodgelock_push_token';
 
 export interface UsePushNotificationsReturn {
     expoPushToken: string | null;

@@ -33,8 +33,8 @@ export interface UseClientsReturn {
     setFirebaseUrl: (url: string) => Promise<void>;
 }
 
-const CLIENTS_KEY = 'lodgelock_clients';
-const FIREBASE_URL_KEY = 'lodgelock_firebase_url';
+export const CLIENTS_KEY = 'lodgelock_clients';
+export const FIREBASE_URL_KEY = 'lodgelock_firebase_url';
 
 export function useClients(): UseClientsReturn {
     const secureStorage = useSecureStorage();

@@ -1,5 +1,5 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
-import { useClients } from '../useClients';
+import { CLIENTS_KEY, useClients } from '../useClients';
 import { useSecureStorage } from '../useSecureStorage';
 import { SharedSecret } from '@lodgelock/shared';
 import * as ExportoCrypto from 'expo-crypto';
@@ -144,7 +144,7 @@ describe('useClients', () => {
             });
 
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'lodgelock_clients',
+                CLIENTS_KEY,
                 expect.stringContaining('Test Client'),
                 false,
             );
@@ -209,7 +209,7 @@ describe('useClients', () => {
             });
 
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'lodgelock_clients',
+                CLIENTS_KEY,
                 '[]',
                 false,
             );
@@ -279,7 +279,7 @@ describe('useClients', () => {
             });
 
             expect(mockSecureStorageReturn.setItem).toHaveBeenCalledWith(
-                'lodgelock_clients',
+                CLIENTS_KEY,
                 expect.stringContaining('New Name'),
                 false,
             );
