@@ -56,7 +56,6 @@ describe('Keyring', () => {
         mockUpdateState.mockResolvedValue();
         mockEmitSnapKeyringEvent.mockResolvedValue();
 
-        // Create mock client with all required properties
         mockClient = {
             roomId: 'test-room',
             submitDevice: jest.fn(),
@@ -70,11 +69,9 @@ describe('Keyring', () => {
             pollUntil: jest.fn(),
         } as jest.Mocked<Client>;
 
-        // Create keyring instance
         keyring = new LodgelockKeyring(mockClient);
     });
 
-    // Helper function to setup keyring state
     const setupKeyringState = (options: {
         wallets?: Record<
             string,
@@ -88,7 +85,7 @@ describe('Keyring', () => {
         };
     };
 
-    // Helper function to create mock account
+
     const createMockAccount = (id = mockAccountId, address = mockAddress) => ({
         id,
         address,
@@ -103,9 +100,8 @@ describe('Keyring', () => {
         ],
         type: EthAccountType.Eoa,
         scopes: ['eip155:0'],
-    });
+    } as KeyringAccount);
 
-    // Helper function to create mock request
     const getMockRequest = (
         method: string = EthMethod.PersonalSign,
         params: Record<string, Json> | Json[] = ['0x123456' as Hex, mockAddress],
@@ -124,7 +120,6 @@ describe('Keyring', () => {
         origin,
     });
 
-    // Helper function to test common error scenarios across methods
     const testAccountNotFound = (
         methodName: string,
         methodCall: () => Promise<unknown>,
