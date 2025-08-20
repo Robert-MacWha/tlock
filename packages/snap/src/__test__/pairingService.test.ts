@@ -100,7 +100,7 @@ describe('PairingService', () => {
             );
 
             await expect(pairingService.start()).rejects.toThrow(
-                'Error generating pairing data',
+                'Network error',
             );
         });
     });
@@ -163,7 +163,7 @@ describe('PairingService', () => {
                     mockClient,
                     mockSharedSecret,
                 ),
-            ).rejects.toThrow('Pairing timed out or failed');
+            ).rejects.toThrow('Timeout');
             expect(mockUpdateState).toHaveBeenCalledTimes(0);
         });
     });

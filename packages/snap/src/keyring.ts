@@ -5,12 +5,8 @@ import type {
     KeyringRequest,
     KeyringResponse,
 } from '@metamask/keyring-api';
-import {
-    KeyringEvent,
-    EthAccountType,
-    EthMethod,
-} from '@metamask/keyring-api';
-import type { Json } from '@metamask/snaps-sdk';
+import { KeyringEvent, EthAccountType, EthMethod } from '@metamask/keyring-api';
+import { type Json } from '@metamask/snaps-sdk';
 import type { Client, RequestType, RequestTypeMap } from '@lodgelock/shared';
 import { v4 as uuid } from 'uuid';
 import { serializeTransaction, type Address, type Hex } from 'viem';
@@ -28,10 +24,8 @@ import {
 import {
     POLL_INTERVAL,
     POLL_TIMEOUT,
-    ERROR_CODES,
     ACCOUNT_NAME_SUGGESTION,
 } from './constants';
-import { throwError, handleError } from './errors';
 import { emitSnapKeyringEvent } from '@metamask/keyring-snap-sdk';
 
 // https://github.com/MetaMask/snap-simple-keyring/blob/main/packages/snap/src/keyring.ts
@@ -70,10 +64,10 @@ export class LodgelockKeyring implements Keyring {
             await this.client.deleteRequest(requestId);
             return response;
         } catch (error) {
-            handleError(
-                error,
-                ERROR_CODES.SIGNING_FAILED,
-                `Polling for ${requestType} completion`,
+            let message = 'Unknown error occurred';
+            if (error instanceof Error) message = error.message;
+            throw new Error(
+                `Polling for ${requestType} completion failed: ${message}`,
             );
         }
     }
@@ -91,10 +85,7 @@ export class LodgelockKeyring implements Keyring {
 
         const wallet = this.state.wallets[id];
         if (!wallet) {
-            throwError(
-                ERROR_CODES.ACCOUNT_NOT_FOUND,
-                `Account with ID ${id} not found`,
-            );
+            throw new Error(`Account with ID ${id} not found`);
         }
         return wallet.account;
     }
@@ -114,14 +105,22 @@ export class LodgelockKeyring implements Keyring {
         );
 
         if (!response.address) {
-            throwError(
-                ERROR_CODES.IMPORT_FAILED,
-                'No address returned from mobile device',
-            );
+            throw new Error('No address returned from mobile device');
         }
 
         const id = uuid();
         const { address } = response;
+
+        //? Possible issue / my lack of understanding.  The KeyringAccount type
+        //? demands a `scopes: `${string}:${string}`[]` field, will throw a type
+        //? error if it's not present, and will throw a unknown runtime error
+        //? if it's present and empty.
+        //?
+        //? So my options are either to exclude the arg and get a type error
+        //? (but it will work) or to use `eip155:0` which isn't valid caip:10
+        //? but is apparently recognized as "all eip155" chains and is kinda
+        //? present within the docs?  At least within the code:
+        //? https://github.com/MetaMask/snaps/blob/bd2ad5d9120b4776ab559dabe6bdd4f381ed1a82/packages/snaps-utils/src/account.ts#L53
         const account: KeyringAccount = {
             id,
             address,
@@ -135,22 +134,13 @@ export class LodgelockKeyring implements Keyring {
                 EthMethod.SignTypedDataV4,
             ],
             type: EthAccountType.Eoa,
-            scopes: [],
+            scopes: ['eip155:0'],
         };
 
-        try {
-            await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, {
-                account,
-                accountNameSuggestion: ACCOUNT_NAME_SUGGESTION,
-            });
-        } catch (error) {
-            // TODO: Handle error where account is already registered more gracefully
-            handleError(
-                error,
-                ERROR_CODES.ACCOUNT_CREATION_FAILED,
-                'Error registering account with MetaMask',
-            );
-        }
+        await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, {
+            account,
+            accountNameSuggestion: ACCOUNT_NAME_SUGGESTION,
+        });
 
         this.state.wallets[id] = { account };
         await this.saveState();
@@ -169,10 +159,7 @@ export class LodgelockKeyring implements Keyring {
 
         const wallet = this.state.wallets[account.id];
         if (!wallet) {
-            throwError(
-                ERROR_CODES.ACCOUNT_NOT_FOUND,
-                `Account with ID ${account.id} not found`,
-            );
+            throw new Error(`Account with ID ${account.id} not found`);
         }
 
         const newAccount: KeyringAccount = {
@@ -208,10 +195,7 @@ export class LodgelockKeyring implements Keyring {
 
         const request = this.state.pendingRequests[id];
         if (!request) {
-            throwError(
-                ERROR_CODES.REQUEST_NOT_FOUND,
-                `Request with ID ${id} not found`,
-            );
+            throw new Error(`Request with ID ${id} not found`);
         }
         return request;
     }
@@ -234,10 +218,7 @@ export class LodgelockKeyring implements Keyring {
     ): Promise<void> {
         const pendingRequest = this.state.pendingRequests[id];
         if (!pendingRequest) {
-            throwError(
-                ERROR_CODES.REQUEST_NOT_FOUND,
-                `Request with ID ${id} not found`,
-            );
+            throw new Error(`Request with ID ${id} not found`);
         }
 
         let result: Json;
@@ -262,10 +243,7 @@ export class LodgelockKeyring implements Keyring {
         console.log('Rejecting request with ID:', id);
 
         if (!this.state.pendingRequests[id]) {
-            throwError(
-                ERROR_CODES.REQUEST_NOT_FOUND,
-                `Request with ID ${id} not found`,
-            );
+            throw new Error(`Request with ID ${id} not found`);
         }
 
         await this.removePendingRequest(id);
@@ -322,7 +300,7 @@ export class LodgelockKeyring implements Keyring {
         );
 
         if (!response.signature) {
-            throwError(ERROR_CODES.SIGNING_FAILED, 'No signature returned');
+            throw new Error('No signature returned');
         }
 
         const recoveredAddress = recoverPersonalSignature({
@@ -331,8 +309,7 @@ export class LodgelockKeyring implements Keyring {
         });
 
         if (recoveredAddress !== from) {
-            throwError(
-                ERROR_CODES.SIGNATURE_VERIFICATION_FAILED,
+            throw new Error(
                 `Recovered address ${recoveredAddress} does not match from address ${from}`,
             );
         }
@@ -364,10 +341,7 @@ export class LodgelockKeyring implements Keyring {
         );
 
         if (!response.signed) {
-            throwError(
-                ERROR_CODES.SIGNING_FAILED,
-                'No signed transaction returned',
-            );
+            throw new Error('No signed transaction returned');
         }
 
         const signed = response.signed;
@@ -394,7 +368,7 @@ export class LodgelockKeyring implements Keyring {
         );
 
         if (!response.signature) {
-            throwError(ERROR_CODES.SIGNING_FAILED, 'No signature returned');
+            throw new Error('No signature returned');
         }
 
         return response.signature;
@@ -416,7 +390,7 @@ export class LodgelockKeyring implements Keyring {
         );
 
         if (!response.signature) {
-            throwError(ERROR_CODES.SIGNING_FAILED, 'No signature returned');
+            throw new Error('No signature returned');
         }
 
         return response.signature;
