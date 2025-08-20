@@ -26,13 +26,12 @@ I've tested several existing MPC/account-management snaps. Each has strengths, b
 | **MPC Wallets**        | \~1 min      | Medium–High (depends on implementation) | Proprietary recovery schemes | Typically 3rd-party infra       | Free / enterprise SaaS     | Teams, institutions, or users who want social recovery or shared custody at the cost of portability                  |
 | **Hardware Wallets**   | 2–5 min      | Very High (keys in secure element)      | Seed phrase backup (offline) | None                            | Paid device (\~\$70–\$200) | Long-term holders with larger balances, low-frequency signing, or those needing maximum isolation                    |
 
-| Snap             | Backup & Recovery                                 | Auth for Signing                              | Dependencies                       | 
-| ---------------- | ------------------------------------------------- | --------------------------------------------- | ---------------------------------- | 
-| **Lodgelock**    | Standard seed phrase (portable)                   | Biometric required each sign                  | Firebase (replaceable)             | 
-| **Para**         | Proprietary backup kit (PDF, non-portable)        | Session-based (no per-sign check)             | Central infra                      | 
-| **Silent Shard** | Proprietary recovery (Google account integration) | Optional biometric (on load only)             | Central infra                      | 
+| Snap             | Backup & Recovery                                 | Auth for Signing                              | Dependencies                       |
+| ---------------- | ------------------------------------------------- | --------------------------------------------- | ---------------------------------- |
+| **Lodgelock**    | Standard seed phrase (portable)                   | Biometric required each sign                  | Firebase (replaceable)             |
+| **Para**         | Proprietary backup kit (PDF, non-portable)        | Session-based (no per-sign check)             | Central infra                      |
+| **Silent Shard** | Proprietary recovery (Google account integration) | Optional biometric (on load only)             | Central infra                      |
 | **Safeheron**    | 2-of-3 MPC with shard recovery option             | Two devices required per sign (browser + app) | LAN connection (no central server) |
-
 
 ## Architecture Overview
 

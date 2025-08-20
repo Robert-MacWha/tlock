@@ -1,6 +1,4 @@
 import { SnapState } from './state';
-import { throwError } from './errors';
-import { ERROR_CODES } from './constants';
 
 export function validatePairedState(
     state: SnapState | null,
@@ -11,7 +9,7 @@ export function validatePairedState(
     validateSharedSecret(state);
 
     if (!state.fcmToken) {
-        throwError(ERROR_CODES.NOT_PAIRED, 'Not paired');
+        throw new Error('Missing FCM token');
     }
 }
 
@@ -21,10 +19,10 @@ export function validateSharedSecret(
     sharedSecret: NonNullable<SnapState['sharedSecret']>;
 } {
     if (!state) {
-        throwError(ERROR_CODES.MISSING_STATE, 'Missing snap state');
+        throw new Error('State is null');
     }
 
     if (!state.sharedSecret) {
-        throwError(ERROR_CODES.MISSING_SECRET, 'Missing shared secret');
+        throw new Error('Missing shared secret');
     }
 }

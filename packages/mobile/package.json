@@ -4,14 +4,14 @@
     "private": true,
     "main": "expo-router/entry",
     "scripts": {
-        "go": "expo start",
-        "dev": "expo run:android --device",
         "android": "expo run:android",
-        "ios": "expo run:ios",
         "build:debug": "expo run:android --device --variant debug",
-        "build:preview": "expo run:android --device --variant preview",
-        "prebuild": "expo prebuild",
+        "build:release": "expo run:android --device --variant release",
+        "dev": "expo run:android --device",
+        "go": "expo start",
+        "ios": "expo run:ios",
         "lint": "eslint . --cache --ext js,ts,tsx",
+        "prebuild": "expo prebuild --clean",
         "test": "jest"
     },
     "jest": {
