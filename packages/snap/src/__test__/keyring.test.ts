@@ -102,7 +102,7 @@ describe('Keyring', () => {
             EthMethod.SignTypedDataV4,
         ],
         type: EthAccountType.Eoa,
-        scopes: [],
+        scopes: ['eip155:0'],
     });
 
     // Helper function to create mock request
@@ -262,7 +262,7 @@ describe('Keyring', () => {
                                 EthMethod.SignTypedDataV4,
                             ],
                             type: EthAccountType.Eoa,
-                            scopes: [],
+                            scopes: ['eip155:0'],
                         } as KeyringAccount,
                         accountNameSuggestion: 'Lodgelock Account',
                     },

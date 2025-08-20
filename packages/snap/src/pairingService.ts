@@ -8,8 +8,7 @@ import {
 } from '@lodgelock/shared';
 import qrcode from 'qrcode';
 import { updateState, getState } from './state';
-import { POLL_INTERVAL, ERROR_CODES } from './constants';
-import { throwError } from './errors';
+import { POLL_INTERVAL } from './constants';
 
 export interface PairingQrData {
     qrData: string;
@@ -20,42 +19,33 @@ export interface PairingQrData {
 
 export class PairingService {
     async start(): Promise<PairingQrData> {
-        try {
-            const sharedSecret = generateSharedSecret();
-            const state = await getState();
-            const client = createClient(
-                sharedSecret,
-                undefined,
-                state?.firebaseUrl,
-            );
+        const sharedSecret = generateSharedSecret();
+        const state = await getState();
+        const client = createClient(
+            sharedSecret,
+            undefined,
+            state?.firebaseUrl,
+        );
 
-            const requestId = await client.submitRequest('pair', {
-                status: 'pending',
-                fcmToken: '',
-                deviceName: '',
-            });
+        const requestId = await client.submitRequest('pair', {
+            status: 'pending',
+            fcmToken: '',
+            deviceName: '',
+        });
 
-            await updateState({
-                sharedSecret,
-            });
+        await updateState({
+            sharedSecret,
+        });
 
-            const qrData = createQrCode(sharedSecret, requestId);
-            const qrSrc = await qrcode.toString(qrData);
+        const qrData = createQrCode(sharedSecret, requestId);
+        const qrSrc = await qrcode.toString(qrData);
 
-            return {
-                qrData,
-                qrSrc,
-                requestId,
-                sharedSecret,
-            };
-        } catch (error: unknown) {
-            const err = error as Error;
-            throwError(
-                ERROR_CODES.PAIRING_FAILED,
-                'Error generating pairing data',
-                err,
-            );
-        }
+        return {
+            qrData,
+            qrSrc,
+            requestId,
+            sharedSecret,
+        };
     }
 
     async waitForPairing(
@@ -64,34 +54,25 @@ export class PairingService {
         sharedSecret: SharedSecret,
         timeoutSeconds = 300,
     ): Promise<PairRequest> {
-        try {
-            const response = await client.pollUntil(
-                requestId,
-                'pair',
-                POLL_INTERVAL,
-                timeoutSeconds,
-                (resp) => {
-                    return resp.status !== 'pending';
-                },
-            );
+        const response = await client.pollUntil(
+            requestId,
+            'pair',
+            POLL_INTERVAL,
+            timeoutSeconds,
+            (resp) => {
+                return resp.status !== 'pending';
+            },
+        );
 
-            // If pairing was successful, save the pairing data
-            if (response.status === 'approved') {
-                await updateState({
-                    sharedSecret,
-                    fcmToken: response.fcmToken,
-                    deviceName: response.deviceName,
-                });
-            }
-
-            return response;
-        } catch (error: unknown) {
-            const err = error as Error;
-            throwError(
-                ERROR_CODES.PAIRING_FAILED,
-                'Pairing timed out or failed',
-                err,
-            );
+        // If pairing was successful, save the pairing data
+        if (response.status === 'approved') {
+            await updateState({
+                sharedSecret,
+                fcmToken: response.fcmToken,
+                deviceName: response.deviceName,
+            });
         }
+
+        return response;
     }
 }

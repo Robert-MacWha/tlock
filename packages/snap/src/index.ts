@@ -94,13 +94,15 @@ export async function selectScreen(
                 return;
         }
     } catch (error) {
-        console.error(
-            `Error showing screen screen=${screen} err=${error as string}`,
-        );
-        if (error instanceof Error) {
-            await showErrorScreen(interfaceId, error.message);
-        } else {
-            await showErrorScreen(interfaceId, 'An unexpected error occurred');
+        let message = 'An unexpected error occurred';
+        //? Apparently metamask doesn't know that the error type exists. Or maybe 
+        //? they have a reason, idk. Regardless, this'll get the `message` field
+        //? from any type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        if (error && typeof error === 'object' && 'message' in error && typeof (error as any).message === 'string') {
+            message = error.message as string;
         }
+        console.log('Error selecting screen:', message);
+        await showErrorScreen(interfaceId, message);
     }
 }

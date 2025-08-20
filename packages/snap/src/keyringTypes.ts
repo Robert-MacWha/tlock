@@ -69,21 +69,21 @@ export interface TransactionSignature {
 
 export type KeyringRequestParams =
     | {
-          method: 'personal_sign';
-          params: [message: Hex, address: Address];
-      }
+        method: 'personal_sign';
+        params: [message: Hex, address: Address];
+    }
     | {
-          method: 'eth_sign';
-          params: [address: Address, hash: Hash];
-      }
+        method: 'eth_sign';
+        params: [address: Address, hash: Hash];
+    }
     | {
-          method: 'eth_signTransaction';
-          params: [transaction: TransactionRequest];
-      }
+        method: 'eth_signTransaction';
+        params: [transaction: TransactionRequest];
+    }
     | {
-          method: 'eth_signTypedData_v4';
-          params: [address: Address, typedData: TypedDataRequest];
-      };
+        method: 'eth_signTypedData_v4';
+        params: [address: Address, typedData: TypedDataRequest];
+    };
 
 /**
  * Represents the response from a keyring operation.
