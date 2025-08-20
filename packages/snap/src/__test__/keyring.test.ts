@@ -49,8 +49,8 @@ describe('Keyring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => { });
-        jest.spyOn(console, 'error').mockImplementation(() => { });
+        jest.spyOn(console, 'log').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         mockUuid.mockImplementation(() => mockAccountId);
         mockUpdateState.mockResolvedValue();
@@ -85,30 +85,33 @@ describe('Keyring', () => {
         };
     };
 
-
-    const createMockAccount = (id = mockAccountId, address = mockAddress) => ({
-        id,
-        address,
-        options: {},
-        methods: [
-            EthMethod.PersonalSign,
-            EthMethod.Sign,
-            EthMethod.SignTransaction,
-            EthMethod.SignTypedDataV1,
-            EthMethod.SignTypedDataV3,
-            EthMethod.SignTypedDataV4,
-        ],
-        type: EthAccountType.Eoa,
-        scopes: ['eip155:0'],
-    } as KeyringAccount);
+    const createMockAccount = (id = mockAccountId, address = mockAddress) =>
+        ({
+            id,
+            address,
+            options: {},
+            methods: [
+                EthMethod.PersonalSign,
+                EthMethod.Sign,
+                EthMethod.SignTransaction,
+                EthMethod.SignTypedDataV1,
+                EthMethod.SignTypedDataV3,
+                EthMethod.SignTypedDataV4,
+            ],
+            type: EthAccountType.Eoa,
+            scopes: ['eip155:0'],
+        }) as KeyringAccount;
 
     const getMockRequest = (
         method: string = EthMethod.PersonalSign,
-        params: Record<string, Json> | Json[] = ['0x123456' as Hex, mockAddress],
+        params: Record<string, Json> | Json[] = [
+            '0x123456' as Hex,
+            mockAddress,
+        ],
         id: string = mockRequestId,
         accountId: string = mockAccountId,
         scope: string = 'eip155:1',
-        origin: string = ""
+        origin: string = '',
     ): KeyringRequest => ({
         id,
         account: accountId,
@@ -175,7 +178,11 @@ describe('Keyring', () => {
 
         it('should store origin', () => {
             const origin = 'https://example.com';
-            const newKeyring = new LodgelockKeyring(mockClient, undefined, origin);
+            const newKeyring = new LodgelockKeyring(
+                mockClient,
+                undefined,
+                origin,
+            );
             expect(newKeyring['origin']).toBe(origin);
         });
     });
@@ -412,7 +419,10 @@ describe('Keyring', () => {
             it('should approve request and emit event', async () => {
                 const signature = '0xabcdef' as Hex;
                 const message = '0x123456' as Hex;
-                const request = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
+                const request = getMockRequest(EthMethod.PersonalSign, [
+                    message,
+                    mockAddress,
+                ]);
                 setupKeyringState({
                     pendingRequests: { [mockRequestId]: request },
                 });
@@ -486,7 +496,10 @@ describe('Keyring', () => {
                 });
                 mockRecoverPersonalSignature.mockReturnValue(mockAddress);
 
-                const mockRequest = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
+                const mockRequest = getMockRequest(EthMethod.PersonalSign, [
+                    message,
+                    mockAddress,
+                ]);
 
                 const response = await keyring.submitRequest(mockRequest);
 
@@ -508,7 +521,10 @@ describe('Keyring', () => {
                 });
                 mockRecoverPersonalSignature.mockReturnValue('0x999');
 
-                const mockRequest = getMockRequest(EthMethod.PersonalSign, [message, mockAddress]);
+                const mockRequest = getMockRequest(EthMethod.PersonalSign, [
+                    message,
+                    mockAddress,
+                ]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -547,7 +563,7 @@ describe('Keyring', () => {
                         method: EthMethod.Sign,
                         params: [mockAddress, message],
                     },
-                    origin: "",
+                    origin: '',
                 };
 
                 const response = await keyring.submitRequest(mockRequest);
@@ -568,7 +584,10 @@ describe('Keyring', () => {
                 mockClient.submitRequest.mockResolvedValue(mockRequestId);
                 mockClient.pollUntil.mockResolvedValue({ status: 'approved' });
 
-                const mockRequest = getMockRequest(EthMethod.Sign, [mockAddress, '0x123456' as Hex]);
+                const mockRequest = getMockRequest(EthMethod.Sign, [
+                    mockAddress,
+                    '0x123456' as Hex,
+                ]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -598,7 +617,9 @@ describe('Keyring', () => {
                     maxPriorityFeePerGas: '0x59682f00',
                 };
 
-                const mockRequest = getMockRequest(EthMethod.SignTransaction, [mockTx]);
+                const mockRequest = getMockRequest(EthMethod.SignTransaction, [
+                    mockTx,
+                ]);
 
                 const response = await keyring.submitRequest(mockRequest);
 
@@ -646,7 +667,9 @@ describe('Keyring', () => {
                     chainId: '0x1' as Hex,
                 };
 
-                const mockRequest = getMockRequest(EthMethod.SignTransaction, [mockTx]);
+                const mockRequest = getMockRequest(EthMethod.SignTransaction, [
+                    mockTx,
+                ]);
 
                 await expect(
                     keyring.submitRequest(mockRequest),
@@ -675,7 +698,10 @@ describe('Keyring', () => {
                     signature,
                 });
 
-                const mockRequest = getMockRequest(EthMethod.SignTypedDataV4, [mockAddress, typedData]);
+                const mockRequest = getMockRequest(EthMethod.SignTypedDataV4, [
+                    mockAddress,
+                    typedData,
+                ]);
 
                 const response = await keyring.submitRequest(mockRequest);
 

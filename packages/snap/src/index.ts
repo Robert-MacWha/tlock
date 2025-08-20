@@ -95,11 +95,16 @@ export async function selectScreen(
         }
     } catch (error) {
         let message = 'An unexpected error occurred';
-        //? Apparently metamask doesn't know that the error type exists. Or maybe 
+        //? Apparently metamask doesn't know that the error type exists. Or maybe
         //? they have a reason, idk. Regardless, this'll get the `message` field
         //? from any type
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        if (error && typeof error === 'object' && 'message' in error && typeof (error as any).message === 'string') {
+        if (
+            error &&
+            typeof error === 'object' &&
+            'message' in error &&
+            typeof (error as any).message === 'string'
+        ) {
             message = error.message as string;
         }
         console.log('Error selecting screen:', message);

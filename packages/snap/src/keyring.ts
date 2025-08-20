@@ -5,11 +5,7 @@ import type {
     KeyringRequest,
     KeyringResponse,
 } from '@metamask/keyring-api';
-import {
-    KeyringEvent,
-    EthAccountType,
-    EthMethod,
-} from '@metamask/keyring-api';
+import { KeyringEvent, EthAccountType, EthMethod } from '@metamask/keyring-api';
 import { type Json } from '@metamask/snaps-sdk';
 import type { Client, RequestType, RequestTypeMap } from '@lodgelock/shared';
 import { v4 as uuid } from 'uuid';
@@ -70,7 +66,9 @@ export class LodgelockKeyring implements Keyring {
         } catch (error) {
             let message = 'Unknown error occurred';
             if (error instanceof Error) message = error.message;
-            throw new Error(`Polling for ${requestType} completion failed: ${message}`);
+            throw new Error(
+                `Polling for ${requestType} completion failed: ${message}`,
+            );
         }
     }
 
@@ -116,13 +114,13 @@ export class LodgelockKeyring implements Keyring {
         //? Possible issue / my lack of understanding.  The KeyringAccount type
         //? demands a `scopes: `${string}:${string}`[]` field, will throw a type
         //? error if it's not present, and will throw a unknown runtime error
-        //? if it's present and empty.  
+        //? if it's present and empty.
         //?
-        //? So my options are either to exclude the arg and get a type error 
+        //? So my options are either to exclude the arg and get a type error
         //? (but it will work) or to use `eip155:0` which isn't valid caip:10
         //? but is apparently recognized as "all eip155" chains and is kinda
         //? present within the docs?  At least within the code:
-        //? https://github.com/MetaMask/snaps/blob/bd2ad5d9120b4776ab559dabe6bdd4f381ed1a82/packages/snaps-utils/src/account.ts#L53 
+        //? https://github.com/MetaMask/snaps/blob/bd2ad5d9120b4776ab559dabe6bdd4f381ed1a82/packages/snaps-utils/src/account.ts#L53
         const account: KeyringAccount = {
             id,
             address,
@@ -136,7 +134,7 @@ export class LodgelockKeyring implements Keyring {
                 EthMethod.SignTypedDataV4,
             ],
             type: EthAccountType.Eoa,
-            scopes: ['eip155:0']
+            scopes: ['eip155:0'],
         };
 
         await emitSnapKeyringEvent(snap, KeyringEvent.AccountCreated, {
