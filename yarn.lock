@@ -4686,7 +4686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/base-controller@npm:^8.0.0, @metamask/base-controller@npm:^8.0.1":
+"@metamask/base-controller@npm:^8.0.0, @metamask/base-controller@npm:^8.0.1, @metamask/base-controller@npm:^8.1.0":
   version: 8.1.0
   resolution: "@metamask/base-controller@npm:8.1.0"
   dependencies:
@@ -5204,12 +5204,12 @@ __metadata:
   linkType: hard
 
 "@metamask/snaps-utils@npm:^11.3.0, @metamask/snaps-utils@npm:^11.4.0":
-  version: 11.4.0
-  resolution: "@metamask/snaps-utils@npm:11.4.0"
+  version: 11.5.0
+  resolution: "@metamask/snaps-utils@npm:11.5.0"
   dependencies:
     "@babel/core": ^7.23.2
     "@babel/types": ^7.23.0
-    "@metamask/base-controller": ^8.0.1
+    "@metamask/base-controller": ^8.1.0
     "@metamask/key-tree": ^10.1.1
     "@metamask/permission-controller": ^11.0.6
     "@metamask/rpc-errors": ^7.0.3
@@ -5231,7 +5231,7 @@ __metadata:
     semver: ^7.5.4
     ses: ^1.14.0
     validate-npm-package-name: ^5.0.0
-  checksum: 1265717dabe5e42ee7a97be5614793de4e1b07afcb3ea07239baca2daab9cedf3e8061acafee82be995acc684284b2506c75cdfbfc7770152b9a823be07f4194
+  checksum: 75f24f437c808a0298212b48a95ca6f3925d30ad6c1c74336545a8c4ed368e9cc8b576d0908c00d2875ac195d853ceb18be3e8b323079263db600a2e478a56f0
   languageName: node
   linkType: hard
 
