@@ -4687,12 +4687,13 @@ __metadata:
   linkType: hard
 
 "@metamask/base-controller@npm:^8.0.0, @metamask/base-controller@npm:^8.0.1":
-  version: 8.1.0
-  resolution: "@metamask/base-controller@npm:8.1.0"
+  version: 8.2.0
+  resolution: "@metamask/base-controller@npm:8.2.0"
   dependencies:
+    "@metamask/messenger": ^0.1.0
     "@metamask/utils": ^11.4.2
     immer: ^9.0.6
-  checksum: 50c25492c332837acd5b5c25d6fbf20f1de1e7551e7a9f2fa1f97ee251f66afb4cbd3850261c780ca41307894eda6e3cfa9a2da3603ec66262ab980fea5eda36
+  checksum: ebcbc59dd9c8296a492d40f43491c63cc14ff1d22cedbe2c05812e98a3e4e4f84b7c457b1bc21fcb3ff340f6dee88ba9cc784829dbe8011312ae8d0edbf798d9
   languageName: node
   linkType: hard
 
@@ -4873,6 +4874,13 @@ __metadata:
     "@metamask/utils": ^11.1.0
     bitcoin-address-validation: ^2.2.3
   checksum: 93ebd440ff7e4a28a829d0e7a7c2d38c27cf3b329d156a5e45cab1f0cd0400731abe017a0adcc9c366f2840678a989fdb385b66b1ac9fb3dc3642d1571691db7
+  languageName: node
+  linkType: hard
+
+"@metamask/messenger@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@metamask/messenger@npm:0.1.0"
+  checksum: 1d8c186f403ab3ce86b44df669e4295be5fdd62932989618174f57aded98a76d0a4029b866cbcf281ed34e92b1daafa1a07cca00b183681be99fdc65713b6c1d
   languageName: node
   linkType: hard
 
